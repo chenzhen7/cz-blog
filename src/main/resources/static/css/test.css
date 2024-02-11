@@ -1,0 +1,19 @@
+
+div.img {
+
+    width: 220px;
+    height: 170px;
+    margin: 200px auto;
+
+}
+
+img.bigger {
+
+    width: 20%;
+    height: 20%;
+    transition:transform 2s;
+}
+img.bigger:hover{
+    transform: scale(1.2,1.2);
+
+}

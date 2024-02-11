@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="referrer" content="no-referrer"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>友链管理</title>
+  <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
+  <link rel="stylesheet" href="../../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"  />
+  <link rel="stylesheet" href="../../static/css/me.css" th:href="@{/css/me.css}">
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="../../static/css/element-ui-index.css" th:href="@{/css/element-ui-index.css}">
+
+</head>
+<body class="admin-body">
+
+<div id="app">
+  <!--顶部栏-->
+  <header class="p-3 text-bg-dark">
+    <div class="container">
+      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+        <span class="fs-4 me-5">ChenZhen</span>
+
+        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+          <li><a href="./blogs.html" th:href="@{/admin/blogs}" class="nav-link px-2 text-white" >文章管理</a></li>
+          <li><a href="./tags.html" th:href="@{/admin/tags}" class="nav-link px-2 text-white">标签管理</a></li>
+          <li><a href="./friendlinks.html" th:href="@{/admin/friendlinks}" class="nav-link px-2 text-secondary">友链管理</a></li>
+          <li><a href="./sys-configs.html" th:href="@{/admin/sys-configs}" class="nav-link px-2 text-white">系统配置管理</a></li>
+          <li><a href="./users.html" th:href="@{/admin/users}" class="nav-link px-2 text-white">用户管理</a></li>
+        </ul>
+
+        <!--头像-->
+        <img class="me-2 img-fluid rounded-5" width="40" height="40" src="../../static/images/me.jpg" th:src="@{${session.user.avatar}}">
+        <!--名字-->
+        <span class="me-3" th:src="@{${session.user.nickname}}" >ChenZhen</span>
+
+        <div class="text-end">
+          <a href="#" @click="logout" class="btn btn-outline-light me-2">注销</a>
+        </div>
+
+
+      </div>
+    </div>
+  </header>
+  <!--列表-->
+  <div class="container mt-5">
+    <div class="card">
+      <div class="card-body">
+        <!-- 添加按钮 -->
+        <el-button class="mb-3" type="primary" plain  @click="clickAdd">添加友链</el-button>
+
+        <!-- 切换导航栏 -->
+        <el-tabs v-model="activeTab" @tab-click="handleTabClick">
+
+
+          <el-tab-pane label="已审核通过" name="PASS">
+            <!-- 表格 -->
+            <el-table
+                    :data="list"
+                    stripe
+                    border
+                    style="width: 100%">
+              <el-table-column
+                      prop="id"
+                      label="ID"
+                      width="150">
+              </el-table-column>
+
+              <el-table-column width="120" label="图片" prop="pictureAddress">
+                <template slot-scope="scope">
+                  <img :src="scope.row.pictureAddress" alt="" width="100%">
+                </template>
+              </el-table-column>
+
+              <el-table-column
+                      prop="blogName"
+                      label="博客名称">
+              </el-table-column>
+
+              <el-table-column
+                      prop="blogAddress"
+                      label="博客地址">
+              </el-table-column>
+
+              <el-table-column
+                      prop="pictureAddress"
+                      label="图片地址">
+              </el-table-column>
+
+              <el-table-column label="状态" align="center" prop="status" >
+                <template slot-scope="scope">
+                  {{ mapStatus(scope.row.status) }}
+                </template>
+              </el-table-column>
+
+              <el-table-column
+                      prop="createTime"
+                      label="创建时间">
+              </el-table-column>
+
+              <el-table-column
+                      prop="updateTime"
+                      label="更新时间">
+              </el-table-column>
+
+              <el-table-column width="150" label="操作">
+                <template slot-scope="scope">
+                  <el-button  size="mini" @click="clickEdit(scope.row.id)">编辑</el-button>
+                  <el-button  size="mini" type="danger" @click="clickDelete(scope.row.id)">删除</el-button>
+                </template>
+              </el-table-column>
+
+            </el-table>
+          </el-tab-pane>
+
+          <el-tab-pane label="未审核" name="AUDITING">
+            <!-- 表格 -->
+            <el-table
+                    :data="list"
+                    stripe
+                    border
+                    style="width: 100%">
+              <el-table-column
+                      prop="id"
+                      label="ID"
+                      width="150">
+              </el-table-column>
+
+              <el-table-column width="120" label="图片" prop="pictureAddress">
+                <template slot-scope="scope">
+                  <img :src="scope.row.pictureAddress" alt="" width="100%">
+                </template>
+              </el-table-column>
+
+              <el-table-column
+                      prop="blogName"
+                      label="博客名称">
+              </el-table-column>
+
+              <el-table-column
+                      prop="blogAddress"
+                      label="博客地址">
+              </el-table-column>
+
+              <el-table-column
+                      prop="pictureAddress"
+                      label="图片地址">
+              </el-table-column>
+
+              <el-table-column label="状态" align="center" prop="status" >
+                <template slot-scope="scope">
+                  {{ mapStatus(scope.row.status) }}
+                </template>
+              </el-table-column>
+
+              <el-table-column
+                      prop="createTime"
+                      label="创建时间">
+              </el-table-column>
+
+              <el-table-column
+                      prop="updateTime"
+                      label="更新时间">
+              </el-table-column>
+
+              <el-table-column width="200" label="操作">
+                <template slot-scope="scope">
+                  <el-button  size="mini" @click="passAudit(scope.row.id)">审核通过</el-button>
+                  <el-button  size="mini" type="danger" @click="clickReject(scope.row.id)">审核拒绝</el-button>
+                </template>
+              </el-table-column>
+
+            </el-table>
+          </el-tab-pane>
+
+          <el-tab-pane label="未通过" name="REJECT">
+            <!-- 表格 -->
+            <el-table
+                    :data="list"
+                    stripe
+                    border
+                    style="width: 100%">
+              <el-table-column
+                      prop="id"
+                      label="ID"
+                      width="150">
+              </el-table-column>
+
+              <el-table-column width="120" label="图片" prop="pictureAddress">
+                <template slot-scope="scope">
+                  <img :src="scope.row.pictureAddress" alt="" width="100%">
+                </template>
+              </el-table-column>
+
+              <el-table-column
+                      prop="blogName"
+                      label="博客名称">
+              </el-table-column>
+
+              <el-table-column
+                      prop="blogAddress"
+                      label="博客地址">
+              </el-table-column>
+
+              <el-table-column
+                      prop="pictureAddress"
+                      label="图片地址">
+              </el-table-column>
+
+              <el-table-column
+                      prop="email"
+                      label="通知邮箱">
+              </el-table-column>
+
+              <el-table-column
+                      prop="reason"
+                      label="拒绝原因">
+              </el-table-column>
+
+              <el-table-column label="状态" align="center" prop="status" >
+                <template slot-scope="scope">
+                  {{ mapStatus(scope.row.status) }}
+                </template>
+              </el-table-column>
+
+              <el-table-column
+                      prop="createTime"
+                      label="创建时间">
+              </el-table-column>
+
+              <el-table-column
+                      prop="updateTime"
+                      label="更新时间">
+              </el-table-column>
+
+              <el-table-column width="150" label="操作">
+                <template slot-scope="scope">
+                  <el-button  size="mini" @click="clickEdit(scope.row.id)">编辑</el-button>
+                  <el-button  size="mini" type="danger" @click="clickDelete(scope.row.id)">删除</el-button>
+                </template>
+              </el-table-column>
+
+            </el-table>
+          </el-tab-pane>
+
+
+        </el-tabs>
+
+
+        <!-- 分页 -->
+        <el-pagination
+                class="mt-5"
+                @current-change="handleCurrentChange"
+                :current-page="searchForm.pageNum"
+                :page-sizes="[10, 20, 30, 40]"
+                :page-size="searchForm.pageSize"
+                :total="total"
+        ></el-pagination>
+      </div>
+    </div>
+
+    <!-- 创建或编辑的表单 -->
+    <el-dialog title="添加/编辑" :visible="dialogVisible" @close="dialogVisible = false" :close-on-click-modal="false">
+      <!-- 表单内容 -->
+      <el-form :model="editForm" label-width="150px">
+        <!-- ID -->
+        <el-form-item label="ID">
+          <el-input v-model="editForm.id" disabled></el-input>
+        </el-form-item>
+
+        <!-- 博客名称 -->
+        <el-form-item label="标签名" prop="blogName">
+          <el-input v-model="editForm.blogName"></el-input>
+        </el-form-item>
+
+        <!-- 博客地址 -->
+        <el-form-item label="标签名" prop="blogAddress">
+          <el-input v-model="editForm.blogAddress"></el-input>
+        </el-form-item>
+
+        <!-- 图片地址 -->
+        <el-form-item label="标签名" prop="pictureAddress">
+          <el-input v-model="editForm.pictureAddress"></el-input>
+        </el-form-item>
+
+
+
+      </el-form>
+      <!-- 按钮操作 -->
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="clickSave">保存</el-button>
+      </span>
+
+    </el-dialog>
+
+
+    <!-- 拒绝审核表单 -->
+    <el-dialog title="拒绝审核" :visible="dialogVisible_reject" @close="dialogVisible_reject = false" :close-on-click-modal="false">
+      <!-- 表单内容 -->
+      <el-form :model="editForm" label-width="150px">
+        <!-- ID -->
+        <el-form-item label="ID">
+          <el-input v-model="rejectForm.id" disabled></el-input>
+        </el-form-item>
+
+        <!--拒绝理由-->
+        <el-form-item label="拒绝理由" prop="reason">
+          <el-input v-model="rejectForm.reason"></el-input>
+        </el-form-item>
+
+
+      </el-form>
+      <!-- 按钮操作 -->
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible_reject = false">取消</el-button>
+        <el-button type="primary" @click="rejectAudit">拒绝审核</el-button>
+      </span>
+
+    </el-dialog>
+
+  </div>
+
+</div>
+</body>
+
+<script src="../../static/lib/jquery-3.2.1/jquery-3.2.1.min.js" th:src="@{/lib/jquery-3.2.1/jquery-3.2.1.min.js}"></script>
+<!-- import Vue before Element -->
+<script src="../../static/lib/vue.js"                   th:src="@{/lib/vue.js}"></script>
+<!-- import JavaScript -->
+<script src="../../static/lib/element-ui-index.js"      th:src="@{/lib/element-ui-index.js}"></script>
+<script src="../../static/lib/axios.min.js"             th:src="@{/lib/axios.min.js}"></script>
+<script src="../../static/lib/axiosInstance.js"         th:src="@{/lib/axiosInstance.js}"></script>
+<script>
+  new Vue({
+    el: '#app',
+    data: function() {
+      return {
+        list: [],
+        total: 0, // 总记录数
+        searchForm: {
+          pageNum: 1, // 当前页
+          pageSize: 10,  // 每页显示条数
+          status: 1
+
+        },
+        // 表单显示
+        dialogVisible: false,
+        formLabelWidth: '120px',
+        editForm:{
+
+        },
+        // 切换导航栏
+        activeTab : 'PASS',
+        dialogVisible_reject:false,
+        rejectForm:{}
+      }
+
+    },
+    methods:{
+      mapStatus(status){
+        if (status === -1){
+          return '审核拒绝'
+        }else if (status === 0){
+          return '未审核'
+        }else if (status === 1){
+          return '已审核'
+        }else {
+          return '未知状态'
+        }
+
+      },
+      //获取分页数据
+      fetchPage(){
+        axiosInstance.get(`/admin/friendlinks/page`,{
+          params: this.searchForm
+        }).then(res => {
+          if (res.code === 20000){
+            this.list = res.data.page.list;
+            this.total = res.data.page.total;
+          }
+
+        })
+      },
+      // 分页切换
+      handleCurrentChange(currentPage) {
+        this.searchForm.pageNum = currentPage;
+        this.fetchPage();
+      },
+      clickAdd(){
+        this.editForm = {}
+        this.dialogVisible = true
+      },
+      clickSave(){
+        if (this.editForm.id) {
+          // 有ID更新
+          axiosInstance.put(`/admin/friendlinks`, this.editForm)
+                  .then(resp => {
+                    if(resp.code === 20000){
+                      this.$message.success('更新成功');
+                      this.dialogVisible = false;
+                      this.fetchPage();
+                    }
+
+                  })
+                  .catch(error => {
+                    console.error(error);
+                  });
+        } else {
+          // 无ID创建
+          axiosInstance.post('/admin/friendlinks', this.editForm)
+                  .then(resp => {
+                    if(resp.code === 20000){
+                      this.$message.success('创建成功');
+                      this.dialogVisible = false;
+                      this.fetchPage();
+                    }
+                  })
+                  .catch(error => {
+                    console.error(error);
+                  });
+        }
+      },
+      // 编辑
+      clickEdit(id) {
+        axiosInstance.get(`/admin/friendlinks/${id}`)
+                .then(resp => {
+                  this.editForm = resp.data.friendlink
+                })
+
+        this.dialogVisible = true;
+      },
+      //点击删除
+      clickDelete(id){
+        this.$confirm('此操作将永久删除该信息, 是否继续?', '提示', {
+          cancelButtonText: '取消',
+          confirmButtonText: '确定',
+          type: 'warning'
+        }).then(() => {
+          this.delete(id)
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        })
+      },
+      // 删除
+      delete(id) {
+        axiosInstance.delete(`/admin/friendlinks/${id}`)
+                .then(() => {
+                  this.fetchPage();
+                })
+                .catch(error => {
+                  console.error(error);
+                });
+      },
+      // 审核
+      passAudit(id){
+        axiosInstance.get(`/admin/friendlinks/pass/${id}`).then(res => {
+          if (res.code === 20000){
+            this.$message.success('审核成功');
+            this.fetchPage();
+          }
+        })
+      },
+      //点击拒绝按钮
+      clickReject(id){
+        this.rejectForm = {}
+        this.rejectForm.id = id
+        this.dialogVisible_reject = true
+      },
+      rejectAudit(){
+        axiosInstance.post(`/admin/friendlinks/reject`, this.rejectForm ).then(res => {
+          if (res.code === 20000){
+            this.dialogVisible_reject = false;
+            this.$message.success('拒绝成功');
+            this.fetchPage();
+          }
+        })
+      },
+      logout(){
+        axiosInstance.get('/admin/logout').then(res => {
+          if (res.code === 20000){
+            location.href = "/admin";
+          }
+        })
+      },
+      // 处理导航栏点击事件
+      handleTabClick(tab) {
+        // 切换表格数据源
+        if (tab.name === 'PASS') {
+          this.activeTab = 'PASS';
+          // 状态为已通过
+          this.searchForm.status = 1;
+          this.fetchPage();
+        }
+        else if (tab.name === 'AUDITING') {
+          this.activeTab = 'AUDITING';
+          // 状态为未通过
+          this.searchForm.status = 0;
+          this.fetchPage();
+
+        }
+        else if (tab.name === 'REJECT') {
+          this.activeTab = 'REJECT';
+          // 状态为未通过
+          this.searchForm.status = -1;
+          this.fetchPage();
+        }
+      },
+
+    },
+
+    mounted(){
+      this.fetchPage()
+    }
+  })
+
+
+
+</script>
+</html>

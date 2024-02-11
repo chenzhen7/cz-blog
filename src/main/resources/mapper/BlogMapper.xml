@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chenzhen.blog.mapper.BlogMapper">
+
+    <resultMap id="BaseResultMap" type="com.chenzhen.blog.entity.pojo.Blog">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="title" column="title" jdbcType="VARCHAR"/>
+            <result property="content" column="content" jdbcType="VARCHAR"/>
+            <result property="description" column="description" jdbcType="VARCHAR"/>
+            <result property="firstPicture" column="first_picture" jdbcType="VARCHAR"/>
+            <result property="commentabled" column="commentabled" jdbcType="BIT"/>
+            <result property="appreciation" column="appreciation" jdbcType="BIT"/>
+            <result property="published" column="published" jdbcType="BIT"/>
+            <result property="recommend" column="recommend" jdbcType="BIT"/>
+            <result property="shareStatement" column="share_statement" jdbcType="BIT"/>
+            <result property="copyright" column="copyright" jdbcType="INTEGER"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="views" column="views" jdbcType="INTEGER"/>
+            <result property="commentCount" column="comment_count" jdbcType="INTEGER"/>
+
+    </resultMap>
+
+    <resultMap id="BlogVoMap" type="com.chenzhen.blog.entity.vo.BlogVO">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="title" column="title" jdbcType="VARCHAR"/>
+        <result property="content" column="content" jdbcType="VARCHAR"/>
+        <result property="description" column="description" jdbcType="VARCHAR"/>
+        <result property="firstPicture" column="first_picture" jdbcType="VARCHAR"/>
+        <result property="commentabled" column="commentabled" jdbcType="BIT"/>
+        <result property="appreciation" column="appreciation" jdbcType="BIT"/>
+        <result property="published" column="published" jdbcType="BIT"/>
+        <result property="recommend" column="recommend" jdbcType="BIT"/>
+        <result property="shareStatement" column="share_statement" jdbcType="BIT"/>
+        <result property="copyright" column="copyright" jdbcType="INTEGER"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="views" column="views" jdbcType="INTEGER"/>
+        <result property="commentCount" column="comment_count" jdbcType="INTEGER"/>
+        <collection property="tagList" ofType="com.chenzhen.blog.entity.pojo.Tag" select="selectTag" column="id">
+        </collection>
+    </resultMap>
+
+    <sql id="selectBlogVo">
+        select b.id,b.title,b.content,b.description,b.first_picture,b.commentabled,b.appreciation,b.published,
+               b.recommend,b.share_statement,b.copyright,b.views,b.comment_count,b.update_time,b.create_time
+        from t_blog b
+    </sql>
+
+    <select id="selectTag" resultType="com.chenzhen.blog.entity.pojo.Tag">
+        select t.id,t.name,t.create_time,t.update_time
+        from t_tag t
+        left join t_blog_tag bt on bt.tag_id = t.id
+        where bt.blog_id = #{id}
+    </select>
+
+
+    <select id="getRecommendList" resultMap="BlogVoMap">
+        <include refid="selectBlogVo"/>
+        where b.published = 1 and b.recommend = 1
+        order by b.update_time  desc
+        limit 4
+    </select>
+
+    <update id="updateViews">
+        update t_blog
+        set views = views + 1
+        where id = #{blogId}
+    </update>
+
+    <update id="updateCommentCount">
+        update t_blog
+        set comment_count = comment_count + 1
+        where id = #{blogId}
+    </update>
+
+
+    <select id="countViews" resultType="long">
+        select sum(views)
+        from t_blog
+    </select>
+
+    <select id="getTitleById" resultType="string">
+        select title
+        from t_blog
+        where id = #{id}
+    </select>
+
+    <select id="pageAdminBlogs" resultMap="BlogVoMap">
+        <include refid="selectBlogVo"/>
+    </select>
+
+    <select id="pageBlogs" resultMap="BlogVoMap">
+        <include refid="selectBlogVo"/>
+        WHERE b.published = 1
+    </select>
+
+    <select id="getBlogVO" resultMap="BlogVoMap">
+        <include refid="selectBlogVo"/>
+        WHERE b.id = #{id}
+    </select>
+
+    <select id="getBlogIdsByTagIds" resultType="long">
+        SELECT DISTINCT id
+        FROM (
+            SELECT b.id, b.create_time
+            FROM t_blog b
+            LEFT JOIN t_blog_tag bt ON b.id = bt.blog_id
+            LEFT JOIN t_tag t ON bt.tag_id = t.id
+            WHERE b.published = 1 AND t.id IN
+            <foreach collection="tagIds" item="tagId" separator="," open="(" close=")">
+                #{tagId}
+            </foreach>
+            ORDER BY b.create_time DESC
+        )AS subquery
+    </select>
+
+    <select id="getBlogListByBlogIds" resultMap="BlogVoMap">
+        <include refid="selectBlogVo"/>
+        where b.id in
+        <foreach collection="blogIds" item="blogId" separator="," open="(" close=")">
+        #{blogId}
+        </foreach>
+    </select>
+
+    <select id="getBlogList" resultMap="BlogVoMap">
+        <include refid="selectBlogVo"/>
+        where b.published = 1
+        order by b.create_time desc
+    </select>
+
+    <select id="getAllTitle" resultType="com.chenzhen.blog.entity.pojo.Blog">
+        select b.id,b.title,b.published,
+               b.recommend,b.share_statement,b.copyright,b.views,b.comment_count,b.update_time,b.create_time,
+               t.id tag_id, t.name tag_name
+        from t_blog b
+                 left join t_blog_tag bt on b.id = bt.blog_id
+                 left join t_tag t on bt.tag_id = t.id
+        where b.published = 1
+    </select>
+
+
+    <insert id="saveBlogTags">
+        INSERT INTO t_blog_tag (blog_id, tag_id)
+        VALUES
+        <foreach collection="tagIds" item="tagId" separator=",">
+            (#{blogId}, #{tagId})
+        </foreach>
+    </insert>
+
+    <delete id="deleteAllBlogTags">
+        DELETE FROM t_blog_tag WHERE blog_id = #{blogId};
+    </delete>
+
+
+
+</mapper>

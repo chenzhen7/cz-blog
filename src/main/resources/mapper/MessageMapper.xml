@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chenzhen.blog.mapper.MessageMapper">
+
+
+    <resultMap id="BaseResultVoMap" type="com.chenzhen.blog.entity.vo.MessageVO">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="parentMessageId" column="parent_message_id" jdbcType="BIGINT"/>
+        <result property="rootMessageId" column="root_message_id" jdbcType="BIGINT"/>
+        <result property="nickname" column="nickname" jdbcType="VARCHAR"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="content" column="content" jdbcType="VARCHAR"/>
+        <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="adminMessage" column="admin_message" jdbcType="BIT"/>
+        <!--
+                一对多关联 collection标签
+                property="messageReplyList" 关联实体集合的属性名
+                ofType="com.chenzhen.blog.entity.dto.MessageReplyDTO" 关联实体的java类型（集合泛型的类型）
+                select="selectReply" 指定子查询
+                column="id" 向子查询传递 参数, 参数从主查询的结果中获取!!!
+        -->
+        <collection property="messageReplyList" ofType="com.chenzhen.blog.entity.dto.MessageReplyDTO" select="selectReply" column="id">
+        </collection>
+    </resultMap>
+
+    <!--主查询 拿到所有根评论-->
+    <select id="getMessageList" resultMap="BaseResultVoMap">
+        SELECT
+            m.id,m.nickname,m.email,m.content,m.avatar,m.address,m.create_time,m.admin_message
+        FROM t_message m
+        WHERE m.root_message_id IS NULL
+        ORDER BY m.create_time DESC
+    </select>
+
+    <!--子查询 根据根评论ID获取所有回复评论-->
+    <select id="selectReply" resultType="com.chenzhen.blog.entity.dto.MessageReplyDTO" parameterType="string">
+        SELECT
+            m.id,m.nickname,m.email,m.content,m.avatar,m.create_time,m.admin_message,m.root_message_id,m.parent_message_id,
+            m2.nickname AS parent_nickname
+        FROM t_message m
+        LEFT JOIN t_message m2 ON m.parent_message_id = m2.id
+        WHERE m.root_message_id = ${id}
+        order by m.create_time asc
+    </select>
+
+
+</mapper>

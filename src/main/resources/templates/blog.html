@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta name="referrer" content="no-referrer"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${blog.title}"></title>
+    <meta name=”Description” Content=”ChenZhen的个人博客，博客详情页面，专注技术生活分享”>
+    <meta name=”Keywords” Content=”ChenZhen,博客,博客详情,陈震″>
+    <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
+
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"  />
+    <link rel="stylesheet" href="../static/lib/aplayer/APlayer.min.css" th:href="@{/lib/aplayer/APlayer.min.css}">
+    <link rel="stylesheet" href="../static/css/github-markdown.min.css" th:href="@{/css/github-markdown.min.css}">
+    <link rel="stylesheet" href="../static/css/animate.css" th:href="@{/css/animate.css}">
+    <link rel="stylesheet" href="../static/lib/tocbot/tocbot.css" th:href="@{/lib/tocbot/tocbot.css}">
+    <link rel="stylesheet" href="../static/lib/prism/prism.css" th:href="@{/lib/prism/prism.css}">
+    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+    <script src="../static/lib/aplayer/Meting.min.js" th:src="@{/lib/aplayer/Meting.min.js}"></script>
+    <script src="../static/lib/aplayer/APlayer.min.js" th:src="@{/lib/aplayer/APlayer.min.js}"></script>
+</head>
+<body >
+
+<!--导航-->
+<div  class="cz-navbar fixed">
+    <div class="cz-pc-menu">
+        <a href="index.html" th:href="@{/}" class="cz-navbar-brand text-decoration-none"><strong th:text="${author}">ChenZhen</strong></a>
+        <div class="cz-navbar-links fs-6 fw-light" id="cz-navbar-links">
+            <a href="index.html"    th:href="@{/}" class="cz-nav-link">首页</a>
+            <a href="tags.html"     th:href="@{/tags}" class="cz-nav-link">标签</a>
+            <a href="archives.html" th:href="@{/archives}" class="cz-nav-link">归档</a>
+            <a href="message.html"  th:href="@{/message}" class="cz-nav-link">留言板</a>
+            <a href="friends.html"  th:href="@{/friends}" class="cz-nav-link">友链</a>
+            <a href="about.html"    th:href="@{/about}" class="cz-nav-link">关于我</a>
+        </div>
+
+        <a href="#" class="cz-navbar-brand" data-bs-toggle="modal" data-bs-target="#searchModal">
+            <strong>搜索</strong>
+        </a>
+
+
+        <button class="cz-menu-toggle-btn">菜单</button>
+    </div>
+    <div class="cz-mobile-menu fw-light fs-6">
+        <a href="index.html"    th:href="@{/}" class="cz-nav-link">首页</a>
+        <a href="tags.html"     th:href="@{/tags}" class="cz-nav-link">标签</a>
+        <a href="archives.html" th:href="@{/archives}" class="cz-nav-link">归档</a>
+        <a href="message.html"  th:href="@{/message}" class="cz-nav-link">留言板</a>
+        <a href="friends.html"  th:href="@{/friends}" class="cz-nav-link">友链</a>
+        <a href="about.html"    th:href="@{/about}" class="cz-nav-link">关于我</a>
+    </div>
+</div>
+
+<!-- 搜索框 -->
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content p-2 ">
+            <div class="modal-body ">
+                <button type="button" class="btn-close float-end" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="text-center fs-5 mb-3">搜　索</div>
+                <div class="input-group mb-4">
+                    <span class="input-group-text" id="basic-addon1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                        </svg>
+                    </span>
+                    <input id="keywordInput" type="text" class="form-control" placeholder="输入关键词" aria-describedby="basic-addon1">
+                </div>
+
+                <div class="mb-2">搜索结果</div>
+                <!-- 搜索结果展示区域 -->
+                <div id="searchResults" class="list-group">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<img class="cz-bg-section object-fit-cover" style="height: 55vh;" src="../static/images/blog.jpg" th:src="@{${blog.firstPicture}}" alt="">
+<div class="text-overlay text-center">
+    <p class="cz-page-title container">文章标题</p>
+    <p class="cz-page-title2 fw-normal">Welcome to my website ——by 陈震 （Chen Zhen）</p>
+</div>
+
+<!--中间内容-->
+<div id="waypoint" class="container-md" style="margin-top: -4em;">
+    <div class="row">
+        <!--左边-->
+        <div class="col-xxl-9 col-12">
+            <!--文章内容-->
+            <div class="card border-2 mb-3 shadow">
+                <div class="card-body border-1">
+                    <!--中间主要内容部分-->
+                    <div id="content" class="markdown-body js-toc-content" th:utext="${blog.content}" >
+                        <h1>
+                            <a id="user-content-github-markdown-css-demo" class="anchor" href="#github-markdown-css-demo"
+                               aria-hidden="true"><span class="octicon octicon-link"></span></a>GitHub Markdown CSS demo</h1>
+                        <p><a name="user-content-headers"></a></p><a name="user-content-headers">
+                    </a><h2><a name="user-content-headers"></a><a id="user-content-headers" class="anchor" href="#headers"
+                                                                  aria-hidden="true"><span class="octicon octicon-link"></span></a>Headers
+                    </h2>
+                        <pre lang="no-highlight"><code># H1
+## H2
+### H3
+#### H4
+##### H5
+###### H6
+
+Alternatively, for H1 and H2, an underline-ish style:
+
+Alt-H1
+======
+
+Alt-H2
+------
+</code></pre>
+                        <h1><a id="user-content-h1" class="anchor" href="#h1" aria-hidden="true"><span class="octicon octicon-link"></span></a>H1
+                        </h1>
+                        <h2><a id="user-content-h2" class="anchor" href="#h2" aria-hidden="true"><span class="octicon octicon-link"></span></a>H2
+                        </h2>
+                        <h3><a id="user-content-h3" class="anchor" href="#h3" aria-hidden="true"><span class="octicon octicon-link"></span></a>H3
+                        </h3>
+                        <h4><a id="user-content-h4" class="anchor" href="#h4" aria-hidden="true"><span class="octicon octicon-link"></span></a>H4
+                        </h4>
+                        <h5><a id="user-content-h5" class="anchor" href="#h5" aria-hidden="true"><span class="octicon octicon-link"></span></a>H5
+                        </h5>
+                        <h6><a id="user-content-h6" class="anchor" href="#h6" aria-hidden="true"><span class="octicon octicon-link"></span></a>H6
+                        </h6>
+                        <p>Alternatively, for H1 and H2, an underline-ish style:</p>
+                        <h1><a id="user-content-alt-h1" class="anchor" href="#alt-h1" aria-hidden="true"><span
+                                class="octicon octicon-link"></span></a>Alt-H1</h1>
+                        <h2><a id="user-content-alt-h2" class="anchor" href="#alt-h2" aria-hidden="true"><span
+                                class="octicon octicon-link"></span></a>Alt-H2</h2>
+                        <p><a name="user-content-headers"></a><a name="user-content-emphasis"></a></p><a name="user-content-emphasis">
+                    </a><h2><a name="user-content-emphasis"></a><a id="user-content-emphasis" class="anchor" href="#emphasis"
+                                                                   aria-hidden="true"><span class="octicon octicon-link"></span></a>Emphasis
+                    </h2>
+                        <pre lang="no-highlight"><code>Emphasis, aka italics, with *asterisks* or _underscores_.
+
+Strong emphasis, aka bold, with **asterisks** or __underscores__.
+
+Combined emphasis with **asterisks and _underscores_**.
+
+Strikethrough uses two tildes. ~~Scratch this.~~
+</code></pre>
+                        <p>Emphasis, aka italics, with <em>asterisks</em> or <em>underscores</em>.</p>
+                        <p>Strong emphasis, aka bold, with <strong>asterisks</strong> or <strong>underscores</strong>.</p>
+                        <p>Combined emphasis with <strong>asterisks and <em>underscores</em></strong>.</p>
+                        <p>Strikethrough uses two tildes.
+                            <del>Scratch this.</del>
+                        </p>
+                        <p><a name="user-content-emphasis"></a><a name="user-content-lists"></a></p><a name="user-content-lists">
+                    </a><h2><a name="user-content-lists"></a><a id="user-content-lists" class="anchor" href="#lists"
+                                                                aria-hidden="true"><span class="octicon octicon-link"></span></a>Lists</h2>
+                        <p>(In this example, leading and trailing spaces are shown with with dots: ⋅)</p>
+                        <pre lang="no-highlight"><code>1. First ordered list item
+2. Another item
+⋅⋅* Unordered sub-list.
+1. Actual numbers don't matter, just that it's a number
+⋅⋅1. Ordered sub-list
+4. And another item.
+
+⋅⋅⋅You can have properly indented paragraphs within list items. Notice the blank line above, and the leading spaces (at least one, but we'll use three here to also align the raw Markdown).
+
+⋅⋅⋅To have a line break without a paragraph, you will need to use two trailing spaces.⋅⋅
+⋅⋅⋅Note that this line is separate, but within the same paragraph.⋅⋅
+⋅⋅⋅(This is contrary to the typical GFM line break behaviour, where trailing spaces are not required.)
+
+* Unordered list can use asterisks
+- Or minuses
++ Or pluses
+</code></pre>
+                        <ol>
+                            <li>First ordered list item</li>
+                            <li>Another item
+                                <ul>
+                                    <li>Unordered sub-list.</li>
+                                </ul>
+                            </li>
+                            <li>Actual numbers don't matter, just that it's a number
+                                <ol>
+                                    <li>Ordered sub-list</li>
+                                </ol>
+                            </li>
+                            <li><p>And another item.</p>
+                                <p>You can have properly indented paragraphs within list items. Notice the blank line above, and the leading
+                                    spaces (at least one, but we'll use three here to also align the raw Markdown).</p>
+                                <p>To have a line break without a paragraph, you will need to use two trailing spaces.
+                                    Note that this line is separate, but within the same paragraph.
+                                    (This is contrary to the typical GFM line break behaviour, where trailing spaces are not required.)</p></li>
+                        </ol>
+                        <ul>
+                            <li>Unordered list can use asterisks</li>
+                            <li>Or minuses</li>
+                            <li><p>Or pluses</p></li>
+                        </ul>
+                        <ol>
+                            <li>foo
+                                <ol>
+                                    <li>bar
+                                        <ol>
+                                            <li>baz
+                                                <ol>
+                                                    <li>faz</li>
+                                                </ol>
+                                            </li>
+                                        </ol>
+                                    </li>
+                                </ol>
+                            </li>
+                            <li><p>foo2</p></li>
+                        </ol>
+                        <ul>
+                            <li>foo
+                                <ul>
+                                    <li>bar
+                                        <ul>
+                                            <li>baz
+                                                <ul>
+                                                    <li>faz</li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li><p>foo2</p></li>
+                        </ul>
+                        <ol>
+                            <li><p>foo</p>
+                                <ul>
+                                    <li>bar
+                                        <ol>
+                                            <li>baz
+                                                <ul>
+                                                    <li>faz</li>
+                                                </ul>
+                                            </li>
+                                        </ol>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ol>
+                        <ul>
+                            <li><p>foo</p>
+                                <ol>
+                                    <li>bar
+                                        <ul>
+                                            <li>baz
+                                                <ol>
+                                                    <li>faz</li>
+                                                </ol>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                            </li>
+                        </ul>
+                        <ol>
+                            <li>Lists in a list item:
+                                <ul>
+                                    <li>Indented four spaces.
+                                        <ul>
+                                            <li>indented eight spaces.</li>
+                                        </ul>
+                                    </li>
+                                    <li>Four spaces again.</li>
+                                </ul>
+                            </li>
+                            <li><p>Multiple paragraphs in a list items:
+                                It's best to indent the paragraphs four spaces
+                                You can get away with three, but it can get
+                                confusing when you nest other things.
+                                Stick to four.</p>
+                                <p>We indented the first line an extra space to align
+                                    it with these paragraphs. In real use, we might do
+                                    that to the entire list so that all items line up.</p>
+                                <p>This paragraph is still part of the list item, but it looks messy to humans. So it's a good idea to wrap your
+                                    nested paragraphs manually, as we did with the first two.</p></li>
+                            <li><p>Blockquotes in a list item:</p>
+                                <blockquote>
+                                    <p>Skip a line and
+                                        indent the &gt;'s four spaces.</p>
+                                </blockquote>
+                            </li>
+                            <li><p>Preformatted text in a list item:</p>
+                                <pre><code>Skip a line and indent eight spaces.
+That's four spaces for the list
+and four to trigger the code block.
+</code></pre>
+                            </li>
+                        </ol>
+                        <h2><a id="user-content-inline-html" class="anchor" href="#inline-html" aria-hidden="true"><span
+                                class="octicon octicon-link"></span></a>Inline HTML</h2>
+                        <p>To reboot your computer, press <kbd>ctrl</kbd>+<kbd>alt</kbd>+<kbd>del</kbd>.</p>
+                        <p><a name="user-content-lists"></a><a name="user-content-links"></a></p><a name="user-content-links">
+                    </a><h2><a name="user-content-links"></a><a id="user-content-links" class="anchor" href="#links"
+                                                                aria-hidden="true"><span class="octicon octicon-link"></span></a>Links</h2>
+                        <p>There are two ways to create links.</p>
+                        <pre lang="no-highlight"><code>[I'm an inline-style link](https://www.google.com)
+
+[I'm an inline-style link with title](https://www.google.com "Google's Homepage")
+
+[I'm a reference-style link][Arbitrary case-insensitive reference text]
+
+[I'm a relative reference to a repository file](../blob/master/LICENSE)
+
+[You can use numbers for reference-style link definitions][1]
+
+Or leave it empty and use the [link text itself]
+
+Some text to show that the reference links can follow later.
+
+[arbitrary case-insensitive reference text]: https://www.mozilla.org
+[1]: http://slashdot.org
+[link text itself]: http://www.reddit.com
+</code></pre>
+                        <p><a name="user-content-links"></a><a href="https://www.google.com">I'm an inline-style link</a></p>
+                        <p><a href="https://www.google.com" title="Google's Homepage">I'm an inline-style link with title</a></p>
+                        <p><a href="https://www.mozilla.org">I'm a reference-style link</a></p>
+                        <p><a href="/tylerlong/github-markdown-css-demo/blob/blob/master/LICENSE">I'm a relative reference to a repository
+                            file</a></p>
+                        <p><a href="http://slashdot.org">You can use numbers for reference-style link definitions</a></p>
+                        <p>Or leave it empty and use the <a href="http://www.reddit.com">link text itself</a></p>
+                        <p>Some text to show that the reference links can follow later.</p>
+                        <p><a name="user-content-images"></a></p><a name="user-content-images">
+                    </a><h2><a name="user-content-images"></a><a id="user-content-images" class="anchor" href="#images"
+                                                                 aria-hidden="true"><span class="octicon octicon-link"></span></a>Images
+                    </h2>
+                        <pre lang="no-highlight"><code>Here's our logo (hover to see the title text):
+
+Inline-style:
+![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+
+Reference-style:
+![alt text][logo]
+
+[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"
+</code></pre>
+                        <p>Here's our logo (hover to see the title text):</p>
+                        <p>Inline-style:
+                            <img src="https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png" alt="alt text"
+                                 title="Logo Title Text 1" style="max-width:100%;"></p>
+                        <p>Reference-style:
+                            <img src="https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png" alt="alt text"
+                                 title="Logo Title Text 2" style="max-width:100%;"></p>
+                        <p><a name="user-content-images"></a><a name="user-content-code"></a></p><a name="user-content-code">
+                    </a><h2><a name="user-content-code"></a><a id="user-content-code-and-syntax-highlighting" class="anchor"
+                                                               href="#code-and-syntax-highlighting" aria-hidden="true"><span
+                            class="octicon octicon-link"></span></a>Code and Syntax Highlighting</h2>
+                        <p><a name="user-content-code">Code blocks are part of the Markdown spec, but syntax highlighting isn't. However, many
+                            renderers -- like Github's and <em>Markdown Here</em> -- support syntax highlighting. Which languages are supported
+                            and how those language names should be written will vary from renderer to renderer. <em>Markdown Here</em> supports
+                            highlighting for dozens of languages (and not-really-languages, like diffs and HTTP headers); to see the complete
+                            list, and how to write the language names, see the </a><a
+                                href="http://softwaremaniacs.org/media/soft/highlight/test.html">highlight.js demo page</a>.</p>
+                        <pre lang="no-highlight"><code>Inline `code` has `back-ticks around` it.
+</code></pre>
+                        <p>Inline <code>code</code> has <code>back-ticks around</code> it.</p>
+                        <p>Blocks of code are either fenced by lines with three back-ticks <code>```</code>, or are indented with four spaces. I
+                            recommend only using the fenced code blocks -- they're easier and only they support syntax highlighting.</p>
+                        <pre lang="no-highlight"><code>```javascript
+var s = "JavaScript syntax highlighting";
+alert(s);
+```
+
+```python
+s = "Python syntax highlighting"
+print s
+```
+
+```
+No language indicated, so no syntax highlighting.
+But let's throw in a &lt;b&gt;tag&lt;/b&gt;.
+```
+</code></pre>
+                        <div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> s <span class="pl-k">=</span> <span
+                                class="pl-s"><span class="pl-pds">"</span>JavaScript syntax highlighting<span class="pl-pds">"</span></span>;
+<span class="pl-c1">alert</span>(s);</pre>
+                        </div>
+                        <div class="highlight highlight-source-python"><pre>s <span class="pl-k">=</span> <span class="pl-s"><span
+                                class="pl-pds">"</span>Python syntax highlighting<span class="pl-pds">"</span></span>
+<span class="pl-k">print</span> s</pre>
+                        </div>
+                        <pre><code>No language indicated, so no syntax highlighting in Markdown Here (varies on Github).
+But let's throw in a &lt;b&gt;tag&lt;/b&gt;.
+</code></pre>
+                        <p><a name="user-content-tables"></a></p><a name="user-content-tables">
+                    </a><h2><a name="user-content-tables"></a><a id="user-content-tables" class="anchor" href="#tables"
+                                                                 aria-hidden="true"><span class="octicon octicon-link"></span></a>Tables
+                    </h2>
+                        <p>Tables aren't part of the core Markdown spec, but they are part of GFM and <em>Markdown Here</em> supports them. They
+                            are an easy way of adding tables to your email -- a task that would otherwise require copy-pasting from another
+                            application.</p>
+                        <pre lang="no-highlight"><code>Colons can be used to align columns.
+
+| Tables        | Are           | Cool  |
+| ------------- |:-------------:| -----:|
+| col 3 is      | right-aligned |  |
+| col 2 is      | centered      |    |
+| zebra stripes | are neat      |     |
+
+The outer pipes (|) are optional, and you don't need to make the raw Markdown line up prettily. You can also use inline Markdown.
+
+Markdown | Less | Pretty
+--- | --- | ---
+*Still* | `renders` | **nicely**
+1 | 2 | 3
+</code></pre>
+                        <p>Colons can be used to align columns.</p>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Tables</th>
+                                <th align="center">Are</th>
+                                <th align="right">Cool</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>col 3 is</td>
+                                <td align="center">right-aligned</td>
+                                <td align="right"></td>
+                            </tr>
+                            <tr>
+                                <td>col 2 is</td>
+                                <td align="center">centered</td>
+                                <td align="right"></td>
+                            </tr>
+                            <tr>
+                                <td>zebra stripes</td>
+                                <td align="center">are neat</td>
+                                <td align="right"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <p>The outer pipes (|) are optional, and you don't need to make the raw Markdown line up prettily. You can also use
+                            inline Markdown.</p>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Markdown</th>
+                                <th>Less</th>
+                                <th>Pretty</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><em>Still</em></td>
+                                <td><code>renders</code></td>
+                                <td><strong>nicely</strong></td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <p><a name="user-content-tables"></a><a name="user-content-blockquotes"></a></p><a name="user-content-blockquotes">
+                    </a><h2><a name="user-content-blockquotes"></a><a id="user-content-blockquotes" class="anchor" href="#blockquotes"
+                                                                      aria-hidden="true"><span class="octicon octicon-link"></span></a>Blockquotes
+                    </h2>
+                        <pre lang="no-highlight"><code>&gt; Blockquotes are very handy in email to emulate reply text.
+&gt; This line is part of the same quote.
+
+Quote break.
+
+&gt; This is a very long line that will still be quoted properly when it wraps. Oh boy let's keep writing to make sure this is long enough to actually wrap for everyone. Oh, you can *put* **Markdown** into a blockquote.
+</code></pre>
+                        <blockquote>
+                            <p>Blockquotes are very handy in email to emulate reply text.
+                                This line is part of the same quote.</p>
+                        </blockquote>
+                        <p>Quote break.</p>
+                        <blockquote>
+                            <p>This is a very long line that will still be quoted properly when it wraps. Oh boy let's keep writing to make sure
+                                this is long enough to actually wrap for everyone. Oh, you can <em>put</em> <strong>Markdown</strong> into a
+                                blockquote.</p>
+                        </blockquote>
+                        <p><a name="user-content-blockquotes"></a><a name="user-content-html"></a></p><a name="user-content-html">
+                    </a><h2><a name="user-content-html"></a><a id="user-content-inline-html-1" class="anchor" href="#inline-html-1"
+                                                               aria-hidden="true"><span class="octicon octicon-link"></span></a>Inline HTML
+                    </h2>
+                        <p>You can also use raw HTML in your Markdown, and it'll mostly work pretty well.</p>
+                        <pre lang="no-highlight"><code>&lt;dl&gt;
+    &lt;dt&gt;Definition list&lt;/dt&gt;
+    &lt;dd&gt;Is something people use sometimes.&lt;/dd&gt;
+
+    &lt;dt&gt;Markdown in HTML&lt;/dt&gt;
+    &lt;dd&gt;Does *not* work **very** well. Use HTML &lt;em&gt;tags&lt;/em&gt;.&lt;/dd&gt;
+&lt;/dl&gt;
+</code></pre>
+                        <dl>
+                            <dt>Definition list</dt>
+                            <dd>Is something people use sometimes.</dd>
+                            <dt>Markdown in HTML</dt>
+                            <dd>Does *not* work **very** well. Use HTML <em>tags</em>.</dd>
+                        </dl>
+                        <p><a name="user-content-html"></a><a name="user-content-hr"></a></p><a name="user-content-hr">
+                    </a><h2><a name="user-content-hr"></a><a id="user-content-horizontal-rule" class="anchor" href="#horizontal-rule"
+                                                             aria-hidden="true"><span class="octicon octicon-link"></span></a>Horizontal
+                        Rule</h2>
+                        <pre><code>Three or more...
+
+---
+
+Hyphens
+
+***
+
+Asterisks
+
+___
+
+Underscores
+</code></pre>
+                        <p>Three or more...</p>
+                        <hr>
+                        <p>Hyphens</p>
+                        <hr>
+                        <p>Asterisks</p>
+                        <hr>
+                        <p>Underscores</p>
+                        <p><a name="user-content-hr"></a><a name="user-content-lines"></a></p><a name="user-content-lines">
+                    </a><h2><a name="user-content-lines"></a><a id="user-content-line-breaks" class="anchor" href="#line-breaks"
+                                                                aria-hidden="true"><span class="octicon octicon-link"></span></a>Line Breaks
+                    </h2>
+                        <p>My basic recommendation for learning how line breaks work is to experiment and discover -- hit &lt;Enter&gt; once
+                            (i.e., insert one newline), then hit it twice (i.e., insert two newlines), see what happens. You'll soon learn to
+                            get what you want. "Markdown Toggle" is your friend.</p>
+                        <p>Here are some things to try out:</p>
+                        <pre><code>Here's a line for us to start with.
+
+This line is separated from the one above by two newlines, so it will be a *separate paragraph*.
+
+This line is also a separate paragraph, but...
+This line is only separated by a single newline, so it's a separate line in the *same paragraph*.
+</code></pre>
+                        <p>Here's a line for us to start with.</p>
+                        <p>This line is separated from the one above by two newlines, so it will be a <em>separate paragraph</em>.</p>
+                        <p>This line is also begins a separate paragraph, but...
+                            This line is only separated by a single newline, so it's a separate line in the <em>same paragraph</em>.</p>
+                        <p>(Technical note: <em>Markdown Here</em> uses GFM line breaks, so there's no need to use MD's two-space line breaks.)
+                        </p>
+                        <p><a name="user-content-lines"></a><a name="user-content-videos"></a></p><a name="user-content-videos">
+                    </a><h2><a name="user-content-videos"></a><a id="user-content-youtube-videos" class="anchor" href="#youtube-videos"
+                                                                 aria-hidden="true"><span class="octicon octicon-link"></span></a>Youtube
+                        videos</h2>
+                        <p>They can't be added directly but you can add an image with a link to the video like this:</p>
+                        <pre lang="no-highlight"><code>&lt;a href="http://www.youtube.com/watch?feature=player_embedded&amp;v=YOUTUBE_VIDEO_ID_HERE
+" target="_blank"&gt;&lt;img src="http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg"
+alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /&gt;&lt;/a&gt;
+</code></pre>
+                        <p>Or, in pure Markdown, but losing the image sizing and border:</p>
+                        <pre lang="no-highlight"><code>[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](http://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HERE)
+</code></pre>
+                        <p>Referencing a bug by #bugID in your git commit links it to the slip. For example #1.</p>
+                        <h2><a id="user-content-task-list" class="anchor" href="#task-list" aria-hidden="true"><span
+                                class="octicon octicon-link"></span></a>Task List</h2>
+                        <ul class="task-list">
+                            <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled"> foo
+                                <ul class="task-list">
+                                    <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled"> foo
+                                    </li>
+                                    <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" checked="checked"
+                                                                      disabled="disabled"> foo
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" checked="checked"
+                                                              disabled="disabled"> foo
+                            </li>
+                        </ul>
+                        <p><a name="user-content-videos">[test]: </a><a href="https://google.com/">http://google.com/</a> "Google"</p>
+                        <h1><a id="user-content-a-heading" class="anchor" href="#a-heading" aria-hidden="true"><span
+                                class="octicon octicon-link"></span></a>A heading</h1>
+                        <p>Just a note, I've found that I can't test my markdown parser vs others.
+                            For example, both markdown.js and showdown code blocks in lists wrong. They're
+                            also completely [inconsistent][test] with regards to paragraphs in list items.</p>
+                        <p>A link. Not anymore.</p>
+                        <p></p>This will make me fail the test because
+                        markdown.js doesnt acknowledge arbitrary html blocks =/<p></p>
+                        <ul>
+                            <li><p>List Item 1</p></li>
+                            <li><p>List Item 2</p>
+                                <ul>
+                                    <li>New List Item 1
+                                        Hi, this is a list item.
+                                    </li>
+                                    <li>New List Item 2
+                                        Another item
+                                        Code goes here.
+                                        Lots of it...
+                                    </li>
+                                    <li>New List Item 3
+                                        The last item
+                                    </li>
+                                </ul>
+                            </li>
+                            <li><p>List Item 3
+                                The final item.</p></li>
+                            <li><p>List Item 4
+                                The real final item.</p></li>
+                        </ul>
+                        <p>Paragraph.</p>
+                        <blockquote>
+                            <ul>
+                                <li>bq Item 1</li>
+                                <li>bq Item 2
+                                    <ul>
+                                        <li>New bq Item 1</li>
+                                        <li>New bq Item 2
+                                            Text here
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </blockquote>
+                        <hr>
+                        <blockquote>
+                            <p>Another blockquote!
+                                I really need to get
+                                more creative with
+                                mockup text..
+                                markdown.js breaks here again</p>
+                        </blockquote>
+                        <h2><a id="user-content-another-heading" class="anchor" href="#another-heading" aria-hidden="true"><span
+                                class="octicon octicon-link"></span></a>Another Heading</h2>
+                        <p>Hello <em>world</em>. Here is a <a href="//hello">link</a>.
+                            And an image <a href="/tylerlong/github-markdown-css-demo/blob/master/src" target="_blank"><img
+                                    src="/tylerlong/github-markdown-css-demo/raw/master/src" alt="alt" style="max-width:100%;"></a>.</p>
+                        <pre><code>Code goes here.
+Lots of it...
+</code></pre>
+                        <blockquote>
+                            <p>A list within a blockquote:</p>
+                            <ul>
+                                <li>asterisk 1</li>
+                                <li>asterisk 2</li>
+                                <li>asterisk 3</li>
+                            </ul>
+                        </blockquote>
+                        <p><strong><em>This is strong and em.</em></strong></p>
+                        <p>So is <strong><em>this</em></strong> word.</p>
+                        <p><strong><em>This is strong and em.</em></strong></p>
+                        <p>So is <strong><em>this</em></strong> word.</p>
+                        <h2><a id="user-content-unordered" class="anchor" href="#unordered" aria-hidden="true"><span
+                                class="octicon octicon-link"></span></a>Unordered</h2>
+                        <p>Asterisks tight:</p>
+                        <ul>
+                            <li> asterisk 1</li>
+                            <li> asterisk 2</li>
+                            <li> asterisk 3</li>
+                        </ul>
+                        <p>Asterisks loose:</p>
+                        <ul>
+                            <li><p>asterisk 1</p></li>
+                            <li><p>asterisk 2</p></li>
+                            <li><p>asterisk 3</p></li>
+                        </ul>
+                        <hr>
+                        <p>Pluses tight:</p>
+                        <ul>
+                            <li> Plus 1</li>
+                            <li> Plus 2</li>
+                            <li> Plus 3</li>
+                        </ul>
+                        <p>Pluses loose:</p>
+                        <ul>
+                            <li><p>Plus 1</p></li>
+                            <li><p>Plus 2</p></li>
+                            <li><p>Plus 3</p></li>
+                        </ul>
+                        <hr>
+                        <p>Minuses tight:</p>
+                        <ul>
+                            <li> Minus 1</li>
+                            <li> Minus 2</li>
+                            <li> Minus 3</li>
+                        </ul>
+                        <p>Minuses loose:</p>
+                        <ul>
+                            <li><p>Minus 1</p></li>
+                            <li><p>Minus 2</p></li>
+                            <li><p>Minus 3</p></li>
+                        </ul>
+                        <h2><a id="user-content-ordered" class="anchor" href="#ordered" aria-hidden="true"><span
+                                class="octicon octicon-link"></span></a>Ordered</h2>
+                        <p>Tight:</p>
+                        <ol>
+                            <li> First</li>
+                            <li> Second</li>
+                            <li> Third</li>
+                        </ol>
+                        <p>and:</p>
+                        <ol>
+                            <li>One</li>
+                            <li>Two</li>
+                            <li>Three</li>
+                        </ol>
+                        <p>Loose using tabs:</p>
+                        <ol>
+                            <li><p>First</p></li>
+                            <li><p>Second</p></li>
+                            <li><p>Third</p></li>
+                        </ol>
+                        <p>and using spaces:</p>
+                        <ol>
+                            <li><p>One</p></li>
+                            <li><p>Two</p></li>
+                            <li><p>Three</p></li>
+                        </ol>
+                        <p>Multiple paragraphs:</p>
+                        <ol>
+                            <li><p>Item 1, graf one.</p>
+                                <p>Item 2. graf two. The quick brown fox jumped over the lazy dog's
+                                    back.</p></li>
+                            <li><p>Item 2.</p></li>
+                            <li><p>Item 3.</p></li>
+                        </ol>
+                        <h2><a id="user-content-nested" class="anchor" href="#nested" aria-hidden="true"><span
+                                class="octicon octicon-link"></span></a>Nested</h2>
+                        <ul>
+                            <li> Tab
+                                <ul>
+                                    <li> Tab
+                                        <ul>
+                                            <li> Tab</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <p>Here's another:</p>
+                        <ol>
+                            <li>First</li>
+                            <li>Second:
+                                <ul>
+                                    <li>Fee</li>
+                                    <li>Fie</li>
+                                    <li>Foe</li>
+                                </ul>
+                            </li>
+                            <li>Third</li>
+                        </ol>
+                        <p>Same thing but with paragraphs:</p>
+                        <ol>
+                            <li><p>First</p></li>
+                            <li><p>Second:</p>
+                                <ul>
+                                    <li>Fee</li>
+                                    <li>Fie</li>
+                                    <li>Foe</li>
+                                </ul>
+                            </li>
+                            <li><p>Third</p></li>
+                        </ol>
+                        <p>This was an error in Markdown 1.0.1:</p>
+                        <ul>
+                            <li><p>this</p>
+                                <ul>
+                                    <li> sub</li>
+                                </ul>
+                                <p>that</p></li>
+                        </ul>
+                        <blockquote>
+                            <p>foo</p>
+                            <blockquote>
+                                <p>bar</p>
+                            </blockquote>
+                            <p>foo</p>
+                        </blockquote>
+                        <h1><a id="user-content-markdown-syntax" class="anchor" href="#markdown-syntax" aria-hidden="true"><span
+                                class="octicon octicon-link"></span></a>Markdown: Syntax</h1>
+                        <ul id="user-content-ProjectSubmenu">
+                            <li><a href="/tylerlong/github-markdown-css-demo/blob/master/projects/markdown"
+                                   title="Markdown Project Page">Main</a></li>
+                            <li><a href="/tylerlong/github-markdown-css-demo/blob/master/projects/markdown/basics" title="Markdown Basics">Basics</a>
+                            </li>
+                            <li>Syntax</li>
+                            <li><a href="/tylerlong/github-markdown-css-demo/blob/master/projects/markdown/license"
+                                   title="Pricing and License Information">License</a></li>
+                            <li><a href="/tylerlong/github-markdown-css-demo/blob/master/projects/markdown/dingus"
+                                   title="Online Markdown Web Form">Dingus</a></li>
+                        </ul>
+                        <ul>
+                            <li><a href="#overview">Overview</a>
+                                <ul>
+                                    <li><a href="#philosophy">Philosophy</a></li>
+                                    <li><a href="#html">Inline HTML</a></li>
+                                    <li><a href="#autoescape">Automatic Escaping for Special Characters</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#block">Block Elements</a>
+                                <ul>
+                                    <li><a href="#p">Paragraphs and Line Breaks</a></li>
+                                    <li><a href="#header">Headers</a></li>
+                                    <li><a href="#blockquote">Blockquotes</a></li>
+                                    <li><a href="#list">Lists</a></li>
+                                    <li><a href="#precode">Code Blocks</a></li>
+                                    <li><a href="#hr">Horizontal Rules</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#span">Span Elements</a>
+                                <ul>
+                                    <li><a href="#link">Links</a></li>
+                                    <li><a href="#em">Emphasis</a></li>
+                                    <li><a href="#code">Code</a></li>
+                                    <li><a href="#img">Images</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#misc">Miscellaneous</a>
+                                <ul>
+                                    <li><a href="#backslash">Backslash Escapes</a></li>
+                                    <li><a href="#autolink">Automatic Links</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+
+
+
+                    </div>
+
+                    <div class="mb-3" th:if="${blog.shareStatement}">
+                        <div class="mb-3"><strong>© 版权声明</strong></div>
+                        <div class="cz-copyright-content">
+                            <p>作者：ChenZhen</p>
+                            <p>博客地址：<a href="https://www.chenzhen.space/" target="_blank">https://www.chenzhen.space/</a></p>
+                            <p>版权：本文为博主 ChenZhen 的原创文章，本文版权归作者所有，转载请附上原文出处链接及本声明。</p>
+                            <p>如果对你有帮助，请到github👇给项目一个小小的star⭐</p>
+                            <p>github地址：<a href="https://github.com/chenzhen7/chenzhen-blog" target="_blank">https://github.com/chenzhen7/chenzhen-blog</a></p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <!--相关推荐-->
+            <div class="card border-2 mb-3 shadow">
+                <div class="card-body border-1">
+
+                    <a href="" class="cz-link" th:href=" '/blog/' + ${similarBlog.id}" th:each="similarBlog : ${similarBlogs}">
+                        <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+                            <div>
+                                <p class="mb-2 fw-bold" th:text="${similarBlog.title}">
+                                    最新版ES8的client API操作 Elasticsearch Java API client 8.0
+                                </p>
+                                <div class="text-muted d-flex align-items-center ">
+                                    <small class="me-3" th:text="${#temporals.format(similarBlog.createTime)}">2023-12-12 17:52</small>
+                                    <small class="d-flex align-items-center ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                                        </svg>
+                                        <div class="me-3" th:text="${similarBlog.views}">1000</div>
+                                    </small>
+                                    <small class="d-flex align-items-center ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-chat-text" viewBox="0 0 16 16">
+                                            <path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
+                                            <path d="M4 5.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zM4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8zm0 2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
+                                        </svg>
+                                        <div class="me-1" th:text="${similarBlog.commentCount}">1000</div>
+                                    </small>
+                                </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32"><path d="M13.1714 12.0007L8.22168 7.05093L9.63589 5.63672L15.9999 12.0007L9.63589 18.3646L8.22168 16.9504L13.1714 12.0007Z" fill="var(--B)"></path></svg>
+                        </div>
+
+                    </a>
+
+                </div>
+            </div>
+
+            <!--评论输入-->
+            <div class="card border-2 mb-3 shadow" th:if="${blog.commentabled}">
+                <!--表单-->
+                <div id="comment-form"  class="card-body border-1">
+                    <div class="row align-items-center mb-3">
+                        <!--头像-->
+                        <div class="col-auto">
+                            <a class="avatar">
+                                <img id="avatar" class="img-thumbnail w-100 h-100" >
+                            </a>
+                        </div>
+                        <!--输入-->
+                        <div class="col">
+                            <div class="row">
+                                <input type="hidden" name="blogId" th:value="${blog.id}">
+                                <input type="hidden" name="parentCommentId" >
+                                <input type="hidden" name="rootCommentId">
+                                <input type="hidden" name="avatar">
+
+                                <div class="col-md-4 mb-1">
+                                    <input name="email" type="email" class="form-control" placeholder="邮箱" id="emailInput" oninput="checkQQEmail()" th:value="${session.user != null ? session.user.email : ''}">
+                                </div>
+                                <div class="col-md-4 mb-1">
+                                    <input name="nickname" type="text" class="form-control" placeholder="昵称" th:value="${session.user != null ? session.user.nickname : ''}">
+                                </div>
+                                <div class="col-md-4 mb-1">
+                                    <input name="address"  type="text" class="form-control" placeholder="站点">
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <!--留言内容-->
+                    <div class="row align-items-center mb-3">
+                        <div class="col">
+                            <textarea id="comment-content" name="content" class="form-control" rows="3" placeholder="注意文明发言哦~"></textarea>
+                        </div>
+                    </div>
+                    <!--表情框-->
+                    <div class="cz-emoji-container mb-3">
+                        <div class="cz-emoji-content">
+                            <!-- Emoji 列表 -->
+                            <span onclick="addEmoji('😀')">😀</span><span onclick="addEmoji('😃')">😃</span><span onclick="addEmoji('😄')">😄</span><span onclick="addEmoji('😁')">😁</span><span onclick="addEmoji('😆')">😆</span><span onclick="addEmoji('😅')">😅</span><span onclick="addEmoji('🤣')">🤣</span><span onclick="addEmoji('😂')">😂</span><span onclick="addEmoji('🙂')">🙂</span><span onclick="addEmoji('🙃')">🙃</span><span onclick="addEmoji('😉')">😉</span><span onclick="addEmoji('😊')">😊</span><span onclick="addEmoji('😇')">😇</span><span onclick="addEmoji('🥰')">🥰</span><span onclick="addEmoji('😍')">😍</span><span onclick="addEmoji('🤩')">🤩</span><span onclick="addEmoji('😘')">😘</span><span onclick="addEmoji('😗')">😗</span><span onclick="addEmoji('😚')">😚</span><span onclick="addEmoji('😙')">😙</span><span onclick="addEmoji('😋')">😋</span><span onclick="addEmoji('😛')">😛</span><span onclick="addEmoji('😜')">😜</span><span onclick="addEmoji('🤪')">🤪</span><span onclick="addEmoji('😝')">😝</span><span onclick="addEmoji('🤑')">🤑</span><span onclick="addEmoji('🤗')">🤗</span><span onclick="addEmoji('🤭')">🤭</span><span onclick="addEmoji('🤫')">🤫</span><span onclick="addEmoji('🤔')">🤔</span><span onclick="addEmoji('🤐')">🤐</span><span onclick="addEmoji('🤨')">🤨</span><span onclick="addEmoji('😐')">😐</span><span onclick="addEmoji('😑')">😑</span><span onclick="addEmoji('😶')">😶</span><span onclick="addEmoji('😏')">😏</span><span onclick="addEmoji('😒')">😒</span><span onclick="addEmoji('🙄')">🙄</span><span onclick="addEmoji('😬')">😬</span><span onclick="addEmoji('🤥')">🤥</span><span onclick="addEmoji('😌')">😌</span><span onclick="addEmoji('😔')">😔</span><span onclick="addEmoji('😪')">😪</span><span onclick="addEmoji('🤤')">🤤</span><span onclick="addEmoji('😴')">😴</span><span onclick="addEmoji('😷')">😷</span><span onclick="addEmoji('🤒')">🤒</span><span onclick="addEmoji('🤕')">🤕</span><span onclick="addEmoji('🤢')">🤢</span><span onclick="addEmoji('🤮')">🤮</span><span onclick="addEmoji('🤧')">🤧</span><span onclick="addEmoji('🥵')">🥵</span><span onclick="addEmoji('🥶')">🥶</span><span onclick="addEmoji('🥴')">🥴</span><span onclick="addEmoji('😵')">😵</span><span onclick="addEmoji('🤯')">🤯</span><span onclick="addEmoji('🤠')">🤠</span><span onclick="addEmoji('🥳')">🥳</span><span onclick="addEmoji('😎')">😎</span><span onclick="addEmoji('🤓')">🤓</span><span onclick="addEmoji('🧐')">🧐</span><span onclick="addEmoji('😕')">😕</span><span onclick="addEmoji('😟')">😟</span><span onclick="addEmoji('🙁')">🙁</span><span onclick="addEmoji('☹️')">☹️</span><span onclick="addEmoji('😮')">😮</span><span onclick="addEmoji('😯')">😯</span><span onclick="addEmoji('😲')">😲</span><span onclick="addEmoji('😳')">😳</span><span onclick="addEmoji('🥺')">🥺</span><span onclick="addEmoji('😦')">😦</span><span onclick="addEmoji('😧')">😧</span><span onclick="addEmoji('😨')">😨</span><span onclick="addEmoji('😰')">😰</span><span onclick="addEmoji('😥')">😥</span><span onclick="addEmoji('😢')">😢</span><span onclick="addEmoji('😭')">😭</span><span onclick="addEmoji('😱')">😱</span><span onclick="addEmoji('😖')">😖</span><span onclick="addEmoji('😣')">😣</span><span onclick="addEmoji('😞')">😞</span><span onclick="addEmoji('😓')">😓</span><span onclick="addEmoji('😩')">😩</span><span onclick="addEmoji('😫')">😫</span><span onclick="addEmoji('🥱')">🥱</span><span onclick="addEmoji('😤')">😤</span><span onclick="addEmoji('😡')">😡</span><span onclick="addEmoji('😠')">😠</span><span onclick="addEmoji('🤬')">🤬</span>
+                        </div>
+                    </div>
+                    <!--发送-->
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <button id="commentpost-btn" type="button" class="btn btn-secondary w-100">发送</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!--评论列表-->
+            <div class="card border-2 mb-3 shadow" th:if="${blog.commentabled}" >
+                <div class="card-body border-1" id="comment-container" >
+                    <!--评论列表-->
+                    <div class="cz-comment-section" th:fragment="commentList" onload="myfunction()">
+                        <div class="cz-comment" th:each="comment : ${commentPageInfo.list}">
+
+                            <div class="avatar" >
+                                <img class="img-thumbnail w-100 h-100" src="../static/images/me.jpg" th:src="@{${comment.avatar}}">
+                                <a href="#" target="_blank" th:href="@{${comment.address}}" th:if="${comment.address != null}">
+                                    <div class="img-thumbnail cz-avatar-overlay">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" class="bi bi-link-45deg" viewBox="0 0 16 16">
+                                            <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
+                                            <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
+                                        </svg>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="cz-comment-content" >
+                                <div class="cz-user-info" th:text="${comment.nickname}">
+                                    <span th:text="${comment.nickname}">ChenZhen</span>
+                                    <span class="badge text-bg-secondary" th:if="${comment.adminComment}">站主</span>
+                                </div>
+                                <div class="cz-comment-text" th:text="${comment.content}" >快来说点什么吧</div>
+                                <div class="cz-comment-footer">
+                                    <span th:text="${#temporals.format(comment.createTime)}">2023-12-15 23:46</span>
+                                    <!--<span>Like</span>-->
+                                    <a href="#" class="me-1"
+                                       th:data-parentcommentid="${comment.id}"
+                                       th:data-commentnickname="${comment.nickname}"
+                                       th:data-rootcommentid="${comment.id}"
+                                       onclick="reply(this)" >
+                                        回复
+                                    </a>
+                                    <a href="#"
+                                       th:if="${session.user}"
+                                       th:href="@{/comments/delete/{id}(id=${comment.id},blogId=${comment.blogId},pageNum=${commentPageInfo.pageNum})}"
+                                       onclick="return confirm('确定要删除该评论吗？三思啊! 删了可就没了！')">
+                                        删除
+                                    </a>
+                                </div>
+                                <!--评论回复列表-->
+                                <div class="cz-reply-section" th:if="${#arrays.length(comment.commentReplyList)} > 0">
+                                    <div class="cz-comment" th:each="reply : ${comment.commentReplyList}">
+                                        <div class="avatar" >
+                                            <img class="img-thumbnail w-100 h-100" src="../static/images/me.jpg" th:src="@{${reply.avatar}}">
+                                            <a href="#" target="_blank" th:href="@{${reply.address}}" th:if="${reply.address != null}">
+                                                <div class="img-thumbnail cz-avatar-overlay">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" class="bi bi-link-45deg" viewBox="0 0 16 16">
+                                                        <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
+                                                        <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
+                                                    </svg>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="cz-comment-content">
+                                            <div class="cz-user-info">
+                                                <span th:text="${reply.nickname}">ChenZhen</span>
+                                                <span class="badge text-bg-secondary" th:if="${reply.adminComment}">站主</span>
+                                                <span th:if="${reply.parentCommentId != reply.rootCommentId}" th:text="'@' + ${reply.parentNickname}" class="ps-2 text-primary">@小白</span>
+                                            </div>
+                                            <div class="cz-comment-text" th:text="${reply.content}">快来说点什么吧</div>
+                                            <div class="cz-comment-footer">
+                                                <span th:text="${#temporals.format(reply.createTime)}">2023-12-15 23:46</span>
+                                                <!--                                <span>Like</span>-->
+                                                <a href="#" class="me-1"
+                                                   th:data-parentcommentid="${reply.id}"
+                                                   th:data-commentnickname="${reply.nickname}"
+                                                   th:data-rootcommentid="${comment.id}"
+                                                   onclick="reply(this)" >
+                                                    回复
+                                                </a>
+                                                <a href="#"
+                                                   th:if="${session.user}"
+                                                   th:href="@{/comments/delete/{id}(id=${reply.id},blogId=${comment.blogId},pageNum=${commentPageInfo.pageNum})}"
+                                                   onclick="return confirm('确定要删除该评论吗？三思啊! 删了可就没了！')">
+                                                    删除
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <!--分页-->
+                    <nav th:if="${not #lists.isEmpty(commentPageInfo.list)}">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${commentPageInfo.hasPreviousPage} ? 'page-item' : 'page-item disabled' ">
+                                <a class="page-link text-black" href="#" th:href="@{ '/message?pageNum=' + ${commentPageInfo.prePage}}">上一页</a>
+                            </li>
+
+                            <li class="page-item"
+                                th:each="num : ${commentPageInfo.navigatepageNums}"
+                                th:classappend="${commentPageInfo.pageNum == num} ? 'page-item active' : 'page-item'">
+                                <a class="page-link text-black fw-bold" href="#" th:href="@{ '/message?pageNum=' + ${num}}" th:text="${num}">1</a>
+                            </li>
+
+                            <li class="page-item" th:classappend="${commentPageInfo.hasNextPage} ? 'page-item' : 'page-item disabled' ">
+                                <a class="page-link text-black" href="#" th:href="@{ '/message?pageNum=' + ${commentPageInfo.nextPage}}" >下一页</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+
+        </div>
+
+        <!--右边-->
+        <div class="col-xxl-3 d-xxl-block d-none ">
+            <!--目录-->
+            <div class="card mb-3 shadow overflow-hidden cz-toc-sticky">
+                <div class="card-body js-toc"></div>
+            </div>
+        </div>
+
+
+
+    </div>
+
+
+</div>
+
+
+
+<div class="bg-white border shadow rounded-3 me-2 cz-float-action " id="float-action">
+
+    <button th:if="${blog.appreciation}" class="cz-float-action-btn" id="showAppreciation-button" data-bs-toggle="modal" data-bs-target="#appreciationModal">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-coin cz-float-action-icon" viewBox="0 0 16 16">
+            <path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9H5.5zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518l.087.02z"/>
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+            <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11zm0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12z"/>
+        </svg>
+        <span class="cz-float-action-text">赞赏</span>
+    </button>
+
+
+    <button class="cz-float-action-btn" id="toComment-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-chat cz-float-action-icon" viewBox="0 0 16 16">
+            <path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
+        </svg>
+        <span class="cz-float-action-text">评论</span>
+    </button>
+
+
+    <button class="cz-float-action-btn" id="toTop-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-chevron-up cz-float-action-icon" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/>
+        </svg>
+        <span class="cz-float-action-text">返回顶部</span>
+    </button>
+</div>
+
+<!-- 赞赏模态框 -->
+<div class="modal fade" id="appreciationModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">赞善码</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p>如果我的博客帮助到了您，您可以友情支持一下。</p>
+                <div class="mb-3">
+                    <p>微信</p>
+                    <img class="img-thumbnail cz-appreciation-qrcode" src="../static/images/wechat.jpg" th:src="@{/images/wechat.jpg}" alt="">
+                </div>
+                <div class="mb-3">
+                    <p>支付宝</p>
+                    <img class="img-thumbnail cz-appreciation-qrcode" src="../static/images/zhifupay.jpg" th:src="@{/images/zhifupay.jpg}" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--底部栏-->
+<footer class="border-top p-3 bg-white text-muted small">
+    <div class="container pb-5 ">
+        <div class=" d-flex align-items-center justify-content-between">
+            <div>
+                <span class="cz-navbar-brand mr-2"><strong th:text="${author}">ChenZhen</strong></span>我的博客已营业：<span id="htmer_time">1年105天8时13分28秒</span>
+            </div>
+            <div>
+                <a target="_blank" class="text-secondary fw-bold" href="#">粤ICP备2022122083号-1</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!--    动态线条-->
+<script src="../static/lib/bootstrap.bundle.min.js" th:src="@{/lib/bootstrap.bundle.min.js}"></script>
+<script src="../static/lib/jquery-3.2.1/jquery-3.2.1.min.js" th:src="@{/lib/jquery-3.2.1/jquery-3.2.1.min.js}"></script>
+<script src="../static/lib/scrollTo/jquery.scrollTo.min.js" th:src="@{/lib/scrollTo/jquery.scrollTo.min.js}"></script>
+<script src="../static/lib/prism/prism.js" th:src="@{/lib/prism/prism.js}"></script>
+<script src="../static/lib/tocbot/tocbot.min.js" th:src="@{/lib/tocbot/tocbot.min.js}"></script>
+<script src="../static/lib/waypoints/jquery.waypoints.min.js"
+        th:src="@{/lib/waypoints/jquery.waypoints.min.js}"></script>
+<script src="../static/lib/clickEffect.js" th:src="@{/lib/clickEffect.js}"></script>
+
+
+<script th:inline="javascript">
+    // 代码高亮
+    Prism.highlightAll({ autoDetect: true });
+
+    // 加载tocbot目录
+    tocbot.init({
+        // 在哪里渲染目录
+        tocSelector: '.js-toc',
+        // 用于构建目录的内容位置
+        contentSelector: '.js-toc-content',
+        // 在contentSelector元素内要抓取的标题
+        headingSelector: 'h1, h2, h3',
+        // 不应折叠的标题级别数
+        // 例如，数字6将显示所有内容，因为只有6个标题级别，数字0将折叠所有内容。
+        // 隐藏的部分将随着滚动到其中的标题而打开和关闭。
+        collapseDepth: 3,
+
+
+    });
+    // 加载评论区
+    function myfunction() {
+        $("#comment-container").load(/*[[@{/comments/{id}(id=${blog.id})}]]*/);
+    }
+
+    // 移动设备导航栏样式切换
+    // 获取菜单切换按钮和移动设备菜单列表的引用
+    const menuToggleBtn = document.querySelector('.cz-menu-toggle-btn');
+    const mobileMenu = document.querySelector('.cz-mobile-menu');
+    // 点击菜单切换按钮时的事件处理函数
+    menuToggleBtn.addEventListener('click', () => {
+        // 切换移动设备菜单列表的显示状态
+        mobileMenu.classList.toggle('show');
+    });
+
+    function addEmoji(emoji) {
+        var contentTextarea = document.getElementById('comment-content');
+        contentTextarea.value = contentTextarea.value + emoji;
+    }
+
+    $('#toTop-button').click(function () {
+        $(window).scrollTo(0, 100);
+    });
+
+    $('#toComment-button').click(function () {
+        $(window).scrollTo($('#comment-container'), 100);
+    });
+
+    $(document).ready(function() {
+        var lastScrollTop = 0;
+
+        // 监听滚动事件
+        $(window).scroll(function() {
+            var st = $(this).scrollTop();
+
+            // 判断滚动方向
+            if (st > lastScrollTop) {
+                // 向下滚动
+                $('#float-action').fadeOut();
+            } else {
+                // 向上滚动
+                $('#float-action').fadeIn();
+            }
+
+            lastScrollTop = st;
+        });
+
+
+    });
+
+
+
+    $('#commentpost-btn').click(function () {
+        console.log("1")
+        // 获取输入的值
+        var nickname = $('input[name="nickname"]').val();
+        var email = $('input[name="email"]').val();
+        var content = $('textarea[name="content"]').val();
+
+        // 校验邮箱
+        if (!isValidEmail(email)) {
+            alert('请输入有效的邮箱地址');
+            return ;
+        }
+        // 校验昵称
+        if (!nickname.trim()) {
+            alert('昵称不能为空');
+            return ;
+        }
+
+        // 校验留言内容
+        if (!content.trim()) {
+            alert('留言内容不能为空');
+            return ;
+        }
+        postData();
+    });
+
+    function checkQQEmail() {
+        var emailInput = document.getElementById('emailInput');
+        var avatar = document.getElementById('avatar');
+
+        // 正则表达式匹配QQ邮箱
+        var qqEmailRegex = /^[1-9]\d{4,10}@qq\.com$/;
+        var userEmail = emailInput.value.trim();
+
+        if (qqEmailRegex.test(userEmail)) {
+            // 提取QQ号码
+            var qqNumber = userEmail.split('@')[0];
+            // 构建QQ头像URL
+            var avatarURL = 'http://q1.qlogo.cn/g?b=qq&nk=' + qqNumber + '&s=100';
+            // 更新头像
+            avatar.src = avatarURL;
+            $("[name='avatar']").val(avatarURL);
+        } else {
+            // 如果不是QQ邮箱，显示默认图片
+            avatar.src = '/images/me.jpg';
+            $("[name='avatar']").val('/images/me.jpg');
+
+        }
+    }
+
+    // 简单的邮箱格式校验函数
+    function isValidEmail(email) {
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    function postData() {
+        $("#comment-container").load(/*[[@{/comments(pageNum=${commentPageInfo.pageNum})}]]*/"", {
+            "rootCommentId": $("[name='rootCommentId']").val(),
+            "parentCommentId": $("[name='parentCommentId']").val(),
+            "blogId": $("[name='blogId']").val(),
+            "nickname": $("[name='nickname']").val(),
+            "email": $("[name='email']").val(),
+            "avatar" : $("[name='avatar']").val(),
+            "content": $("[name='content']").val(),
+            "address" : $("[name='address']").val()
+        }, function (responseTxt, statusTxt, xhr) {
+            $(window).scrollTo($('#goto'), 500);
+            clearContent();
+        });
+    }
+
+    function clearContent() {
+        $("[name='content']").val('');
+        $("[name='parentCommentId']").val(null);
+        $("[name='rootCommentId']").val(null);
+        $("[name='content']").attr("placeholder", "请输入评论信息...");
+    }
+
+    function reply(obj) {
+        var parentCommentId = $(obj).data('parentcommentid');
+        var rootCommentId = $(obj).data('rootcommentid');
+        var commentNickname = $(obj).data('commentnickname');
+        $("[name='content']").attr("placeholder", "@" + commentNickname).focus();
+        $("[name='parentCommentId']").val(parentCommentId);
+        $("[name='rootCommentId']").val(rootCommentId);
+        $(window).scrollTo($('#comment-form'), 100);
+    }
+
+
+    $(function () {
+        $("#comment-container").load(/*[[@{/comments/{id}(id=${blog.id})}]]*/);
+    });
+
+
+    // 运行时间统计
+    function secondToDate(second) {
+        if (!second) {
+            return 0;
+        }
+        var time = new Array(0, 0, 0, 0, 0);
+        if (second >= 365 * 24 * 3600) {
+            time[0] = parseInt(second / (365 * 24 * 3600));
+            second %= 365 * 24 * 3600;
+        }
+        if (second >= 24 * 3600) {
+            time[1] = parseInt(second / (24 * 3600));
+            second %= 24 * 3600;
+        }
+        if (second >= 3600) {
+            time[2] = parseInt(second / 3600);
+            second %= 3600;
+        }
+        if (second >= 60) {
+            time[3] = parseInt(second / 60);
+            second %= 60;
+        }
+        if (second > 0) {
+            time[4] = second;
+        }
+        return time;
+    }
+
+    function setTime() {
+        /*此处为网站的创建时间*/
+        var create_time = Math.round(new Date(Date.UTC(2022, 8, 21, 15, 15, 15)).getTime() / 1000);
+        var timestamp = Math.round((new Date().getTime() + 8 * 60 * 60 * 1000) / 1000);
+        currentTime = secondToDate((timestamp - create_time));
+        currentTimeHtml = currentTime[0] + '年' + currentTime[1] + '天'
+            + currentTime[2] + '时' + currentTime[3] + '分' + currentTime[4]
+            + '秒';
+        document.getElementById("htmer_time").innerHTML = currentTimeHtml;
+    }
+
+    setInterval(setTime, 1000);
+
+
+    // 获取关键词输入框
+    const keywordInput = $('#keywordInput');
+    //搜索 当用户输入结束时触发事件
+    keywordInput.on('input', function() {
+        // 使用定时器延迟发送 AJAX 请求，以确保用户输入结束
+        clearTimeout(this.timer);
+        this.timer = setTimeout(function () {
+            // 获取用户输入的关键词
+            const keyword = keywordInput.val();
+            // 发送 AJAX 请求
+            $.ajax({
+                url: '/search',
+                method: 'GET',
+                data: { keyword: keyword },
+                success: function(response) {
+                    // 处理从后端返回的数据
+                    if (response.code === 20000){
+                        var resultList = response.data.blogs;
+                        // 获取搜索结果列表容器
+                        var searchResults = $('#searchResults');
+                        // 清空原来的结果
+                        searchResults.empty();
+                        if (resultList){
+                            // 渲染搜索结果列表
+                            resultList.forEach(function(blog) {
+                                var blogItem = $('<a>').attr('href', `/blog/${blog.id}`).addClass('list-group-item list-group-item-action').text(blog.title);
+                                searchResults.append(blogItem);
+                            });
+                        }
+                    }
+                },
+                error: function(error) {
+                    console.error('Error:', error);
+                }
+            });
+        }, 1000); // 1000 毫秒延迟
+    });
+
+
+</script>
+</body>
+</html>

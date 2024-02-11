@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>错误</title>
+  <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
+  <link rel="stylesheet" href="../../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"  />
+  <style>
+    body {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f8f9fa;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    .error-code {
+      font-size: 6rem;
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .error-message {
+      font-size: 2rem;
+      margin-top: 20px;
+    }
+
+    .home-link {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+
+<div class="container">
+  <div class="error-code">错误</div>
+  <div class="error-message">对不起，服务异常，请联系管理员</div>
+  <div class="mb-3" th:if="${url != null}" th:text="${url}">url</div>
+  <div th:if="${message != null}" th:text="${message}">Exception message</div>
+
+  <p class="home-link">
+    <a href="#" th:href="@{/}">返回首页</a>
+  </p>
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta name="referrer" content="no-referrer"/>
+    <meta name="baidu-site-verification" content="code-xGGBIzYDQx" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页-ChenZhen的客栈-CZ的java学习日记</title>
+    <meta name=”Description” Content=”ChenZhen客栈是一个界面友好，用于记录陈震的个人生活、学习、成长过程，并以文章、图片、音乐、资源等方式进行显示的个人博客网站”>
+    <meta name=”Keywords” Content=”ChenZhen,博客,资源库,照片墙,音乐盒″>
+
+    <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
+<!--    <link rel="stylesheet" href="../../static/lib/editormd/css/editormd.min.css" th:href="@{/lib/editormd/css/editormd.min.css}">-->
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"  />
+    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+</head>
+<body >
+
+
+<!--导航-->
+<div class="cz-navbar">
+    <div class="cz-pc-menu">
+        <a href="index.html" th:href="@{/}" class="cz-navbar-brand text-decoration-none"><strong th:text="${author}">ChenZhen</strong></a>
+        <div class="cz-navbar-links fs-6 fw-light">
+            <a href="index.html"    th:href="@{/}" class="cz-nav-link cz-active-link">首页</a>
+            <a href="tags.html"     th:href="@{/tags}" class="cz-nav-link">标签</a>
+            <a href="archives.html" th:href="@{/archives}" class="cz-nav-link">归档</a>
+            <a href="message.html"  th:href="@{/message}" class="cz-nav-link">留言板</a>
+            <a href="friends.html"  th:href="@{/friends}" class="cz-nav-link">友链</a>
+            <a href="about.html"    th:href="@{/about}" class="cz-nav-link">关于我</a>
+        </div>
+        <a href="#" class="cz-navbar-brand" data-bs-toggle="modal" data-bs-target="#searchModal">
+            <strong>搜索</strong>
+        </a>
+
+        <button class="cz-menu-toggle-btn">菜单</button>
+    </div>
+    <div class="cz-mobile-menu fw-light fs-6">
+        <a href="index.html"    th:href="@{/}" class="cz-nav-link cz-active-link">首页</a>
+        <a href="tags.html"     th:href="@{/tags}" class="cz-nav-link">标签</a>
+        <a href="archives.html" th:href="@{/archives}" class="cz-nav-link">归档</a>
+        <a href="message.html"  th:href="@{/message}" class="cz-nav-link">留言板</a>
+        <a href="friends.html"  th:href="@{/friends}" class="cz-nav-link">友链</a>
+        <a href="about.html"    th:href="@{/about}" class="cz-nav-link">关于我</a>
+    </div>
+</div>
+
+<!--固定在顶部的导航-->
+<div class="cz-navbar fixed d-none" id="fixed-navbar">
+    <div class="cz-pc-menu">
+        <a href="index.html" th:href="@{/}" class="cz-navbar-brand text-decoration-none"><strong th:text="${author}">ChenZhen</strong></a>
+        <div class="cz-navbar-links fs-6 fw-light">
+            <a href="index.html"    th:href="@{/}" class="cz-nav-link cz-active-link">首页</a>
+            <a href="tags.html"     th:href="@{/tags}" class="cz-nav-link">标签</a>
+            <a href="archives.html" th:href="@{/archives}" class="cz-nav-link">归档</a>
+            <a href="message.html"  th:href="@{/message}" class="cz-nav-link">留言板</a>
+            <a href="friends.html"  th:href="@{/friends}" class="cz-nav-link">友链</a>
+            <a href="about.html"    th:href="@{/about}" class="cz-nav-link">关于我</a>
+        </div>
+        <a href="#" class="cz-navbar-brand" data-bs-toggle="modal" data-bs-target="#searchModal">
+            <strong>搜索</strong>
+        </a>
+
+
+        <button class="cz-menu-toggle-btn">菜单</button>
+    </div>
+    <div class="cz-mobile-menu fw-light fs-6">
+        <a href="index.html"    th:href="@{/}" class="cz-nav-link cz-active-link">首页</a>
+        <a href="tags.html"     th:href="@{/tags}" class="cz-nav-link">标签</a>
+        <a href="archives.html" th:href="@{/archives}" class="cz-nav-link">归档</a>
+        <a href="message.html"  th:href="@{/message}" class="cz-nav-link">留言板</a>
+        <a href="friends.html"  th:href="@{/friends}" class="cz-nav-link">友链</a>
+        <a href="about.html"    th:href="@{/about}" class="cz-nav-link">关于我</a>
+    </div>
+</div>
+
+
+<!-- 搜索框 -->
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content p-2 ">
+            <div class="modal-body ">
+                <button type="button" class="btn-close float-end" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="text-center fs-5 mb-3">搜　索</div>
+                <div class="input-group mb-4">
+                    <span class="input-group-text" id="basic-addon1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                        </svg>
+                    </span>
+                    <input id="keywordInput" type="text" class="form-control" placeholder="输入关键词" aria-describedby="basic-addon1">
+                </div>
+
+                <div class="mb-2">搜索结果</div>
+                <!-- 搜索结果展示区域 -->
+                <div id="searchResults" class="list-group">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!--顶部图片-->
+<div alt="" id="cz-bg-img" class="cz-bg-section cz-bg-img "
+     style="background-image: url('../static/images/index.png')"
+     th:style="'background-image: url(' + @{/images/index.png} + ')'">
+
+    <div class="m-bg-class_cover" align="center">
+        <p class="cz-index-title">- Chen Zhen's Blog -</p>
+        <p class="cz-index-title2">Welcome to my website ——by 陈震 （Chen Zhen）</p>
+    </div>
+</div>
+
+<div class="container">
+    <!--最新推荐-->
+    <div class=" pt-4 pb-4 mt-4">
+        <h5 class="fw-bold cz-spanborder"><span>最近推荐</span></h5>
+        <div class="row">
+            <!--左边-->
+            <div class="col-lg-6" th:if="${not #lists.isEmpty(recommendList)}" >
+                <div class="card border-0 mb-4 box-shadow h-xl-300">
+                    <div class="cz-recommendImage-container">
+                        <img src="../static/images/recommendPicture.png" th:src="@{${recommendList[0].firstPicture}}" alt="Your Image">
+                    </div>
+
+                    <div class="card-body px-0 pb-0 d-flex flex-column align-items-start">
+                        <h2 class="h4 fw-bold">
+                            <a class="fw-bold cz-link" href="blog.html"  th:href="@{/blog/{id}(id=${recommendList[0].id})}" >
+                                <span th:text="${recommendList[0].title}">最近推荐博文1</span>
+                            </a>
+                        </h2>
+                        <p class="card-text fw-light" th:text="${recommendList[0].description}" >
+                            最近推荐博文描述
+                        </p>
+                        <small class="d-block text-muted">ChenZhen</small>
+
+                        <div class="d-flex justify-content-between w-100">
+
+                            <div class="text-muted d-flex align-items-center ">
+                                <small class="me-3" th:text="${#temporals.format(recommendList[0].createTime)}">2023-12-12 17:52</small>
+                                <small class="d-flex align-items-center ">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                                    </svg>
+                                    <div class="me-3 ms-1" th:text="${recommendList[0].views}">1000</div>
+                                </small>
+                                <small class="d-flex align-items-center ">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-chat-text" viewBox="0 0 16 16">
+                                        <path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
+                                        <path d="M4 5.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zM4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8zm0 2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
+                                    </svg>
+                                    <div class="me-1 ms-1" th:text="${recommendList[0].commentCount}">1000</div>
+                                </small>
+                            </div>
+
+                            <div>
+                                <span class="badge bg-secondary ms-1" th:each="tag : ${recommendList[0].tagList}" th:text="${tag.name}">标签</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--右边-->
+            <div class="col-lg-6" >
+                <div class="flex-md-row mb-4 mt-4 box-shadow h-xl-300" th:each="blog, iterStat : ${recommendList}" th:if="${iterStat.index > 0}">
+                    <a class="cz-link" href="#" th:href="@{/blog/{id}(id=${blog.id})}">
+                        <div class="mb-3 d-flex align-items-md-center">
+                            <div class="cz-recommendImage-container2">
+                                <img src="../static/images/me.jpg" th:src="@{${blog.firstPicture}}" >
+                            </div>
+                            <div class="ps-3 w-100">
+                                <h2 class="mb-2 h6 fw-bold">
+                                    <div class="fw-bold" th:text="${blog.title}">最近推荐博文2</div>
+                                </h2>
+                                <div class="card-text text-muted small">
+                                    ChenZhen
+                                </div>
+                                <div class="d-flex justify-content-between w-100">
+                                    <div class="text-muted d-flex align-items-center ">
+                                        <!--时间-->
+                                        <small class="me-3" th:text="${#temporals.format(blog.createTime)}">2023-12-12 17:52</small>
+                                        <!--浏览量-->
+                                        <small class="d-flex align-items-center ">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                                <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                                            </svg>
+                                            <div class="me-3 ms-1" th:text="${blog.views}">1000</div>
+                                        </small>
+                                        <!--评论数-->
+                                        <small class="d-flex align-items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-chat-text" viewBox="0 0 16 16">
+                                                <path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
+                                                <path d="M4 5.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zM4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8zm0 2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
+                                            </svg>
+                                            <div class="me-1 ms-1" th:text="${blog.commentCount}">1000</div>
+                                        </small>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-secondary ms-1" th:each="tag : ${blog.tagList}" th:text="${tag.name}">Java</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!--主要内容-->
+    <div class="mb-5">
+        <div class="row justify-content-between">
+            <!--博文列表-->
+            <div class="col-md-9">
+                <h5 class="fw-bold cz-spanborder"><span>博文列表</span></h5>
+
+                <!--博文-->
+                <div class="d-none d-md-block">
+                    <div class="mb-5 d-flex justify-content-between" th:if="${not #lists.isEmpty(page.list)}" th:each="blog : ${page.list}">
+
+                        <div class="pr-3">
+                            <h2 class="mb-2 h4 fw-bold">
+                                <a class="fw-bold cz-link2 text-break" href="" th:href="@{/blog/{id}(id=${blog.id})}" th:text="${blog.title}">最新版ES8的client API操作 Elasticsearch Java API client 8.0</a>
+                            </h2>
+                            <p class="fw-light cz-blog-description" th:text="${blog.description}" >
+                                我们在学习ES客户端时，一直使用的都是`Java High Level Rest Client`，在浏览官网时，发现官方给出的警告是：`Java REST` 客户端已被弃用.
+                            </p>
+                            <a class="card-text text-muted small" href="" th:href="@{/about}">
+                                ChenZhen
+                            </a>
+                            <div class="d-flex justify-content-between">
+                                <div class="text-muted d-flex align-items-center ">
+                                    <!--时间-->
+                                    <small class="me-3" th:text="${#temporals.format(blog.updateTime,'yyyy-MM-dd HH:mm')}">2023-12-12 17:52</small>
+                                    <div class="d-flex align-content-center">
+                                        <!--浏览量-->
+                                        <small class="d-flex align-items-center ">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                                <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                                            </svg>
+                                            <div class="me-3 ms-1" th:text="${blog.views}">1000</div>
+                                        </small>
+                                        <!--评论数-->
+                                        <small class="d-flex align-items-center ">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-chat-text" viewBox="0 0 16 16">
+                                                <path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
+                                                <path d="M4 5.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zM4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8zm0 2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
+                                            </svg>
+                                            <div class="me-1 ms-1" th:text="${blog.commentCount}">1000</div>
+                                        </small>
+                                    </div>
+                                </div>
+                                <!--标签-->
+                                <div class="pe-5">
+                                    <span class="badge bg-secondary ms-1" th:each="tag : ${blog.tagList}" th:text="${tag.name}">Java</span>
+                                    <span class="badge bg-primary" th:if="${blog.copyright == 1}">原创</span>
+                                    <span class="badge bg-danger" th:if="${blog.copyright == 0}">转载</span>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <!--博文首图-->
+                        <div class="d-flex align-items-md-center">
+                            <img class="cz-blog-img" src="../static/images/recommendPicture.png" th:src="@{${blog.firstPicture}}">
+                        </div>
+
+                    </div>
+                </div>
+
+                <!--博文（移动端展示）-->
+                <div class="d-md-none">
+                    <div class="mb-5" th:if="${not #lists.isEmpty(page.list)}" th:each="blog : ${page.list}">
+                        <div class="d-flex justify-content-between" >
+
+                            <h2 class="mb-2 h4 fw-bold">
+                                <a class="fw-bold cz-link2 text-break" href="" th:href="@{/blog/{id}(id=${blog.id})}" th:text="${blog.title}">最新版ES8的client API操作 Elasticsearch Java API client 8.0</a>
+                            </h2>
+
+                            <!--博文首图-->
+                            <div class="d-flex align-items-center">
+                                <img class="cz-blog-img" src="../static/images/recommendPicture.png" th:src="@{${blog.firstPicture}}">
+                            </div>
+
+                        </div>
+
+                        <p class="fw-light cz-blog-description" th:text="${blog.description}" >
+                            我们在学习ES客户端时，一直使用的都是`Java High Level Rest Client`，在浏览官网时，发现官方给出的警告是：`Java REST` 客户端已被弃用.
+                        </p>
+                        <a class="card-text text-muted small" href="" th:href="@{/about}">
+                            ChenZhen
+                        </a>
+                        <div class="d-flex justify-content-between">
+                            <div class="text-muted">
+                                <!--时间-->
+                                <small class="me-3" th:text="${#temporals.format(blog.updateTime,'yyyy-MM-dd HH:mm')}">2023-12-12 17:52</small>
+                                <div class="d-flex align-content-center">
+                                    <!--浏览量-->
+                                    <small class="d-flex align-items-center ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                                        </svg>
+                                        <div class="me-3 ms-1" th:text="${blog.views}">1000</div>
+                                    </small>
+                                    <!--评论数-->
+                                    <small class="d-flex align-items-center ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-chat-text" viewBox="0 0 16 16">
+                                            <path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
+                                            <path d="M4 5.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zM4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8zm0 2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
+                                        </svg>
+                                        <div class="me-1 ms-1" th:text="${blog.commentCount}">1000</div>
+                                    </small>
+                                </div>
+                            </div>
+                            <!--标签-->
+                            <div>
+                                <span class="badge bg-secondary ms-1" th:each="tag : ${blog.tagList}" th:text="${tag.name}">Java</span>
+                                <span class="badge bg-primary" th:if="${blog.copyright == 1}">原创</span>
+                                <span class="badge bg-danger" th:if="${blog.copyright == 0}">转载</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!--分页-->
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${page.hasPreviousPage} ? 'page-item' : 'page-item disabled' ">
+                            <a class="page-link text-black" href="#">
+                                <span aria-hidden="true" th:href="@{/{pageNum}(pageNum=${page.prePage})}">上一页</span>
+                            </a>
+                        </li>
+
+                        <li class="page-item"
+                            th:each="num : ${page.navigatepageNums}"
+                            th:classappend="${page.pageNum == num} ? 'page-item active' : 'page-item'">
+                            <a class="page-link text-black" href="#" th:href="@{'/'+${num}}" th:text="${num}">1</a>
+                        </li>
+
+                        <li class="page-item" th:classappend="${page.hasNextPage} ? 'page-item' : 'page-item disabled' ">
+                            <a class="page-link text-black" href="#">
+                                <span aria-hidden="true" th:href="@{/{pageNum}(pageNum=${page.nextPage})}">下一页</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <!--站点概览-->
+            <div class="col-md-3 pl-4" >
+                <div class="cz-toc-sticky">
+                    <h5 class="fw-bold cz-spanborder"><span>站点概览</span></h5>
+
+                    <span class="cz-navbar-brand fs-3 mr-2 mb-2 "><strong th:text="${author}">ChenZhen</strong></span>
+
+                    <div>
+                        <p class="fw-light" th:text="${profile}">这个人不懒，却什么都没有写.</p>
+                    </div>
+
+                    <!--地点-->
+                    <div class="d-flex align-items-center mb-2 ">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
+                            <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>
+                            <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                        </svg>
+                        <small class="ms-2" th:text="${location}">广州</small>
+                    </div>
+                    <!--email-->
+                    <div class="d-flex align-items-center mb-2 ">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope-at" viewBox="0 0 16 16">
+                            <path d="M2 2a2 2 0 0 0-2 2v8.01A2 2 0 0 0 2 14h5.5a.5.5 0 0 0 0-1H2a1 1 0 0 1-.966-.741l5.64-3.471L8 9.583l7-4.2V8.5a.5.5 0 0 0 1 0V4a2 2 0 0 0-2-2H2Zm3.708 6.208L1 11.105V5.383l4.708 2.825ZM1 4.217V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v.217l-7 4.2-7-4.2Z"/>
+                            <path d="M14.247 14.269c1.01 0 1.587-.857 1.587-2.025v-.21C15.834 10.43 14.64 9 12.52 9h-.035C10.42 9 9 10.36 9 12.432v.214C9 14.82 10.438 16 12.358 16h.044c.594 0 1.018-.074 1.237-.175v-.73c-.245.11-.673.18-1.18.18h-.044c-1.334 0-2.571-.788-2.571-2.655v-.157c0-1.657 1.058-2.724 2.64-2.724h.04c1.535 0 2.484 1.05 2.484 2.326v.118c0 .975-.324 1.39-.639 1.39-.232 0-.41-.148-.41-.42v-2.19h-.906v.569h-.03c-.084-.298-.368-.63-.954-.63-.778 0-1.259.555-1.259 1.4v.528c0 .892.49 1.434 1.26 1.434.471 0 .896-.227 1.014-.643h.043c.118.42.617.648 1.12.648Zm-2.453-1.588v-.227c0-.546.227-.791.573-.791.297 0 .572.192.572.708v.367c0 .573-.253.744-.564.744-.354 0-.581-.215-.581-.8Z"/>
+                        </svg>
+                        <small class="ms-2" th:text="${email}">1583296383qq.com</small>
+                    </div>
+                    <!--微信-->
+                    <div class="d-flex align-items-center mb-2 ">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-wechat" viewBox="0 0 16 16">
+                            <path d="M11.176 14.429c-2.665 0-4.826-1.8-4.826-4.018 0-2.22 2.159-4.02 4.824-4.02S16 8.191 16 10.411c0 1.21-.65 2.301-1.666 3.036a.324.324 0 0 0-.12.366l.218.81a.616.616 0 0 1 .029.117.166.166 0 0 1-.162.162.177.177 0 0 1-.092-.03l-1.057-.61a.519.519 0 0 0-.256-.074.509.509 0 0 0-.142.021 5.668 5.668 0 0 1-1.576.22ZM9.064 9.542a.647.647 0 1 0 .557-1 .645.645 0 0 0-.646.647.615.615 0 0 0 .09.353Zm3.232.001a.646.646 0 1 0 .546-1 .645.645 0 0 0-.644.644.627.627 0 0 0 .098.356Z"/>
+                            <path d="M0 6.826c0 1.455.781 2.765 2.001 3.656a.385.385 0 0 1 .143.439l-.161.6-.1.373a.499.499 0 0 0-.032.14.192.192 0 0 0 .193.193c.039 0 .077-.01.111-.029l1.268-.733a.622.622 0 0 1 .308-.088c.058 0 .116.009.171.025a6.83 6.83 0 0 0 1.625.26 4.45 4.45 0 0 1-.177-1.251c0-2.936 2.785-5.02 5.824-5.02.05 0 .1 0 .15.002C10.587 3.429 8.392 2 5.796 2 2.596 2 0 4.16 0 6.826Zm4.632-1.555a.77.77 0 1 1-1.54 0 .77.77 0 0 1 1.54 0Zm3.875 0a.77.77 0 1 1-1.54 0 .77.77 0 0 1 1.54 0Z"/>
+                        </svg>
+                        <small class="ms-2" th:text="${wechat}">ChenZhen_7</small>
+                    </div>
+                    <!--QQ-->
+                    <div class="d-flex align-items-center mb-2 ">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-tencent-qq" viewBox="0 0 16 16">
+                            <path d="M6.048 3.323c.022.277-.13.523-.338.55-.21.026-.397-.176-.419-.453-.022-.277.13-.523.338-.55.21-.026.397.176.42.453Zm2.265-.24c-.603-.146-.894.256-.936.333-.027.048-.008.117.037.15.045.035.092.025.119-.003.361-.39.751-.172.829-.129l.011.007c.053.024.147.028.193-.098.023-.063.017-.11-.006-.142-.016-.023-.089-.08-.247-.118Z"/>
+                            <path fill-rule="evenodd" d="M11.727 6.719c0-.022.01-.375.01-.557 0-3.07-1.45-6.156-5.015-6.156-3.564 0-5.014 3.086-5.014 6.156 0 .182.01.535.01.557l-.72 1.795a25.85 25.85 0 0 0-.534 1.508c-.68 2.187-.46 3.093-.292 3.113.36.044 1.401-1.647 1.401-1.647 0 .979.504 2.256 1.594 3.179-.408.126-.907.319-1.228.556-.29.213-.253.43-.201.518.228.386 3.92.246 4.985.126 1.065.12 4.756.26 4.984-.126.052-.088.088-.305-.2-.518-.322-.237-.822-.43-1.23-.557 1.09-.922 1.594-2.2 1.594-3.178 0 0 1.041 1.69 1.401 1.647.168-.02.388-.926-.292-3.113a25.78 25.78 0 0 0-.534-1.508l-.72-1.795ZM9.773 5.53c-.13-.286-1.431-.605-3.042-.605h-.017c-1.611 0-2.913.319-3.042.605a.096.096 0 0 0-.01.04c0 .022.008.04.018.056.11.159 1.554.943 3.034.943h.017c1.48 0 2.924-.784 3.033-.943a.095.095 0 0 0 .008-.096Zm-4.32-.989c-.483.022-.896-.529-.922-1.229-.026-.7.344-1.286.828-1.308.483-.022.896.529.922 1.23.027.7-.344 1.286-.827 1.307Zm2.538 0c.483.022.896-.529.922-1.229.026-.7-.344-1.286-.827-1.308-.484-.022-.896.529-.923 1.23-.026.7.344 1.285.828 1.307ZM2.928 8.99a10.674 10.674 0 0 0-.097 2.284c.146 2.45 1.6 3.99 3.846 4.012h.091c2.246-.023 3.7-1.562 3.846-4.011.054-.9 0-1.663-.097-2.285-1.312.26-2.669.41-3.786.396h-.017c-.297.003-.611-.005-.937-.023v2.148c-1.106.154-2.21-.068-2.21-.068V9.107a22.93 22.93 0 0 1-.639-.117Z"/>
+                        </svg>
+                        <small class="ms-2" th:text="${qq}">1583296383</small>
+                    </div>
+
+                    <div class="d-flex align-items-center mt-4 mb-2 w-100">
+                        <!--BiliBili-->
+                        <a href="https://space.bilibili.com/400743049" target="_blank" class="cz-site-links w-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-youtube" viewBox="0 0 16 16">
+                                <path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.108-.082 2.06l-.008.105-.009.104c-.05.572-.124 1.14-.235 1.558a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/>
+                            </svg>
+                            <small class="ms-1">BiliBili</small>
+                        </a>
+
+                        <!--Github-->
+                        <a href="https://github.com/chenzhen7" target="_blank" class="cz-site-links  w-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
+                                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                            </svg>
+                            <small class="ms-1">Github</small>
+                        </a>
+                    </div>
+
+                    <!--CSDN-->
+                    <div class="d-flex align-items-center mb-2 w-100">
+                        <a href="https://blog.csdn.net/ShockChen7" target="_blank" class="cz-site-links  w-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-c-circle-fill" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0ZM8.146 4.992c.961 0 1.641.633 1.729 1.512h1.295v-.088c-.094-1.518-1.348-2.572-3.03-2.572-2.068 0-3.269 1.377-3.269 3.638v1.073c0 2.267 1.178 3.603 3.27 3.603 1.675 0 2.93-1.02 3.029-2.467v-.093H9.875c-.088.832-.75 1.418-1.729 1.418-1.224 0-1.927-.891-1.927-2.461v-1.06c0-1.583.715-2.503 1.927-2.503Z"/>
+                            </svg>
+                            <small class="ms-1">CSDN</small>
+                        </a>
+
+                        <a href="about.html" th:href="@{/about}"  class="cz-site-links  w-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill" viewBox="0 0 16 16">
+                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                            </svg>
+                            <small class="ms-1">More Info </small>
+                        </a>
+                    </div>
+
+                    <div id="blog-message" th:fragment="blogMessage">
+                        <h5 class="fw-bold cz-spanborder mt-5"><span>站点概览</span></h5>
+
+                        <div class="d-flex align-items-center mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                            </svg>
+                            <div class="ms-2"><span th:text="${blogViewTotal}">14</span> 访问总数 <small class="cz-text-green" th:text=" ${blogViewTotal - blogViewYesterday} + '↑' ">100↑</small></div>
+                        </div>
+
+                        <div class="d-flex align-items-center mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-medical" viewBox="0 0 16 16">
+                                <path d="M7.5 5.5a.5.5 0 0 0-1 0v.634l-.549-.317a.5.5 0 1 0-.5.866L6 7l-.549.317a.5.5 0 1 0 .5.866l.549-.317V8.5a.5.5 0 1 0 1 0v-.634l.549.317a.5.5 0 1 0 .5-.866L8 7l.549-.317a.5.5 0 1 0-.5-.866l-.549.317V5.5zm-2 4.5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5z"/>
+                                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+                            </svg>
+                            <div class="ms-2"><span th:text="${blogTotal}">14</span> 博文数量 </div>
+
+                        </div>
+
+                        <div class="d-flex align-items-center mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-text" viewBox="0 0 16 16">
+                                <path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
+                                <path d="M4 5.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zM4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8zm0 2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
+                            </svg>
+                            <div class="ms-2"><span th:text="${blogCommentTotal}">14</span> 评论总数</div>
+                        </div>
+
+                        <div class="d-flex align-items-center mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16">
+                                <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z"/>
+                            </svg>
+                            <div class="ms-2"><span th:text="${blogMessageTotal}">14</span> 留言总数</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!--底部栏-->
+<footer class="border-top p-3 bg-white text-muted small">
+    <div class="container pb-5 ">
+        <div class=" d-flex align-items-center justify-content-between">
+            <div>
+                <span class="cz-navbar-brand mr-2"><strong th:text="${author}">ChenZhen</strong></span>我的博客已营业：<span id="htmer_time">1年105天8时13分28秒</span>
+            </div>
+            <div>
+                <a target="_blank" class="text-secondary fw-bold" href="#">粤ICP备2022122083号-1</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!--    动态线条-->
+<script src="../static/lib/clickEffect.js" th:src="@{/lib/clickEffect.js}"></script>
+<script src="../static/lib/bootstrap.bundle.min.js" th:src="@{/lib/bootstrap.bundle.min.js}"></script>
+<script src="../static/lib/jquery-3.2.1/jquery-3.2.1.min.js" th:src="@{/lib/jquery-3.2.1/jquery-3.2.1.min.js}"></script>
+<script src="../static/lib/waypoints/jquery.waypoints.min.js" th:src="@{/lib/waypoints/jquery.waypoints.min.js}"></script>
+<!--<meting-js server="tencent" type="playlist" id="8602443396" fixed="true" mini="true" autoplay="false" order="list" volume="0.5"></meting-js>-->
+
+
+
+<script>
+    //设置滚动视差效果
+    // 获取相关元素
+    var bgSection = $(".cz-bg-section");
+    var mBgClassCover = $(".m-bg-class_cover");
+    var title1 = $(".cz-index-title");
+    var title2 = $(".cz-index-title2");
+
+    // 监听滚动事件
+    $(window).scroll(function() {
+        // 计算滚动距离
+        var scrollPos = $(this).scrollTop();
+
+        // 设置滚动视差效果
+        bgSection.css("background-position", "50% " + scrollPos / 2 + "px");
+        mBgClassCover.css("bottom", -scrollPos + "px");
+        title1.css("transform", "translateY(" + scrollPos / 2 + "px)");
+        title2.css("transform", "translateY(" + scrollPos / 2 + "px)");
+    });
+
+
+    // 移动设备导航栏样式切换
+    // 获取菜单切换按钮和移动设备菜单列表的引用
+    const menuToggleBtns = document.querySelectorAll('.cz-menu-toggle-btn');
+    const mobileMenus = document.querySelectorAll('.cz-mobile-menu');
+    // 点击菜单切换按钮时的事件处理函数
+    menuToggleBtns.forEach(menuToggleBtn =>{
+        menuToggleBtn.addEventListener('click', () => {
+            // 切换移动设备菜单列表的显示状态
+            // 循环遍历所有 mobileMenu 元素，为它们添加 show 类
+            mobileMenus.forEach(mobileMenu => {
+                mobileMenu.classList.toggle('show');
+            });
+        }
+    )
+    });
+
+
+    // 向下滚动 导航栏固定在顶部
+    // 获取导航栏元素的引用 id="fixed-navbar"的元素
+    const fixedNavbar = document.querySelector('#fixed-navbar');
+    // 计算滚动触发固定导航栏的距离（例如，向下滚动 800px 后固定导航栏）
+    const scrollDistanceToFixNavbar = 500;
+    // 滚动事件监听器
+    window.addEventListener('scroll', () => {
+        // 获取当前滚动位置
+        const currentScroll = window.pageYOffset;
+        // 如果滚动位置超过指定距离，添加固定样式类，否则移除固定样式类
+        if (currentScroll > scrollDistanceToFixNavbar) {
+            fixedNavbar.classList.remove('d-none');
+        } else {
+            fixedNavbar.classList.add('d-none');
+        }
+    });
+
+    // 运行时间统计
+    function secondToDate(second) {
+        if (!second) {
+            return 0;
+        }
+        var time = new Array(0, 0, 0, 0, 0);
+        if (second >= 365 * 24 * 3600) {
+            time[0] = parseInt(second / (365 * 24 * 3600));
+            second %= 365 * 24 * 3600;
+        }
+        if (second >= 24 * 3600) {
+            time[1] = parseInt(second / (24 * 3600));
+            second %= 24 * 3600;
+        }
+        if (second >= 3600) {
+            time[2] = parseInt(second / 3600);
+            second %= 3600;
+        }
+        if (second >= 60) {
+            time[3] = parseInt(second / 60);
+            second %= 60;
+        }
+        if (second > 0) {
+            time[4] = second;
+        }
+        return time;
+    }
+    function setTime() {
+        /*此处为网站的创建时间*/
+        var create_time = Math.round(new Date(Date.UTC(2022, 8, 21, 15, 15, 15)).getTime() / 1000);
+        var timestamp = Math.round((new Date().getTime() + 8 * 60 * 60 * 1000) / 1000);
+        currentTime = secondToDate((timestamp - create_time));
+        currentTimeHtml = currentTime[0] + '年' + currentTime[1] + '天'
+            + currentTime[2] + '时' + currentTime[3] + '分' + currentTime[4]
+            + '秒';
+        document.getElementById("htmer_time").innerHTML = currentTimeHtml;
+    }
+    setInterval(setTime, 1000);
+
+    // 获取关键词输入框
+    const keywordInput = $('#keywordInput');
+    //搜索 当用户输入结束时触发事件
+    keywordInput.on('input', function() {
+        // 使用定时器延迟发送 AJAX 请求，以确保用户输入结束
+        clearTimeout(this.timer);
+        this.timer = setTimeout(function () {
+            // 获取用户输入的关键词
+            const keyword = keywordInput.val();
+            // 发送 AJAX 请求
+            $.ajax({
+                url: '/search',
+                method: 'GET',
+                data: { keyword: keyword },
+                success: function(response) {
+                    // 处理从后端返回的数据
+                    if (response.code === 20000){
+                        var resultList = response.data.blogs;
+                        // 获取搜索结果列表容器
+                        var searchResults = $('#searchResults');
+                        // 清空原来的结果
+                        searchResults.empty();
+                        if (resultList){
+                            // 渲染搜索结果列表
+                            resultList.forEach(function(blog) {
+                                var blogItem = $('<a>').attr('href', `/blog/${blog.id}`).addClass('list-group-item list-group-item-action').text(blog.title);
+                                searchResults.append(blogItem);
+                            });
+                        }
+                    }
+                },
+                error: function(error) {
+                    console.error('Error:', error);
+                }
+            });
+        }, 1000); // 1000 毫秒延迟
+    });
+
+
+    //Aplyer初始化
+    // var ap = new APlayer
+    // ({
+    //     element: document.getElementById('aplayer'),
+    //     showlrc: false,
+    //     fixed: true,
+    //     mini: true,
+    //
+    //     audio: {
+    //         title: '半岛铁盒',
+    //         author: '周杰伦',
+    //         url: 'https://echeverra.cn/wp-content/uploads/2022/05/周杰伦-半岛铁盒.mp3',
+    //         pic: 'https://echeverra.cn/wp-content/uploads/2022/05/周杰伦-半岛铁盒-mp3-image.png'
+    //     }
+    // });
+    // ap.init();
+
+</script>
+</body>
+
+</html>

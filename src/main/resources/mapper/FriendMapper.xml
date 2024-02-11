@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chenzhen.blog.mapper.FriendMapper">
+
+    <resultMap id="BaseResultMap" type="com.chenzhen.blog.entity.pojo.Friend">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="blogAddress" column="blog_address" jdbcType="VARCHAR"/>
+            <result property="blogName" column="blog_name" jdbcType="VARCHAR"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="pictureAddress" column="picture_address" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,blog_address,blog_name,blog_description,picture_address,email,status,reason,
+        create_time,picture_address
+    </sql>
+    <select id="selectOneByBlogAddress" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_friend
+        where
+        blog_address = #{blogAddress,jdbcType=VARCHAR}
+    </select>
+
+    <select id="pageFriendLinks" resultType="com.chenzhen.blog.entity.pojo.Friend">
+        select
+        <include refid="Base_Column_List"/>
+        from t_friend
+        where 1=1
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+
+    </select>
+</mapper>

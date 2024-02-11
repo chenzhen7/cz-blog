@@ -1,0 +1,31 @@
+server:
+  port: 8188
+
+spring:
+  profiles:
+    active: dev
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+    static-path-pattern: /**
+  mail:
+    host: smtp.qq.com  # 配置 smtp 服务器地址
+    port: 25  # smtp 服务器端口
+    username:  #配置你的邮箱地址
+    password:  #配置申请到的授权码
+    protocol: smtp #协议
+    thymeleaf-html: mail  #设置要解析发送的html模板（需要你将mail.html文件放到/resources/templates下面）
+
+mybatis-plus:
+  type-aliases-package: com.chenzhen.blog.entity
+
+pagehelper:
+  auto-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  page-size-zero: true
+  params: count=countSql
+
+
+

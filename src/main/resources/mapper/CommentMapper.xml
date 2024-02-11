@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chenzhen.blog.mapper.CommentMapper">
+
+    <resultMap id="CommentVoMap" type="CommentVO">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="rootCommentId" column="root_comment_id" jdbcType="BIGINT"/>
+        <result property="parentCommentId" column="parent_comment_id" jdbcType="BIGINT"/>
+        <result property="nickname" column="nickname" jdbcType="VARCHAR"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="blogId" column="blog_id" jdbcType="BIGINT"/>
+        <result property="content" column="content" jdbcType="VARCHAR"/>
+        <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="adminComment" column="admin_comment" jdbcType="BIT"/>
+        <!--
+                一对多关联 collection标签
+                property="messageReplyList" 关联实体集合的属性名
+                ofType="com.chenzhen.blog.entity.dto.MessageReplyDTO" 关联实体的java类型（集合泛型的类型）
+                select="selectReply" 指定子查询
+                column="id" 向子查询传递 参数, 参数从主查询的结果中获取!!!
+        -->
+        <collection property="commentReplyList" ofType="com.chenzhen.blog.entity.dto.CommentReplyDTO" select="selectReply" column="id">
+        </collection>
+    </resultMap>
+
+    <!--主查询 拿到所有根评论-->
+    <select id="getRootCommentList" resultMap="CommentVoMap">
+        select
+            c.id,c.blog_id,c.parent_comment_id,c.root_comment_id,c.nickname,c.email,c.content,c.avatar,c.address,c.admin_comment,c.create_time,c.update_time
+        from t_comment c
+        where c.blog_id = #{blogId} and c.root_comment_id is null
+        order by c.create_time desc
+    </select>
+
+    <!--子查询 根据根评论ID获取所有回复评论-->
+    <select id="selectReply" resultType="com.chenzhen.blog.entity.dto.CommentReplyDTO" parameterType="string">
+        SELECT
+            c.id,c.nickname,c.email,c.content,c.avatar,c.create_time,c.admin_comment,c.parent_comment_id,c.root_comment_id,
+            c2.nickname as parent_nickname
+        FROM t_comment c
+        left join t_comment c2 on c.parent_comment_id = c2.id
+        where c.root_comment_id = ${id}
+        order by c.create_time asc
+    </select>
+
+
+
+
+
+
+
+
+</mapper>

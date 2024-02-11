@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="referrer" content="no-referrer"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>流年记-CZ的java学习日记</title>
+  <meta name=”Description” Content=”ChenZhen的个人博客，流年记页面，用于记录生活点滴过往”>
+  <meta name=”Keywords” Content=”ChenZhen的流年记,博客″>
+  <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
+  <link rel="stylesheet" href="../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" />
+  <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+</head>
+<body>
+
+  <!--导航-->
+<div  class="cz-navbar fixed">
+  <div class="cz-pc-menu">
+    <a href="index.html" th:href="@{/}" class="cz-navbar-brand text-decoration-none"><strong th:text="${author}">ChenZhen</strong></a>
+    <div class="cz-navbar-links fs-6 fw-light" id="cz-navbar-links">
+      <a href="index.html"    th:href="@{/}" class="cz-nav-link">首页</a>
+      <a href="tags.html"     th:href="@{/tags}" class="cz-nav-link ">标签</a>
+      <a href="archives.html" th:href="@{/archives}" class="cz-nav-link cz-active-link">归档</a>
+      <a href="message.html"  th:href="@{/message}" class="cz-nav-link">留言板</a>
+      <a href="friends.html"  th:href="@{/friends}" class="cz-nav-link">友链</a>
+      <a href="about.html"    th:href="@{/about}" class="cz-nav-link">关于我</a>
+    </div>
+    <a href="#" class="cz-navbar-brand" data-bs-toggle="modal" data-bs-target="#searchModal">
+      <strong>搜索</strong>
+    </a>
+
+    <button class="cz-menu-toggle-btn">菜单</button>
+  </div>
+  <div class="cz-mobile-menu fw-light fs-6">
+    <a href="index.html"    th:href="@{/}" class="cz-nav-link">首页</a>
+    <a href="tags.html"     th:href="@{/tags}" class="cz-nav-link ">标签</a>
+    <a href="archives.html" th:href="@{/archives}" class="cz-nav-link cz-active-link">归档</a>
+    <a href="message.html"  th:href="@{/message}" class="cz-nav-link">留言板</a>
+    <a href="friends.html"  th:href="@{/friends}" class="cz-nav-link">友链</a>
+    <a href="about.html"    th:href="@{/about}" class="cz-nav-link">关于我</a>
+  </div>
+</div>
+
+<!-- 搜索框 -->
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content p-2 ">
+      <div class="modal-body ">
+        <button type="button" class="btn-close float-end" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="text-center fs-5 mb-3">搜　索</div>
+        <div class="input-group mb-4">
+                  <span class="input-group-text" id="basic-addon1">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                      </svg>
+                  </span>
+          <input id="keywordInput" type="text" class="form-control" placeholder="输入关键词" aria-describedby="basic-addon1">
+        </div>
+
+        <div class="mb-2">搜索结果</div>
+        <!-- 搜索结果展示区域 -->
+        <div id="searchResults" class="list-group">
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!--顶部背景图片-->
+<div  alt="" class="cz-bg-section cz-bg-img"
+     style="height: 45vh;background-image:url('../static/images/archives.jpg')"
+     th:style="'height: 45vh;background-image: url(' + @{/images/archives.jpg} + ')'">
+
+  <div class="m-bg-class_cover" align="center">
+    <p class="cz-page-title">- 💾归档 -</p>
+    <p class="cz-page-title2 fw-normal">Welcome to my website ——by 陈震 （Chen Zhen）</p>
+  </div>
+
+</div>
+
+<!--时间轴-->
+<div class="container mt-5" style="max-width: 1170px;">
+  <div class="cz-timeline">
+      <a class="cz-timeline-item " href="#" th:href="@{/blog/{id}(id=${memory.id})}" th:each="memory : ${memoryList}">
+        <div class="cz-timeline-content d-flex justify-content-between ">
+          <div>
+            <div class="cz-timeline-date" th:text="${#temporals.format(memory.createTime)}">2023-01-01 17:52</div>
+            <div class="cz-timeline-title text-break" th:text="${memory.title}">文章标题 1</div>
+            <div class="cz-timeline-description text-break" th:text="${memory.description}">
+              这是第一篇文章的内容摘要或描述。可以添加更多细节和内容。
+            </div>
+          </div>
+          <div class="d-flex align-items-center">
+            <img height="100" width="200" src="../static/images/recommendPicture.png" th:src="@{${memory.firstPicture}}">
+          </div>
+        </div>
+      </a>
+  </div>
+</div>
+
+<!--底部栏-->
+<footer class="border-top p-3 bg-white text-muted small">
+  <div class="container pb-5 ">
+    <div class=" d-flex align-items-center justify-content-between">
+      <div>
+        <span class="cz-navbar-brand mr-2"><strong th:text="${author}">ChenZhen</strong></span>我的博客已营业：<span id="htmer_time">1年105天8时13分28秒</span>
+      </div>
+      <div>
+        <a target="_blank" class="text-secondary fw-bold" href="#">粤ICP备2022122083号-1</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<script src="../static/lib/jquery-3.2.1/jquery-3.2.1.min.js" th:src="@{/lib/jquery-3.2.1/jquery-3.2.1.min.js}"></script>
+<script src="../static/lib/waypoints/jquery.waypoints.min.js" th:src="@{/lib/waypoints/jquery.waypoints.min.js}"></script>
+<script src="../static/lib/clickEffect.js" th:src="@{/lib/clickEffect.js}"></script>
+
+
+
+<script>
+
+  // 移动设备导航栏样式切换
+  // 获取菜单切换按钮和移动设备菜单列表的引用
+  const menuToggleBtn = document.querySelector('.cz-menu-toggle-btn');
+  const mobileMenu = document.querySelector('.cz-mobile-menu');
+  // 点击菜单切换按钮时的事件处理函数
+  menuToggleBtn.addEventListener('click', () => {
+    // 切换移动设备菜单列表的显示状态
+    mobileMenu.classList.toggle('show');
+  });
+
+
+
+
+  $('.menu.toggle').click(function () {
+    $('.m-item').toggleClass('m-mobile-hide');
+  });
+
+    // 运行时间统计
+    function secondToDate(second) {
+        if (!second) {
+            return 0;
+        }
+        var time = new Array(0, 0, 0, 0, 0);
+        if (second >= 365 * 24 * 3600) {
+            time[0] = parseInt(second / (365 * 24 * 3600));
+            second %= 365 * 24 * 3600;
+        }
+        if (second >= 24 * 3600) {
+            time[1] = parseInt(second / (24 * 3600));
+            second %= 24 * 3600;
+        }
+        if (second >= 3600) {
+            time[2] = parseInt(second / 3600);
+            second %= 3600;
+        }
+        if (second >= 60) {
+            time[3] = parseInt(second / 60);
+            second %= 60;
+        }
+        if (second > 0) {
+            time[4] = second;
+        }
+        return time;
+    }
+    function setTime() {
+        /*此处为网站的创建时间*/
+      var create_time = Math.round(new Date(Date.UTC(2022, 8, 21, 15, 15, 15)).getTime() / 1000);
+        var timestamp = Math.round((new Date().getTime() + 8 * 60 * 60 * 1000) / 1000);
+        currentTime = secondToDate((timestamp - create_time));
+        currentTimeHtml = currentTime[0] + '年' + currentTime[1] + '天'
+            + currentTime[2] + '时' + currentTime[3] + '分' + currentTime[4]
+            + '秒';
+        document.getElementById("htmer_time").innerHTML = currentTimeHtml;
+    }
+    setInterval(setTime, 1000);
+
+  // 获取关键词输入框
+  const keywordInput = $('#keywordInput');
+  //搜索 当用户输入结束时触发事件
+  keywordInput.on('input', function() {
+    // 使用定时器延迟发送 AJAX 请求，以确保用户输入结束
+    clearTimeout(this.timer);
+    this.timer = setTimeout(function () {
+      // 获取用户输入的关键词
+      const keyword = keywordInput.val();
+      // 发送 AJAX 请求
+      $.ajax({
+        url: '/search',
+        method: 'GET',
+        data: { keyword: keyword },
+        success: function(response) {
+          // 处理从后端返回的数据
+          if (response.code === 20000){
+            var resultList = response.data.blogs;
+            // 获取搜索结果列表容器
+            var searchResults = $('#searchResults');
+            // 清空原来的结果
+            searchResults.empty();
+            if (resultList){
+              // 渲染搜索结果列表
+              resultList.forEach(function(blog) {
+                var blogItem = $('<a>').attr('href', `/blog/${blog.id}`).addClass('list-group-item list-group-item-action').text(blog.title);
+                searchResults.append(blogItem);
+              });
+            }
+          }
+        },
+        error: function(error) {
+          console.error('Error:', error);
+        }
+      });
+    }, 1000); // 1000 毫秒延迟
+  });
+
+
+</script>
+</body>
+</html>
