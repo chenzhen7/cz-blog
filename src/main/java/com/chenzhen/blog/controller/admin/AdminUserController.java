@@ -10,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 /**
  * @author ChenZhen
  * @Description
@@ -66,7 +68,7 @@ public class AdminUserController {
     @ResponseBody
     @PostMapping("/updatePassword")
     //修改密码
-    public R updatePassword(@RequestBody UpdateUserPwdDTO updateUserPwdDTO){
+    public R updatePassword(@RequestBody @Valid UpdateUserPwdDTO updateUserPwdDTO){
         return userService.updatePassword(updateUserPwdDTO);
 
     }
