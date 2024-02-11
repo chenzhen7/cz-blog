@@ -42,59 +42,58 @@ yaml中的邮箱地址和授权码，具体怎么配置可以看我博客文章 
 地址：[https://www.chenzhen.space/](https://www.chenzhen.space/)
 
 ## 首页1
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/d02bd2b3a12f4cf2a34a47fdf7263c7e.png)
+![在这里插入图片描述](images/首页1.png)
 ## 首页2
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/00dcb7bee8754bd68d721996e7457355.png)
+![在这里插入图片描述](images/首页2.png)
 ## 首页3
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/d0495c1f9d474053b41437e651d16dd9.png)
+![在这里插入图片描述](images/首页3.png)
 ## 文章详情页1
 文章内容和目录
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/dd499159149042dc81dc6f8b6106cc6f.png)
+![在这里插入图片描述](images/文章详情页1.png)
 ## 文章详情页2
 底部推荐文章
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/dbe1c97077fa4fb8b62be1d6e4942754.png)
+![在这里插入图片描述](images/文章详情页2.png)
 ## 文章详情页3
 文章评论区
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/c66235508786418298940843acee8998.png)
+![在这里插入图片描述](images/文章详情页3.png)
 ## 赞赏
 文章赞善码
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/d0e0e732974146eb8b3e52b0a97f4a4e.png)
+![在这里插入图片描述](images/赞赏.png)
 ## 搜索
 关键词搜索
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/52c77ffef3c24ce7a49cd279fd08bdf6.png)
+![在这里插入图片描述](images/搜索.png)
 ## 文章标签页
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/191660577bc4486fb7e34a53da28915d.png)
+![在这里插入图片描述](images/文章标签页.png)
 ## 归档
 根据时间顺序展示文章
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/657e2a2e6fb741d1890ae43c6fb07d53.png)
+![在这里插入图片描述](images/归档.png)
 ## 留言板
 游客可以评论，并留下自己的博客网站，其他游客点击头像可以跳转
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/5b2982fe10bb41e4a9bd27ffdff2a376.png)
+![在这里插入图片描述](images/留言板.png)
 ## 友链
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/eaac1e213da248ffbc466c7bd660083a.png)
+![在这里插入图片描述](images/友链.png)
 ## 友链2
 友链申请，后台审核后可以留下友链
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/4643f765cdbd432495b346970019c5a9.png)
+![在这里插入图片描述](images/友链2.png)
 ## 关于我
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/d4000fa210934a61b3c65017566c38db.png)
+![在这里插入图片描述](images/关于我.png)
 ## 后台登录界面
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/b9562a04c7e241b5b1e7e615a9abf3c5.png)
+![在这里插入图片描述](images/后台登录界面.png)
 ## 文章管理
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/87b7df20457f467c84fdd2166e55b76d.png)
+![在这里插入图片描述](images/文章管理.png)
 ## 编辑文章
 主流markdown编辑器
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/c6bc3f88993949aeb189513701992e12.png)
+![在这里插入图片描述](images/编辑文章.png)
 ## 标签管理
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/75b566e1217b4266ae0b393223adc961.png)
+![在这里插入图片描述](images/标签管理.png)
 ## 友链管理
 友链管理、审核
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/8cfb19cea64f422b97ce3a9ad1068f7b.png)
+![在这里插入图片描述](images/友链管理.png)
 ## 系统参数管理
 管理网站的系统参数（个人简介、栈主名称、QQ、微信。。。）
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/61ef5b3a7513442a8d16ed35a715bd42.png)
+![在这里插入图片描述](images/系统参数管理.png)
 ## 用户管理
 在这里修改密码
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/3703441d32a44111a9b54dd29dffb398.png)
+![在这里插入图片描述](images/用户管理.png)
 
 
