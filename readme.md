@@ -21,21 +21,32 @@ yaml中的邮箱地址和授权码，具体怎么配置可以看我博客文章 
 # 技术栈
 ## 前端
 JS框架：JQuery + Vue
+
 CSS框架：Bootstrap5
+
 Markdown编辑器：editormd
+
 代码高亮： prism
+
 目录生成：Tocbot
 
 ## 后端
 整体使用springboot + Thymeleaf + Mybatis进行开发
 
 核心框架：SpringBoot 2.7.3
+
 持久层框架：MybatisPlus 
+
 模板框架：Thymeleaf
+
 分页插件：PageHelper
+
 数据库：mysql8
+
 工具包：Hutool
+
 鉴权框架：Satoken
+
 参数校验：hibernate-validator
 
 # 功能模块
