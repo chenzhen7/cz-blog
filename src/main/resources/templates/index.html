@@ -354,85 +354,149 @@
             </div>
             <!--站点概览-->
             <div class="col-md-3 pl-4" >
-                <div class="cz-toc-sticky">
+                <div class="">
+                    <!--个人信息-->
                     <h5 class="fw-bold cz-spanborder"><span>站点概览</span></h5>
+                    <div class="mb-5">
 
-                    <span class="cz-navbar-brand fs-3 mr-2 mb-2 "><strong th:text="${author}">ChenZhen</strong></span>
+                        <span class="cz-navbar-brand fs-3 mr-2 mb-2 "><strong th:text="${author}">ChenZhen</strong></span>
 
-                    <div>
-                        <p class="fw-light" th:text="${profile}">这个人不懒，却什么都没有写.</p>
-                    </div>
+                        <div>
+                            <p class="fw-light" th:text="${profile}">这个人不懒，却什么都没有写.</p>
+                        </div>
 
-                    <!--地点-->
-                    <div class="d-flex align-items-center mb-2 ">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
-                            <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>
-                            <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-                        </svg>
-                        <small class="ms-2" th:text="${location}">广州</small>
-                    </div>
-                    <!--email-->
-                    <div class="d-flex align-items-center mb-2 ">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope-at" viewBox="0 0 16 16">
-                            <path d="M2 2a2 2 0 0 0-2 2v8.01A2 2 0 0 0 2 14h5.5a.5.5 0 0 0 0-1H2a1 1 0 0 1-.966-.741l5.64-3.471L8 9.583l7-4.2V8.5a.5.5 0 0 0 1 0V4a2 2 0 0 0-2-2H2Zm3.708 6.208L1 11.105V5.383l4.708 2.825ZM1 4.217V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v.217l-7 4.2-7-4.2Z"/>
-                            <path d="M14.247 14.269c1.01 0 1.587-.857 1.587-2.025v-.21C15.834 10.43 14.64 9 12.52 9h-.035C10.42 9 9 10.36 9 12.432v.214C9 14.82 10.438 16 12.358 16h.044c.594 0 1.018-.074 1.237-.175v-.73c-.245.11-.673.18-1.18.18h-.044c-1.334 0-2.571-.788-2.571-2.655v-.157c0-1.657 1.058-2.724 2.64-2.724h.04c1.535 0 2.484 1.05 2.484 2.326v.118c0 .975-.324 1.39-.639 1.39-.232 0-.41-.148-.41-.42v-2.19h-.906v.569h-.03c-.084-.298-.368-.63-.954-.63-.778 0-1.259.555-1.259 1.4v.528c0 .892.49 1.434 1.26 1.434.471 0 .896-.227 1.014-.643h.043c.118.42.617.648 1.12.648Zm-2.453-1.588v-.227c0-.546.227-.791.573-.791.297 0 .572.192.572.708v.367c0 .573-.253.744-.564.744-.354 0-.581-.215-.581-.8Z"/>
-                        </svg>
-                        <small class="ms-2" th:text="${email}">1583296383qq.com</small>
-                    </div>
-                    <!--微信-->
-                    <div class="d-flex align-items-center mb-2 ">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-wechat" viewBox="0 0 16 16">
-                            <path d="M11.176 14.429c-2.665 0-4.826-1.8-4.826-4.018 0-2.22 2.159-4.02 4.824-4.02S16 8.191 16 10.411c0 1.21-.65 2.301-1.666 3.036a.324.324 0 0 0-.12.366l.218.81a.616.616 0 0 1 .029.117.166.166 0 0 1-.162.162.177.177 0 0 1-.092-.03l-1.057-.61a.519.519 0 0 0-.256-.074.509.509 0 0 0-.142.021 5.668 5.668 0 0 1-1.576.22ZM9.064 9.542a.647.647 0 1 0 .557-1 .645.645 0 0 0-.646.647.615.615 0 0 0 .09.353Zm3.232.001a.646.646 0 1 0 .546-1 .645.645 0 0 0-.644.644.627.627 0 0 0 .098.356Z"/>
-                            <path d="M0 6.826c0 1.455.781 2.765 2.001 3.656a.385.385 0 0 1 .143.439l-.161.6-.1.373a.499.499 0 0 0-.032.14.192.192 0 0 0 .193.193c.039 0 .077-.01.111-.029l1.268-.733a.622.622 0 0 1 .308-.088c.058 0 .116.009.171.025a6.83 6.83 0 0 0 1.625.26 4.45 4.45 0 0 1-.177-1.251c0-2.936 2.785-5.02 5.824-5.02.05 0 .1 0 .15.002C10.587 3.429 8.392 2 5.796 2 2.596 2 0 4.16 0 6.826Zm4.632-1.555a.77.77 0 1 1-1.54 0 .77.77 0 0 1 1.54 0Zm3.875 0a.77.77 0 1 1-1.54 0 .77.77 0 0 1 1.54 0Z"/>
-                        </svg>
-                        <small class="ms-2" th:text="${wechat}">ChenZhen_7</small>
-                    </div>
-                    <!--QQ-->
-                    <div class="d-flex align-items-center mb-2 ">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-tencent-qq" viewBox="0 0 16 16">
-                            <path d="M6.048 3.323c.022.277-.13.523-.338.55-.21.026-.397-.176-.419-.453-.022-.277.13-.523.338-.55.21-.026.397.176.42.453Zm2.265-.24c-.603-.146-.894.256-.936.333-.027.048-.008.117.037.15.045.035.092.025.119-.003.361-.39.751-.172.829-.129l.011.007c.053.024.147.028.193-.098.023-.063.017-.11-.006-.142-.016-.023-.089-.08-.247-.118Z"/>
-                            <path fill-rule="evenodd" d="M11.727 6.719c0-.022.01-.375.01-.557 0-3.07-1.45-6.156-5.015-6.156-3.564 0-5.014 3.086-5.014 6.156 0 .182.01.535.01.557l-.72 1.795a25.85 25.85 0 0 0-.534 1.508c-.68 2.187-.46 3.093-.292 3.113.36.044 1.401-1.647 1.401-1.647 0 .979.504 2.256 1.594 3.179-.408.126-.907.319-1.228.556-.29.213-.253.43-.201.518.228.386 3.92.246 4.985.126 1.065.12 4.756.26 4.984-.126.052-.088.088-.305-.2-.518-.322-.237-.822-.43-1.23-.557 1.09-.922 1.594-2.2 1.594-3.178 0 0 1.041 1.69 1.401 1.647.168-.02.388-.926-.292-3.113a25.78 25.78 0 0 0-.534-1.508l-.72-1.795ZM9.773 5.53c-.13-.286-1.431-.605-3.042-.605h-.017c-1.611 0-2.913.319-3.042.605a.096.096 0 0 0-.01.04c0 .022.008.04.018.056.11.159 1.554.943 3.034.943h.017c1.48 0 2.924-.784 3.033-.943a.095.095 0 0 0 .008-.096Zm-4.32-.989c-.483.022-.896-.529-.922-1.229-.026-.7.344-1.286.828-1.308.483-.022.896.529.922 1.23.027.7-.344 1.286-.827 1.307Zm2.538 0c.483.022.896-.529.922-1.229.026-.7-.344-1.286-.827-1.308-.484-.022-.896.529-.923 1.23-.026.7.344 1.285.828 1.307ZM2.928 8.99a10.674 10.674 0 0 0-.097 2.284c.146 2.45 1.6 3.99 3.846 4.012h.091c2.246-.023 3.7-1.562 3.846-4.011.054-.9 0-1.663-.097-2.285-1.312.26-2.669.41-3.786.396h-.017c-.297.003-.611-.005-.937-.023v2.148c-1.106.154-2.21-.068-2.21-.068V9.107a22.93 22.93 0 0 1-.639-.117Z"/>
-                        </svg>
-                        <small class="ms-2" th:text="${qq}">1583296383</small>
-                    </div>
-
-                    <div class="d-flex align-items-center mt-4 mb-2 w-100">
-                        <!--BiliBili-->
-                        <a href="https://space.bilibili.com/400743049" target="_blank" class="cz-site-links w-50">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-youtube" viewBox="0 0 16 16">
-                                <path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.108-.082 2.06l-.008.105-.009.104c-.05.572-.124 1.14-.235 1.558a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/>
+                        <!--地点-->
+                        <div class="d-flex align-items-center mb-2 ">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
+                                <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>
+                                <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
                             </svg>
-                            <small class="ms-1">BiliBili</small>
-                        </a>
-
-                        <!--Github-->
-                        <a href="https://github.com/chenzhen7" target="_blank" class="cz-site-links  w-50">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
-                                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                            <small class="ms-2" th:text="${location}">广州</small>
+                        </div>
+                        <!--email-->
+                        <div class="d-flex align-items-center mb-2 ">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope-at" viewBox="0 0 16 16">
+                                <path d="M2 2a2 2 0 0 0-2 2v8.01A2 2 0 0 0 2 14h5.5a.5.5 0 0 0 0-1H2a1 1 0 0 1-.966-.741l5.64-3.471L8 9.583l7-4.2V8.5a.5.5 0 0 0 1 0V4a2 2 0 0 0-2-2H2Zm3.708 6.208L1 11.105V5.383l4.708 2.825ZM1 4.217V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v.217l-7 4.2-7-4.2Z"/>
+                                <path d="M14.247 14.269c1.01 0 1.587-.857 1.587-2.025v-.21C15.834 10.43 14.64 9 12.52 9h-.035C10.42 9 9 10.36 9 12.432v.214C9 14.82 10.438 16 12.358 16h.044c.594 0 1.018-.074 1.237-.175v-.73c-.245.11-.673.18-1.18.18h-.044c-1.334 0-2.571-.788-2.571-2.655v-.157c0-1.657 1.058-2.724 2.64-2.724h.04c1.535 0 2.484 1.05 2.484 2.326v.118c0 .975-.324 1.39-.639 1.39-.232 0-.41-.148-.41-.42v-2.19h-.906v.569h-.03c-.084-.298-.368-.63-.954-.63-.778 0-1.259.555-1.259 1.4v.528c0 .892.49 1.434 1.26 1.434.471 0 .896-.227 1.014-.643h.043c.118.42.617.648 1.12.648Zm-2.453-1.588v-.227c0-.546.227-.791.573-.791.297 0 .572.192.572.708v.367c0 .573-.253.744-.564.744-.354 0-.581-.215-.581-.8Z"/>
                             </svg>
-                            <small class="ms-1">Github</small>
-                        </a>
+                            <small class="ms-2" th:text="${email}">1583296383qq.com</small>
+                        </div>
+                        <!--微信-->
+                        <div class="d-flex align-items-center mb-2 ">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-wechat" viewBox="0 0 16 16">
+                                <path d="M11.176 14.429c-2.665 0-4.826-1.8-4.826-4.018 0-2.22 2.159-4.02 4.824-4.02S16 8.191 16 10.411c0 1.21-.65 2.301-1.666 3.036a.324.324 0 0 0-.12.366l.218.81a.616.616 0 0 1 .029.117.166.166 0 0 1-.162.162.177.177 0 0 1-.092-.03l-1.057-.61a.519.519 0 0 0-.256-.074.509.509 0 0 0-.142.021 5.668 5.668 0 0 1-1.576.22ZM9.064 9.542a.647.647 0 1 0 .557-1 .645.645 0 0 0-.646.647.615.615 0 0 0 .09.353Zm3.232.001a.646.646 0 1 0 .546-1 .645.645 0 0 0-.644.644.627.627 0 0 0 .098.356Z"/>
+                                <path d="M0 6.826c0 1.455.781 2.765 2.001 3.656a.385.385 0 0 1 .143.439l-.161.6-.1.373a.499.499 0 0 0-.032.14.192.192 0 0 0 .193.193c.039 0 .077-.01.111-.029l1.268-.733a.622.622 0 0 1 .308-.088c.058 0 .116.009.171.025a6.83 6.83 0 0 0 1.625.26 4.45 4.45 0 0 1-.177-1.251c0-2.936 2.785-5.02 5.824-5.02.05 0 .1 0 .15.002C10.587 3.429 8.392 2 5.796 2 2.596 2 0 4.16 0 6.826Zm4.632-1.555a.77.77 0 1 1-1.54 0 .77.77 0 0 1 1.54 0Zm3.875 0a.77.77 0 1 1-1.54 0 .77.77 0 0 1 1.54 0Z"/>
+                            </svg>
+                            <small class="ms-2" th:text="${wechat}">ChenZhen_7</small>
+                        </div>
+                        <!--QQ-->
+                        <div class="d-flex align-items-center mb-2 ">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-tencent-qq" viewBox="0 0 16 16">
+                                <path d="M6.048 3.323c.022.277-.13.523-.338.55-.21.026-.397-.176-.419-.453-.022-.277.13-.523.338-.55.21-.026.397.176.42.453Zm2.265-.24c-.603-.146-.894.256-.936.333-.027.048-.008.117.037.15.045.035.092.025.119-.003.361-.39.751-.172.829-.129l.011.007c.053.024.147.028.193-.098.023-.063.017-.11-.006-.142-.016-.023-.089-.08-.247-.118Z"/>
+                                <path fill-rule="evenodd" d="M11.727 6.719c0-.022.01-.375.01-.557 0-3.07-1.45-6.156-5.015-6.156-3.564 0-5.014 3.086-5.014 6.156 0 .182.01.535.01.557l-.72 1.795a25.85 25.85 0 0 0-.534 1.508c-.68 2.187-.46 3.093-.292 3.113.36.044 1.401-1.647 1.401-1.647 0 .979.504 2.256 1.594 3.179-.408.126-.907.319-1.228.556-.29.213-.253.43-.201.518.228.386 3.92.246 4.985.126 1.065.12 4.756.26 4.984-.126.052-.088.088-.305-.2-.518-.322-.237-.822-.43-1.23-.557 1.09-.922 1.594-2.2 1.594-3.178 0 0 1.041 1.69 1.401 1.647.168-.02.388-.926-.292-3.113a25.78 25.78 0 0 0-.534-1.508l-.72-1.795ZM9.773 5.53c-.13-.286-1.431-.605-3.042-.605h-.017c-1.611 0-2.913.319-3.042.605a.096.096 0 0 0-.01.04c0 .022.008.04.018.056.11.159 1.554.943 3.034.943h.017c1.48 0 2.924-.784 3.033-.943a.095.095 0 0 0 .008-.096Zm-4.32-.989c-.483.022-.896-.529-.922-1.229-.026-.7.344-1.286.828-1.308.483-.022.896.529.922 1.23.027.7-.344 1.286-.827 1.307Zm2.538 0c.483.022.896-.529.922-1.229.026-.7-.344-1.286-.827-1.308-.484-.022-.896.529-.923 1.23-.026.7.344 1.285.828 1.307ZM2.928 8.99a10.674 10.674 0 0 0-.097 2.284c.146 2.45 1.6 3.99 3.846 4.012h.091c2.246-.023 3.7-1.562 3.846-4.011.054-.9 0-1.663-.097-2.285-1.312.26-2.669.41-3.786.396h-.017c-.297.003-.611-.005-.937-.023v2.148c-1.106.154-2.21-.068-2.21-.068V9.107a22.93 22.93 0 0 1-.639-.117Z"/>
+                            </svg>
+                            <small class="ms-2" th:text="${qq}">1583296383</small>
+                        </div>
+
+                        <div class="d-flex align-items-center mt-4 mb-2 w-100">
+                            <!--BiliBili-->
+                            <a href="https://space.bilibili.com/400743049" target="_blank" class="cz-site-links w-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-youtube" viewBox="0 0 16 16">
+                                    <path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.108-.082 2.06l-.008.105-.009.104c-.05.572-.124 1.14-.235 1.558a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/>
+                                </svg>
+                                <small class="ms-1">BiliBili</small>
+                            </a>
+
+                            <!--Github-->
+                            <a href="https://github.com/chenzhen7" target="_blank" class="cz-site-links  w-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
+                                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                                </svg>
+                                <small class="ms-1">Github</small>
+                            </a>
+                        </div>
+
+                        <!--CSDN-->
+                        <div class="d-flex align-items-center mb-2 w-100">
+                            <a href="https://blog.csdn.net/ShockChen7" target="_blank" class="cz-site-links  w-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-c-circle-fill" viewBox="0 0 16 16">
+                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0ZM8.146 4.992c.961 0 1.641.633 1.729 1.512h1.295v-.088c-.094-1.518-1.348-2.572-3.03-2.572-2.068 0-3.269 1.377-3.269 3.638v1.073c0 2.267 1.178 3.603 3.27 3.603 1.675 0 2.93-1.02 3.029-2.467v-.093H9.875c-.088.832-.75 1.418-1.729 1.418-1.224 0-1.927-.891-1.927-2.461v-1.06c0-1.583.715-2.503 1.927-2.503Z"/>
+                                </svg>
+                                <small class="ms-1">CSDN</small>
+                            </a>
+
+                            <a href="about.html" th:href="@{/about}"  class="cz-site-links  w-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill" viewBox="0 0 16 16">
+                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                </svg>
+                                <small class="ms-1">More Info </small>
+                            </a>
+                        </div>
                     </div>
 
-                    <!--CSDN-->
-                    <div class="d-flex align-items-center mb-2 w-100">
-                        <a href="https://blog.csdn.net/ShockChen7" target="_blank" class="cz-site-links  w-50">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-c-circle-fill" viewBox="0 0 16 16">
-                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0ZM8.146 4.992c.961 0 1.641.633 1.729 1.512h1.295v-.088c-.094-1.518-1.348-2.572-3.03-2.572-2.068 0-3.269 1.377-3.269 3.638v1.073c0 2.267 1.178 3.603 3.27 3.603 1.675 0 2.93-1.02 3.029-2.467v-.093H9.875c-.088.832-.75 1.418-1.729 1.418-1.224 0-1.927-.891-1.927-2.461v-1.06c0-1.583.715-2.503 1.927-2.503Z"/>
-                            </svg>
-                            <small class="ms-1">CSDN</small>
-                        </a>
+                    <!--音乐播放器-->
+                    <h5 class="fw-bold cz-spanborder"><span>Music</span></h5>
+                    <div class="cz-player-card">
+                        <div class="cz-player-top">
+                            <div class="cz-player-img">
+                                <img src="../static/images/me.jpg" class="h-100 cz-player-cover" alt="">
+                            </div>
+                            <div class="cz-player-texts">
+                                <div class="cz-player-title-1">歌曲名</div>
+                                <div class="cz-player-title-2">歌手</div>
+                            </div>
 
-                        <a href="about.html" th:href="@{/about}"  class="cz-site-links  w-50">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill" viewBox="0 0 16 16">
-                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                            </svg>
-                            <small class="ms-1">More Info </small>
-                        </a>
+                        </div>
+                        <audio id="audioPlayer" controls class="d-none">
+                            <source id="audioSource" src="../static/music/井口裕香%20(いぐち%20ゆか)%20-%20白金ディスコ%20(白金迪斯科)%20(纯音乐).mp3" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+
+                        <div class="cz-player-controls">
+                            <div class="d-flex align-items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" height="20" width="24" class="cz-player-volume_button">
+                                    <path clip-rule="evenodd" d="M11.26 3.691A1.2 1.2 0 0 1 12 4.8v14.4a1.199 1.199 0 0 1-2.048.848L5.503 15.6H2.4a1.2 1.2 0 0 1-1.2-1.2V9.6a1.2 1.2 0 0 1 1.2-1.2h3.103l4.449-4.448a1.2 1.2 0 0 1 1.308-.26Zm6.328-.176a1.2 1.2 0 0 1 1.697 0A11.967 11.967 0 0 1 22.8 12a11.966 11.966 0 0 1-3.515 8.485 1.2 1.2 0 0 1-1.697-1.697A9.563 9.563 0 0 0 20.4 12a9.565 9.565 0 0 0-2.812-6.788 1.2 1.2 0 0 1 0-1.697Zm-3.394 3.393a1.2 1.2 0 0 1 1.698 0A7.178 7.178 0 0 1 18 12a7.18 7.18 0 0 1-2.108 5.092 1.2 1.2 0 1 1-1.698-1.698A4.782 4.782 0 0 0 15.6 12a4.78 4.78 0 0 0-1.406-3.394 1.2 1.2 0 0 1 0-1.698Z" fill-rule="evenodd"></path>
+                                </svg>
+                                <div class="cz-player-volume">
+                                    <div class="cz-player-slider">
+                                        <div class="cz-player-green"></div>
+                                    </div>
+                                    <div class="cz-player-circle"></div>
+                                </div>
+                            </div>
+                            <div class="cz-player-bar">
+                                <svg id="preBtn" viewBox="0 0 16 16" class="flip-horizontal" fill="currentColor" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7.596 7.304a.802.802 0 0 1 0 1.392l-6.363 3.692C.713 12.69 0 12.345 0 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692Z"></path>
+                                    <path d="M15.596 7.304a.802.802 0 0 1 0 1.392l-6.363 3.692C8.713 12.69 8 12.345 8 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692Z"></path>
+                                </svg>
+                                <svg id="playBtn" viewBox="0 0 16 16" class="" fill="currentColor" height="18" width="18" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"></path>
+                                </svg>
+                                <svg id="pauseBtn" style="display: none" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/>
+                                </svg>
+                                <svg id="nextBtn" viewBox="0 0 16 16" class="" fill="currentColor" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7.596 7.304a.802.802 0 0 1 0 1.392l-6.363 3.692C.713 12.69 0 12.345 0 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692Z"></path>
+                                    <path d="M15.596 7.304a.802.802 0 0 1 0 1.392l-6.363 3.692C8.713 12.69 8 12.345 8 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692Z"></path>
+                                </svg>
+                            </div>
+
+                            <div class="cz-player-pfp">
+                                <div class="cz-player-playing">
+                                    <div class="cz-player-line cz-player-line-1"></div>
+                                    <div class="cz-player-line cz-player-line-2"></div>
+                                    <div class="cz-player-line cz-player-line-3"></div>
+                                    <div class="cz-player-line cz-player-line-4"></div>
+                                    <div class="cz-player-line cz-player-line-5"></div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
+
+                    <h5 class="fw-bold cz-spanborder mt-5"><span>站点统计</span></h5>
                     <div id="blog-message" th:fragment="blogMessage">
-                        <h5 class="fw-bold cz-spanborder mt-5"><span>站点概览</span></h5>
 
                         <div class="d-flex align-items-center mb-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
@@ -497,7 +561,7 @@
 
 
 
-<script>
+<script th:inline="javascript">
     //设置滚动视差效果
     // 获取相关元素
     var bgSection = $(".cz-bg-section");
@@ -525,13 +589,13 @@
     // 点击菜单切换按钮时的事件处理函数
     menuToggleBtns.forEach(menuToggleBtn =>{
         menuToggleBtn.addEventListener('click', () => {
-            // 切换移动设备菜单列表的显示状态
-            // 循环遍历所有 mobileMenu 元素，为它们添加 show 类
-            mobileMenus.forEach(mobileMenu => {
-                mobileMenu.classList.toggle('show');
-            });
-        }
-    )
+                // 切换移动设备菜单列表的显示状态
+                // 循环遍历所有 mobileMenu 元素，为它们添加 show 类
+                mobileMenus.forEach(mobileMenu => {
+                    mobileMenu.classList.toggle('show');
+                });
+            }
+        )
     });
 
 
@@ -629,23 +693,137 @@
         }, 1000); // 1000 毫秒延迟
     });
 
+    const audioPlayer = document.getElementById('audioPlayer');
+    const playBtn = document.getElementById('playBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const preBtn = document.getElementById('preBtn');
+    const nextBtn = document.getElementById('nextBtn');
 
-    //Aplyer初始化
-    // var ap = new APlayer
-    // ({
-    //     element: document.getElementById('aplayer'),
-    //     showlrc: false,
-    //     fixed: true,
-    //     mini: true,
-    //
-    //     audio: {
-    //         title: '半岛铁盒',
-    //         author: '周杰伦',
-    //         url: 'https://echeverra.cn/wp-content/uploads/2022/05/周杰伦-半岛铁盒.mp3',
-    //         pic: 'https://echeverra.cn/wp-content/uploads/2022/05/周杰伦-半岛铁盒-mp3-image.png'
-    //     }
-    // });
-    // ap.init();
+    const volumeBar = document.querySelector('.cz-player-green');
+    const volumeCircle = document.querySelector('.cz-player-circle');
+    const volumeSlider = document.querySelector('.cz-player-slider');
+    const maxVolume = 100; // 设置最大音量
+
+
+    let isDragging = false; // 用于标记是否正在拖动
+    let currentVolume = 50; // 初始音量为50%
+    updateVolume(currentVolume);
+
+    // 鼠标按下事件监听
+    volumeCircle.addEventListener('mousedown', startDrag);
+    // 鼠标移动事件监听
+    document.addEventListener('mousemove', handleDrag);
+    // 鼠标松开事件监听
+    document.addEventListener('mouseup', endDrag);
+    // 开始拖动
+    function startDrag(e) {
+        isDragging = true;
+        handleDrag(e);
+    }
+    // 处理拖动
+    function handleDrag(e) {
+        if (isDragging) {
+            const rect = volumeSlider.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            let percentage = offsetX / volumeSlider.offsetWidth;
+            percentage = Math.max(0, Math.min(1, percentage)); // 确保在0到1之间
+            const newVolume = Math.round(percentage * maxVolume);
+            updateVolume(newVolume);
+        }
+    }
+    // 结束拖动
+    function endDrag() {
+        isDragging = false;
+    }
+    // 根据点击位置设置音量
+    volumeSlider.addEventListener('click', e => {
+        const rect = volumeSlider.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const percentage = offsetX / volumeSlider.offsetWidth;
+        const newVolume = Math.round(percentage * maxVolume);
+        updateVolume(newVolume);
+    });
+
+    // 更新音量条和音量圆圈
+    function updateVolume(volume) {
+        currentVolume = volume;
+        volumeBar.style.width = `${currentVolume}%`;
+        volumeCircle.style.left = `${currentVolume}%`;
+        audioPlayer.volume = currentVolume / maxVolume;
+    }
+
+    var musicList = /*[[${musicList}]]*/null;
+    var currentIndex = 0;
+
+    const title = document.querySelector('.cz-player-title-1');
+    const artist = document.querySelector('.cz-player-title-2');
+    const cover = document.querySelector('.cz-player-cover');
+    const audioSource = document.getElementById('audioSource');
+    if (musicList) {
+        loadAudio(currentIndex);
+    }
+
+    function loadAudio(index) {
+        title.innerHTML = musicList[index].title;
+        artist.innerHTML = musicList[index].artist;
+        cover.src = musicList[index].coverPath;
+        audioSource.src = musicList[index].filePath;
+        audioPlayer.load();
+    }
+
+    // 播放音乐
+    function play() {
+        audioPlayer.play();
+        // 显示暂停按钮
+        pauseBtn.style.display = 'block';
+        // 隐藏播放按钮
+        playBtn.style.display = 'none';
+    }
+    // 暂停音乐
+    function pause() {
+        audioPlayer.pause();
+        // 隐藏暂停按钮
+        pauseBtn.style.display = 'none';
+        // 显示播放按钮
+        playBtn.style.display = 'block';
+    }
+    // 上一首
+    function playNext() {
+        currentIndex = (currentIndex + 1) % musicList.length;
+        loadAudio(currentIndex);
+        play();
+
+    }
+    //下一首
+    function playPrevious() {
+        currentIndex = (currentIndex - 1 + musicList.length) % musicList.length;
+        loadAudio(currentIndex);
+        play();
+    }
+
+    playBtn.addEventListener('click', () => {
+        play()
+    });
+
+    pauseBtn.addEventListener('click', () => {
+        pause()
+    });
+
+    preBtn.addEventListener('click', () => {
+        playPrevious();
+    });
+
+    nextBtn.addEventListener('click', () => {
+        playNext();
+    });
+
+
+
+
+
+
+
+
 
 </script>
 </body>

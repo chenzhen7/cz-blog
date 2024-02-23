@@ -1,6 +1,7 @@
 package com.chenzhen.blog.controller;
 
 import com.chenzhen.blog.entity.enums.SysConfigEnum;
+import com.chenzhen.blog.entity.pojo.Music;
 import com.chenzhen.blog.entity.vo.CommentVO;
 import com.chenzhen.blog.entity.pojo.Blog;
 import com.chenzhen.blog.entity.vo.BlogVO;
@@ -37,6 +38,8 @@ public class IndexController {
     private MessageService messageService;
     @Autowired
     private ViewsService viewsService;
+    @Autowired
+    private MusicService musicService;
 
 
     //跳转首页
@@ -49,6 +52,8 @@ public class IndexController {
         PageInfo<BlogVO> pageInfo = blogService.pageIndex(pageNum, 12);
         //获取推荐列表
         List<BlogVO> recommendList = blogService.getRecommendList();
+        //获取音乐列表
+        List<Music> musicList = musicService.list();
         // 获取作者
         String author = sysConfigService.getByEnums(SysConfigEnum.AUTHOR).getValue();
         // 获取个人简介
@@ -72,20 +77,21 @@ public class IndexController {
         // 获取留言总数
         Long blogMessageTotal = messageService.count();
 
-        model.addAttribute("blogViewTotal",blogViewTotal);
-        model.addAttribute("blogViewYesterday",blogViewYesterday);
-        model.addAttribute("blogTotal",blogTotal);
-        model.addAttribute("blogCommentTotal",blogCommentTotal);
-        model.addAttribute("blogMessageTotal",blogMessageTotal);
-
         model.addAttribute("page",pageInfo);
         model.addAttribute("recommendList",recommendList);
+        model.addAttribute("musicList",musicList);
         model.addAttribute("author",author);
         model.addAttribute("profile",profile);
         model.addAttribute("location",location);
         model.addAttribute("email",email);
         model.addAttribute("qq",qq);
         model.addAttribute("wechat",wechat);
+
+        model.addAttribute("blogViewTotal",blogViewTotal);
+        model.addAttribute("blogViewYesterday",blogViewYesterday);
+        model.addAttribute("blogTotal",blogTotal);
+        model.addAttribute("blogCommentTotal",blogCommentTotal);
+        model.addAttribute("blogMessageTotal",blogMessageTotal);
 
         // 更新总浏览量
         viewsService.updateTotalViews();

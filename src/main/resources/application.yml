@@ -16,6 +16,10 @@ spring:
     password:  #配置申请到的授权码
     protocol: smtp #协议
     thymeleaf-html: mail  #设置要解析发送的html模板（需要你将mail.html文件放到/resources/templates下面）
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
 
 mybatis-plus:
   type-aliases-package: com.chenzhen.blog.entity

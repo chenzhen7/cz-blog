@@ -149,9 +149,9 @@ body{
 }
 
 .m-font-size-text{
-     font-size: 45px;
+    font-size: 45px;
     font-weight: 600;
-     color: #ffffff;
+    color: #ffffff;
 
 }
 
@@ -218,8 +218,8 @@ body{
 }
 
 .m-margin-top-maxx {
-     margin-top: 5em !important;
- }
+    margin-top: 5em !important;
+}
 .m-margin-top-maxxx {
     margin-top: 19em !important;
 }
@@ -253,9 +253,9 @@ body{
 }
 
 /*.m-center {*/
-    /*display: block!important;*/
-    /*margin-right: auto!important;*/
-    /*margin-left: auto!important;*/
+/*display: block!important;*/
+/*margin-right: auto!important;*/
+/*margin-left: auto!important;*/
 /*}*/
 
 /*-----opacity------*/
@@ -349,7 +349,7 @@ body{
 }
 
 .m-mobile-show {
-   display: none !important;
+    display: none !important;
 }
 
 @media screen and (max-width: 786px){
@@ -1973,4 +1973,244 @@ body{
     height: 200px;
     width: 200px;
 
+}
+
+
+/*音乐播放器*/
+
+.flip-horizontal {
+    transform: scaleX(-1);
+}
+
+
+.cz-player-bar {
+    width: 100px;
+    margin: -15px auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5px;
+    cursor: pointer;
+}
+
+.cz-player-card {
+    position: relative;
+    min-width: 250px;
+    min-height: 120px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+}
+
+.cz-player-top {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-block-end: .5rem;
+}
+
+.cz-player-pfp {
+    position: relative;
+    height: 40px;
+    width: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cz-player-img{
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+
+}
+
+.cz-player-title-1 {
+    color: black;
+    font-size: 1.25rem;
+    font-weight: 900;
+}
+
+.cz-player-title-2 {
+    color: black;
+    font-size: .75rem;
+    opacity: .8;
+}
+
+/* new */
+.cz-player-song-time {
+    width: 100%;
+    margin-inline: auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+}
+
+.cz-player-time {
+    width: 90%;
+    background-color: #5e5e5e;
+    height: .35rem;
+    border-radius: 3px;
+}
+
+.cz-player-elapsed {
+    width: 42%;
+    background-color: #1db954;
+    height: 100%;
+    border-radius: 3px;
+}
+
+.cz-player-controls {
+    color: black;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 100%;
+}
+
+.cz-player-volume {
+    height: 100%;
+    width: 48px;
+}
+
+.cz-player-air {
+    height: 100%;
+    width: 48px;
+}
+
+.cz-player-controls svg {
+    cursor: pointer;
+    transition: 0.1s;
+}
+
+.cz-player-controls svg:hover {
+    color: #1db954;
+}
+
+.cz-player-controls .cz-player-heart:hover {
+    color: pink;
+}
+
+.cz-player-volume {
+    position: relative;
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+.cz-player-volume .cz-player-slider {
+    height: 4px;
+    background-color: #5e5e5e;
+    width: 100%;
+    border-radius: 2px;
+    margin-left: .3rem;
+}
+
+.cz-player-volume .cz-player-slider .cz-player-green {
+    background-color: #1db954;
+    height: 100%;
+    width: 80%;
+    border-radius: 3px;
+}
+
+.cz-player-volume .cz-player-circle {
+    background-color: black;
+    height: 6px;
+    width: 6px;
+    border-radius: 3px;
+    position: absolute;
+    right: 20%;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+
+}
+
+.cz-player-volume_button:hover ~ .cz-player-volume  {
+    opacity: 1;
+}
+
+
+.cz-player-timetext {
+    color: black;
+}
+
+.cz-player-time_now {
+    font-size: .8rem;
+    background-color: #00000060;
+    padding: .5rem;
+    border-radius: .5rem;
+    background-blend-mode: multiply;
+}
+
+.cz-player-time_full {
+    font-size: .8rem;
+    background-color: #00000060;
+    padding: .5rem;
+    border-radius: .5rem;
+    background-blend-mode: multiply;
+}
+
+.cz-player-playing {
+    display: flex;
+    position: relative;
+    justify-content: center;
+    gap: 1px;
+    width: 30px;
+    height: 20px;
+}
+
+.cz-player-line {
+    background-color: black;
+    height: 20px;
+    width: 2px;
+    position: relative;
+    transform-origin: bottom;
+}
+
+.cz-player-line-1 {
+    animation: infinite playing 1s ease-in-out;
+    animation-delay: 0.2s;
+}
+
+.cz-player-line-2 {
+    animation: infinite playing 1s ease-in-out;
+    animation-delay: 0.5s;
+}
+
+.cz-player-line-3 {
+    animation: infinite playing 1s ease-in-out;
+    animation-delay: 0.6s;
+}
+
+.cz-player-line-4 {
+    animation: infinite playing 1s ease-in-out;
+    animation-delay: 0s;
+}
+
+.cz-player-line-5 {
+    animation: infinite playing 1s ease-in-out;
+    animation-delay: 0.4s;
+}
+
+@keyframes playing {
+    0% {
+        transform: scaleY(0.1);
+    }
+
+    33% {
+        transform: scaleY(0.6);
+    }
+
+    66% {
+        transform: scaleY(0.9);
+    }
+
+    100% {
+        transform: scaleY(0.1);
+    }
 }

@@ -55,8 +55,9 @@ public class LogAspect {
         long startTime = (long) request.getAttribute("startTime");
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
-
-        logger.info("结果: {} , 请求耗时: {} 毫秒", result.getClass().getName(),elapsedTime);
+        if (result != null) {
+            logger.info("结果: {} , 请求耗时: {} 毫秒", result.getClass().getName(),elapsedTime);
+        }
     }
 
 

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="referrer" content="no-referrer"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>博客管理</title>
+  <link href="../static/images/favicon.ico" th:href="@{/images/favicon.ico}" rel="icon" type="image/x-ico">
+  <link rel="stylesheet" href="../../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"  />
+  <link rel="stylesheet" href="../../static/css/me.css" th:href="@{/css/me.css}">
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="../../static/css/element-ui-index.css" th:href="@{/css/element-ui-index.css}">
+
+</head>
+<body class="admin-body">
+
+  <div id="app">
+    <!--顶部栏-->
+    <header class="p-3 text-bg-dark">
+      <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+           <span class="fs-4 me-5">ChenZhen</span>
+
+          <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+            <li><a href="./blogs.html" th:href="@{/admin/blogs}" class="nav-link px-2 text-white" >文章管理</a></li>
+            <li><a href="./tags.html" th:href="@{/admin/tags}" class="nav-link px-2 text-white">标签管理</a></li>
+            <li><a href="./friendlinks.html" th:href="@{/admin/friendlinks}" class="nav-link px-2 text-white">友链管理</a></li>
+            <li><a href="./musics.html" th:href="@{/admin/musics}" class="nav-link px-2 text-secondary">音乐管理</a></li>
+            <li><a href="./sys-configs.html" th:href="@{/admin/sys-configs}" class="nav-link px-2 text-white">系统配置管理</a></li>
+            <li><a href="./users.html" th:href="@{/admin/users}" class="nav-link px-2 text-white">用户管理</a></li>
+          </ul>
+
+          <!--头像-->
+          <img class="me-2 img-fluid rounded-5" width="40" height="40" src="../../static/images/me.jpg" th:src="@{${session.user.avatar}}">
+          <!--名字-->
+          <span class="me-3" th:src="@{${session.user.nickname}}" >ChenZhen</span>
+
+          <div class="text-end">
+            <a href="#" @click="logout" class="btn btn-outline-light me-2">注销</a>
+          </div>
+
+
+        </div>
+      </div>
+    </header>
+
+
+    <!--列表-->
+    <div class="container mt-5">
+      <div class="card">
+        <div class="card-body">
+          <!-- 添加按钮 -->
+          <el-button class="mb-3" type="primary" plain  @click="clickAdd">上传</el-button>
+
+          <el-table
+                  :data="list"
+                  stripe
+                  border
+                  style="width: 100%">
+            <el-table-column
+                    prop="id"
+                    label="ID"
+                    width="150">
+            </el-table-column>
+
+            <el-table-column width="120" label="封面" prop="coverPath">
+              <template slot-scope="scope">
+                <img :src="scope.row.coverPath" alt="" width="100%">
+              </template>
+            </el-table-column>
+
+            <el-table-column
+                    prop="title"
+                    label="歌名">
+            </el-table-column>
+
+            <el-table-column
+                    prop="artist"
+                    label="歌手名">
+            </el-table-column>
+
+
+            <el-table-column
+                    prop="createTime"
+                    label="创建时间">
+            </el-table-column>
+
+            <el-table-column
+                    prop="updateTime"
+                    label="更新时间">
+            </el-table-column>
+
+            <el-table-column width="150" label="操作" >
+              <template slot-scope="scope">
+                <el-button  size="mini" @click="clickEdit(scope.row.id)">编辑</el-button>
+                <el-button  size="mini" type="danger" @click="clickDelete(scope.row.id)">删除</el-button>
+              </template>
+            </el-table-column>
+
+          </el-table>
+
+          <!-- 分页 -->
+          <el-pagination
+                  class="mt-5"
+                  @current-change="handleCurrentChange"
+                  :current-page="searchForm.pageNum"
+                  :page-sizes="[10, 20, 30, 40]"
+                  :page-size="searchForm.pageSize"
+                  :total="total"
+          ></el-pagination>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- 创建或编辑的表单 -->
+    <el-dialog title="上传" :visible="dialogVisible" @close="dialogVisible = false" :close-on-click-modal="false">
+      <!-- 表单内容 -->
+      <el-form :model="editForm" label-width="150px">
+
+        <el-form-item label="文件路径" >
+          <el-upload
+                  ref="upload"
+                  action="/admin/musics/upload"
+                  :file-list="fileList"
+                  :on-success="handleAvatarSuccess"
+                  :before-upload="beforeUpload"
+                  :with-credentials="true"
+                  :auto-upload="false"
+                  :multiple="true">
+            <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
+            <div slot="tip" class="el-upload__tip">只能上传音频文件，且不超过100M</div>
+          </el-upload>
+        </el-form-item>
+
+
+      </el-form>
+
+
+    </el-dialog>
+
+  </div>
+</body>
+
+  <script src="../../static/lib/jquery-3.2.1/jquery-3.2.1.min.js" th:src="@{/lib/jquery-3.2.1/jquery-3.2.1.min.js}"></script>
+  <!-- import Vue before Element -->
+  <script src="../../static/lib/vue.js"                   th:src="@{/lib/vue.js}"></script>
+  <!-- import JavaScript -->
+  <script src="../../static/lib/element-ui-index.js"      th:src="@{/lib/element-ui-index.js}"></script>
+  <script src="../../static/lib/axios.min.js"             th:src="@{/lib/axios.min.js}"></script>
+  <script src="../../static/lib/axiosInstance.js"         th:src="@{/lib/axiosInstance.js}"></script>
+
+  <script>
+
+    new Vue({
+        el: '#app',
+        data: function() {
+          return {
+            list: [],
+            total: 0, // 总记录数
+            searchForm: {
+              pageNum: 1, // 当前页
+              pageSize: 10  // 每页显示条数
+            },
+            // 表单显示
+            dialogVisible: false,
+            formLabelWidth: '120px',
+            editForm:{
+
+            },
+            fileList:[]
+
+          }
+
+        },
+        methods:{
+          submitUpload() {
+            this.$refs.upload.submit();
+          },
+          handleRemove(file, fileList) {
+
+          },
+          handlePreview(file) {
+
+          },
+          beforeUpload(file) {
+
+            const isMusic = file.type === 'audio/mp3'
+                    || file.type === 'audio/wav'
+                    || file.type === 'audio/m4a'
+                    || file.type === 'audio/mpeg'
+                    || file.type === 'audio/flac'
+                    || file.type === 'audio/3gp'
+            ;
+
+            if (!isMusic) {
+              this.$message.error('只能上传音频文件！');
+            }
+            return isMusic;
+          },
+          clickAdd(){
+            this.dialogVisible = true
+          },
+          //上传成功逻辑
+          handleAvatarSuccess() {
+            this.fetchPage();
+            this.$message.success('上传成功！');
+          },
+          //获取分页数据
+          fetchPage(){
+            axiosInstance.get(`/admin/musics/page`,{
+              params: this.searchForm
+            }).then(res => {
+              if (res.code === 20000){
+                this.list = res.data.page.list;
+                this.total = res.data.page.total;
+              }
+
+            })
+          },
+          // 分页切换
+          handleCurrentChange(currentPage) {
+            this.searchForm.pageNum = currentPage;
+            this.fetchPage();
+          },
+
+
+          //点击删除
+          clickDelete(id){
+            this.$confirm('此操作将永久删除该信息, 是否继续?', '提示', {
+              cancelButtonText: '取消',
+              confirmButtonText: '确定',
+              type: 'warning'
+            }).then(() => {
+              this.delete(id)
+            }).catch(() => {
+              this.$message({
+                type: 'info',
+                message: '已取消删除'
+              });
+            })
+          },
+          // 删除
+          delete(id) {
+            axiosInstance.delete(`/admin/musics/${id}`)
+                    .then(() => {
+                      this.fetchPage();
+                    })
+                    .catch(error => {
+                      console.error(error);
+                    });
+          },
+          logout(){
+            axiosInstance.get('/admin/logout').then(res => {
+              if (res.code === 20000){
+                location.href = "/admin";
+              }
+            })
+          }
+
+        },
+
+        mounted(){
+          this.fetchPage()
+        }
+      })
+
+
+
+  </script>
+
+</html>
