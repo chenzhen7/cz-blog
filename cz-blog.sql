@@ -14,8 +14,6 @@ MySQL - 8.0.11 : Database - cz-blog
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 CREATE DATABASE /*!32312 IF NOT EXISTS*/`cz-blog` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */;
 
-USE `cz-blog`;
-
 /*Table structure for table `t_blog` */
 
 DROP TABLE IF EXISTS `t_blog`;
@@ -121,6 +119,24 @@ CREATE TABLE `t_message` (
 
 /*Data for the table `t_message` */
 
+/*Table structure for table `t_music` */
+
+DROP TABLE IF EXISTS `t_music`;
+
+CREATE TABLE `t_music` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) DEFAULT NULL COMMENT '音乐标题',
+  `artist` varchar(255) DEFAULT NULL COMMENT '艺术家或歌手名',
+  `file_name` varchar(255) DEFAULT NULL COMMENT '文件名',
+  `file_path` varchar(255) DEFAULT NULL COMMENT '音乐文件路径',
+  `cover_path` varchar(255) DEFAULT NULL COMMENT '封面路径',
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+/*Data for the table `t_music` */
+
 /*Table structure for table `t_sys_config` */
 
 DROP TABLE IF EXISTS `t_sys_config`;
@@ -194,9 +210,12 @@ CREATE TABLE `t_views` (
   `create_time` datetime DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `t_views` */
+
+insert  into `t_views`(`id`,`total_views`,`yesterday_views`,`create_time`,`update_time`) values 
+(3,22,5,'2024-02-23 16:52:52','2024-02-24 01:08:56');
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
