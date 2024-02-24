@@ -19,6 +19,39 @@
 yaml中的邮箱地址和授权码，具体怎么配置可以看我博客文章 [https://www.chenzhen.space/blog/28](https://www.chenzhen.space/blog/28 )，如果没有配置则邮件通知功能不会生效。
 
 
+# 技术栈
+## 前端
+JS框架：JQuery + Vue
+
+CSS框架：Bootstrap5
+
+Markdown编辑器：editormd
+
+代码高亮： prism
+
+目录生成：Tocbot
+
+## 后端
+整体使用springboot + Thymeleaf + Mybatis进行开发
+
+核心框架：SpringBoot 2.7.3
+
+持久层框架：MybatisPlus
+
+模板框架：Thymeleaf
+
+分页插件：PageHelper
+
+数据库：mysql8
+
+工具包：Hutool
+
+鉴权框架：Satoken
+
+参数校验：hibernate-validator
+
+
+
 # 功能模块
 ## 管理后台
 1. 登录：使用satoken提供的拦截器对管理员身份进行验证，拦截所有非管理员访问后台相关页面，管理员登录后拥有管理权限，能在后台管理页面对博客、标签和友链进行管理
