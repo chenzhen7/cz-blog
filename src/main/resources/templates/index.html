@@ -791,14 +791,18 @@
     function playNext() {
         currentIndex = (currentIndex + 1) % musicList.length;
         loadAudio(currentIndex);
-        play();
+        if (!audioPlayer.paused){
+            play();
+        }
 
     }
     //下一首
     function playPrevious() {
         currentIndex = (currentIndex - 1 + musicList.length) % musicList.length;
         loadAudio(currentIndex);
-        play();
+        if (!audioPlayer.paused){
+            play();
+        }
     }
 
     playBtn.addEventListener('click', () => {
