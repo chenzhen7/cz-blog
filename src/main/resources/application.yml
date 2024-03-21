@@ -31,5 +31,5 @@ pagehelper:
   page-size-zero: true
   params: count=countSql
 
-
-
+#默认封面路径
+default-cover-path: /static/images/default_cover.jpg

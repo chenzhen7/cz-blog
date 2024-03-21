@@ -1,5 +1,7 @@
 package com.chenzhen.blog.controller;
 
+import com.chenzhen.blog.factories.CoverStrategyFactory;
+import com.chenzhen.blog.strategies.CoverStrategy;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.tag.Tag;
@@ -60,25 +62,11 @@ public class MusicController {
     @ResponseBody
     @GetMapping("/cover/{filename}")
     public void cover(@PathVariable String filename, HttpServletResponse response){
-        try {
-            //读取音乐
-            AudioFile audioFile = AudioFileIO.read(new File(UPLOAD_DIR + filename));
-            Tag tag = audioFile.getTag();
-            //封面
-            Artwork artwork = tag.getFirstArtwork();
-            if (artwork == null) {
-                return;
-            }
-            //输出流，通过输出流将文件写回浏览器
-            ServletOutputStream outputStream = response.getOutputStream();
-            // 设置响应类型为图像类型
-            response.setContentType(artwork.getMimeType());
-            // 将封面图像写入响应输出流
-            outputStream.write(artwork.getBinaryData());
-            //关闭资源
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // 获取文件扩展名
+        String fileExtension = filename.substring(filename.lastIndexOf(".") + 1);
+        // 获取封面下载策略
+        CoverStrategy coverStrategy = CoverStrategyFactory.getCoverStrategy(fileExtension);
+        // 调用策略
+        coverStrategy.download(UPLOAD_DIR + filename,response);
     }
 }

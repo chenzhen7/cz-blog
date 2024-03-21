@@ -12,4 +12,4 @@ spring:
       max-lifetime: 120000
 
 upload:
-  directory: C:\Users\Administrator\Desktop\cz-blog-upload\
+  directory: D:\cz-blog-upload\
