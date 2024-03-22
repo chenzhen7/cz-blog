@@ -85,23 +85,22 @@
 </div>
 
 <!--中间内容-->
-<div id="waypoint" class="container-md" style="margin-top: -4em;">
+<div id="waypoint" class="container-md mt-5">
     <div class="row">
         <!--左边-->
         <div class="col-xxl-9 col-12">
             <!--文章内容-->
-            <div class="card border-2 mb-3 shadow">
-                <div class="card-body border-1">
-                    <!--中间主要内容部分-->
-                    <div id="content" class="markdown-body js-toc-content" th:utext="${blog.content}" >
-                        <h1>
-                            <a id="user-content-github-markdown-css-demo" class="anchor" href="#github-markdown-css-demo"
-                               aria-hidden="true"><span class="octicon octicon-link"></span></a>GitHub Markdown CSS demo</h1>
-                        <p><a name="user-content-headers"></a></p><a name="user-content-headers">
-                    </a><h2><a name="user-content-headers"></a><a id="user-content-headers" class="anchor" href="#headers"
-                                                                  aria-hidden="true"><span class="octicon octicon-link"></span></a>Headers
-                    </h2>
-                        <pre lang="no-highlight"><code># H1
+            <div class="mb-3 shadow border">
+                <!--中间主要内容部分-->
+                <div id="content" class="markdown-body js-toc-content" th:utext="${blog.content}" >
+                    <h1>
+                        <a id="user-content-github-markdown-css-demo" class="anchor" href="#github-markdown-css-demo"
+                           aria-hidden="true"><span class="octicon octicon-link"></span></a>GitHub Markdown CSS demo</h1>
+                    <p><a name="user-content-headers"></a></p><a name="user-content-headers">
+                </a><h2><a name="user-content-headers"></a><a id="user-content-headers" class="anchor" href="#headers"
+                                                              aria-hidden="true"><span class="octicon octicon-link"></span></a>Headers
+                </h2>
+                    <pre lang="no-highlight"><code># H1
 ## H2
 ### H3
 #### H4
@@ -824,7 +823,7 @@ Lots of it...
 
                     </div>
 
-                    <div class="mb-3" th:if="${blog.shareStatement}">
+                    <div class="mb-3 p-4 bg-white" th:if="${blog.shareStatement}">
                         <div class="mb-3"><strong>© 版权声明</strong></div>
                         <div class="cz-copyright-content">
                             <p>作者：ChenZhen</p>
@@ -835,12 +834,11 @@ Lots of it...
                         </div>
                     </div>
 
-                </div>
             </div>
 
 
             <!--相关推荐-->
-            <div class="card border-2 mb-3 shadow">
+            <div class="card  mb-3 shadow">
                 <div class="card-body border-1">
 
                     <a href="" class="cz-link" th:href=" '/blog/' + ${similarBlog.id}" th:each="similarBlog : ${similarBlogs}">
@@ -876,7 +874,7 @@ Lots of it...
             </div>
 
             <!--评论输入-->
-            <div class="card border-2 mb-3 shadow" th:if="${blog.commentabled}">
+            <div class="card mb-3 shadow" th:if="${blog.commentabled}">
                 <!--表单-->
                 <div id="comment-form"  class="card-body border-1">
                     <div class="row align-items-center mb-3">
@@ -932,7 +930,7 @@ Lots of it...
             </div>
 
             <!--评论列表-->
-            <div class="card border-2 mb-3 shadow" th:if="${blog.commentabled}" >
+            <div class="card mb-3 shadow" th:if="${blog.commentabled}" >
                 <div class="card-body border-1" id="comment-container" >
                     <!--评论列表-->
                     <div class="cz-comment-section" th:fragment="commentList" onload="myfunction()">
@@ -1049,10 +1047,10 @@ Lots of it...
         </div>
 
         <!--右边-->
-        <div class="col-xxl-3 d-xxl-block d-none ">
+        <div class="col-xxl-3 d-xxl-block d-none">
             <!--目录-->
-            <div class="card mb-3 shadow overflow-hidden cz-toc-sticky">
-                <div class="card-body js-toc"></div>
+            <div class="border mb-3 shadow overflow-hidden cz-toc-sticky">
+                <div class="cz-toc js-toc"></div>
             </div>
         </div>
 

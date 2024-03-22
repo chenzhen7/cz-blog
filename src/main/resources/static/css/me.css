@@ -1837,6 +1837,13 @@ body{
     }
 }
 
+.cz-toc{
+    box-sizing: border-box;
+    margin: 0 auto;
+    padding: 15px;
+    background-color: #ffffff;
+}
+
 .cz-toc-sticky{
     position:-webkit-sticky;
     position:sticky;
@@ -1853,9 +1860,10 @@ body{
     transition:transform 0.3s;
 }
 
-.js-toc.card-body{
+.js-toc.cz-toc{
     max-height: 80vh;
     overflow-y: auto;
+    scrollbar-width: none;
 }
 
 .js-toc a:hover{
@@ -1994,10 +2002,10 @@ body{
 }
 
 .cz-player-card {
+    padding: 10px;
     position: relative;
     min-width: 250px;
     min-height: 120px;
-    border-radius: 10px;
     display: flex;
     flex-direction: column;
     gap: .5rem;
