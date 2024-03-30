@@ -789,18 +789,20 @@
     }
     // 上一首
     function playNext() {
+        let isPaused = audioPlayer.paused
         currentIndex = (currentIndex + 1) % musicList.length;
         loadAudio(currentIndex);
-        if (!audioPlayer.paused){
+        if (!isPaused){
             play();
         }
 
     }
     //下一首
     function playPrevious() {
+        let isPaused = audioPlayer.paused
         currentIndex = (currentIndex - 1 + musicList.length) % musicList.length;
         loadAudio(currentIndex);
-        if (!audioPlayer.paused){
+        if (!isPaused){
             play();
         }
     }
