@@ -75,7 +75,8 @@ public class MessageController {
             message.setAvatar(user.getAvatar());
             message.setAdminMessage(true);
         }
-        messageService.save(message);//将评论信息保存数据库
+        //将评论信息保存数据库
+        messageService.save(message);
         //异步发送评论提醒邮件
         emailService.sendMail(user, message);
 

@@ -34,21 +34,20 @@ public class EmailServiceImpl implements EmailService {
     @Async("asyncThreadPoolTaskExecutor")  //设置为一个异步方法
     public void sendMail(User user, Message message) throws MessagingException {
 
-        if (user!=null){
-            //如果是管理员发的评论
-            if (message.getParentMessageId() == null){
-                //如果是根评论
-                //不需要发给自己邮件
+        //如果评论是管理员发布且非根评论，则该评论为管理员的回复，则给[回复的对象]发一封提醒邮件
+        if (user != null && message.getParentMessageId() != null){
+            //获取父评论
+            Message parentMessage = messageMapper.selectById(message.getParentMessageId());
+            //如果父评论是管理员，不发邮件
+            if (parentMessage.isAdminMessage()){
                 return;
-            }else {
-                //如果不是根评论，则给[回复的对象]发一封提醒邮件
-                Message parentMessage = messageMapper.selectById(message.getParentMessageId());//获取父评论
-                Mail mail = new Mail(null, parentMessage.getEmail(), parentMessage.getNickname(), parentMessage.getContent(),
-                        message.getNickname(), message.getContent(),
-                        "/message", "您在《ChenZhen的客栈-留言板》中的评论有了新的回复！");
-
-                mailUtil.sendThymeleafEmail(mail);
             }
+            Mail mail = new Mail(null, parentMessage.getEmail(), parentMessage.getNickname(), parentMessage.getContent(),
+                    message.getNickname(), message.getContent(),
+                    "/message", "您在《ChenZhen的客栈-留言板》中的评论有了新的回复！");
+
+            mailUtil.sendThymeleafEmail(mail);
+
         }else {
             //如果不是管理员发的评论
             if (message.getParentMessageId() == null){
@@ -80,22 +79,21 @@ public class EmailServiceImpl implements EmailService {
     public void sendMail(User user, Comment comment) throws MessagingException {
 
         String title = blogMapper.getTitleById(comment.getBlogId()); //评论所在的博文标题
-
-        if (user!=null){
-            //如果是管理员发的评论
-            if (comment.getParentCommentId()  == null ){
-                //如果是根评论
-                //不需要发给自己邮件
+        //如果评论是管理员发布且非根评论，则该评论为管理员的回复，则给[回复的对象]发一封提醒邮件
+        if (user != null && comment.getParentCommentId() != null){
+            //获取父评论
+            Comment parentComment = commentMapper.selectById(comment.getParentCommentId() );//获取父评论
+            //如果父评论是管理员，不发邮件
+            if (parentComment.isAdminComment()){
                 return;
-            }else {
-                //如果不是根评论，则给[我回复的对象]发一封提醒邮件
-                Comment parentComment = commentMapper.selectById(comment.getParentCommentId() );//获取父评论
-
-                Mail mail = new Mail(null, parentComment.getEmail(), parentComment.getNickname(), parentComment.getContent(),
-                        comment.getNickname(), comment.getContent(),
-                        "/blog/"+comment.getBlogId(), "您在ChenZhen的博客《"+title+"》中的评论有了新的回复！");
-                mailUtil.sendThymeleafEmail(mail);
             }
+            //如果不是根评论，则给[我回复的对象]发一封提醒邮件
+
+            Mail mail = new Mail(null, parentComment.getEmail(), parentComment.getNickname(), parentComment.getContent(),
+                    comment.getNickname(), comment.getContent(),
+                    "/blog/"+comment.getBlogId(), "您在ChenZhen的博客《"+title+"》中的评论有了新的回复！");
+            mailUtil.sendThymeleafEmail(mail);
+
         }else {
             //如果不是管理员发的评论
             if (comment.getParentCommentId() == null){
