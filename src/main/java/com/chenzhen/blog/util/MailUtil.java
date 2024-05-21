@@ -29,9 +29,10 @@ public class MailUtil {
     @Autowired
     private SpringTemplateEngine springTemplateEngine;//Spring 模板引擎
 
-    @Value("${spring.mail.username}") //从yaml配置文件中获取
-    private String from; //发送方邮箱地址
-
+    //自己的邮箱地址 从yaml配置文件中获取
+    @Value("${spring.mail.username}")
+    private String from;
+    //邮箱模板路径 /resourece/templates下
     @Value("${spring.mail.thymeleaf-html}")
     private String html;
 

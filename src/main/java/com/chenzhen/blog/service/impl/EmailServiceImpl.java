@@ -12,6 +12,7 @@ import com.chenzhen.blog.util.MailUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,9 @@ public class EmailServiceImpl implements EmailService {
     private CommentMapper commentMapper;
     @Autowired
     private BlogMapper blogMapper;
-
+    //自己的邮箱地址 从yaml配置文件中获取
+    @Value("${spring.mail.username}")
+    private String myEmail;
 
     @Override
     @Async("asyncThreadPoolTaskExecutor")  //设置为一个异步方法
@@ -53,7 +56,7 @@ public class EmailServiceImpl implements EmailService {
             if (message.getParentMessageId() == null){
                 //如果是根评论
                 //发给我自己，提醒有人在留言板留言了
-                Mail mail = new Mail(null, "1583296383@qq.com", "ChenZhen", null,
+                Mail mail = new Mail(null, myEmail, "ChenZhen", null,
                         message.getNickname(), message.getContent(),
                         "/message","在《ChenZhen的客栈-留言板》中有了新的留言！");
 
@@ -91,7 +94,7 @@ public class EmailServiceImpl implements EmailService {
 
             Mail mail = new Mail(null, parentComment.getEmail(), parentComment.getNickname(), parentComment.getContent(),
                     comment.getNickname(), comment.getContent(),
-                    "/blog/"+comment.getBlogId(), "您在ChenZhen的博客《"+title+"》中的评论有了新的回复！");
+                    "/blog/" + comment.getBlogId(), "您在ChenZhen的博客《" + title + "》中的评论有了新的回复！");
             mailUtil.sendThymeleafEmail(mail);
 
         }else {
@@ -99,9 +102,9 @@ public class EmailServiceImpl implements EmailService {
             if (comment.getParentCommentId() == null){
                 //如果是根评论
                 //发给我自己，提醒有人在留言板留言了
-                Mail mail = new Mail(null, "1583296383@qq.com", "ChenZhen", null,
+                Mail mail = new Mail(null, myEmail, "ChenZhen", null,
                         comment.getNickname(), comment.getContent(),
-                        "/blog/"+comment.getBlogId(),"您在ChenZhen的博客《"+title+"》中有了新的评论！");
+                        "/blog/" + comment.getBlogId(),"您在ChenZhen的博客《" + title + "》中有了新的评论！");
                 mailUtil.sendThymeleafEmail(mail);
 
             }else{
@@ -110,7 +113,7 @@ public class EmailServiceImpl implements EmailService {
                 Comment parentComment = commentMapper.selectById(comment.getParentCommentId());//获取父评论
                 Mail mail = new Mail(null,parentComment.getEmail(),parentComment.getNickname(),
                         parentComment.getContent(),comment.getNickname(),comment.getContent(),
-                        "/blog/"+comment.getBlogId(),"您在ChenZhen的博客《"+title+"》中的评论有了新的回复！");
+                        "/blog/" + comment.getBlogId(),"您在ChenZhen的博客《" + title + "》中的评论有了新的回复！");
                 mailUtil.sendThymeleafEmail(mail);
 
             }
