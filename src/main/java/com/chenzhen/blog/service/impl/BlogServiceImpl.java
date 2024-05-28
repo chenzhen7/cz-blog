@@ -4,7 +4,10 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.chenzhen.blog.entity.pojo.Type;
+import com.chenzhen.blog.entity.vo.TypeBlogVO;
 import com.chenzhen.blog.mapper.TagMapper;
 import com.chenzhen.blog.mapper.ViewsMapper;
 import com.chenzhen.blog.entity.pojo.Blog;
@@ -13,6 +16,7 @@ import com.chenzhen.blog.entity.vo.BlogVO;
 import com.chenzhen.blog.entity.query.BaseQuery;
 import com.chenzhen.blog.service.BlogService;
 import com.chenzhen.blog.mapper.BlogMapper;
+import com.chenzhen.blog.service.TypeService;
 import com.chenzhen.blog.service.ViewsService;
 import com.chenzhen.blog.util.MarkdownUtil;
 import com.chenzhen.blog.util.R;
@@ -38,11 +42,9 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
 
 
     @Autowired
-    private TagMapper tagMapper;
-    @Autowired
-    private ViewsService viewsService;
-    @Autowired
     private BlogMapper blogMapper;
+    @Autowired
+    private TypeService typeService;
 
     @Override
     public PageInfo<BlogVO> pageAdminBlogs(BaseQuery query) {
@@ -215,19 +217,25 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     }
 
     @Override
-    public PageInfo<BlogVO> pageIndex(Integer pageNum, Integer pageSize) {
+    public PageInfo<TypeBlogVO> pageIndex(Long typeId, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
         PageHelper.orderBy("create_time desc");
 
-        List<BlogVO> blogList = pageBlogs();
-        PageInfo<BlogVO> pageInfo = new PageInfo<>(blogList, 5);
+        //如果没有传分类Id 默认选第一个分类中的博文列表
+        if (typeId == null){
+            Type type = typeService.getOne(new QueryWrapper<Type>().orderByDesc("create_time").last("limit 1"));
+            if (type != null){
+                typeId = type.getId();
+            }
+        }
+        //获取该分类下的所有博文列表 typeId为空则获取所有
+        List<TypeBlogVO> blogList = blogMapper.pageBlogs(typeId);
+        PageInfo<TypeBlogVO> pageInfo = new PageInfo<>(blogList, 5);
         return pageInfo;
 
     }
 
-    private List<BlogVO> pageBlogs() {
-        return blogMapper.pageBlogs();
-    }
+
 
     @Override
     public List<BlogVO> getRecommendList() {

@@ -2,9 +2,11 @@ package com.chenzhen.blog.controller;
 
 import com.chenzhen.blog.entity.enums.SysConfigEnum;
 import com.chenzhen.blog.entity.pojo.Music;
+import com.chenzhen.blog.entity.pojo.Type;
 import com.chenzhen.blog.entity.vo.CommentVO;
 import com.chenzhen.blog.entity.pojo.Blog;
 import com.chenzhen.blog.entity.vo.BlogVO;
+import com.chenzhen.blog.entity.vo.TypeBlogVO;
 import com.chenzhen.blog.mapper.ViewsMapper;
 import com.chenzhen.blog.service.*;
 import com.chenzhen.blog.util.R;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
@@ -40,16 +43,20 @@ public class IndexController {
     private ViewsService viewsService;
     @Autowired
     private MusicService musicService;
+    @Autowired
+    private TypeService typeService;
 
 
     //跳转首页
-    @GetMapping(value = {"/","/{pageNum}"})
-    public String index(@PathVariable(value = "pageNum",required = false)Integer pageNum, Model model){
-        if (pageNum==null){
-            pageNum=1;
-        }
+    @GetMapping()
+    public String index(@RequestParam(value = "pageNum",required = false,defaultValue = "1")Integer pageNum,
+                        @RequestParam(value = "type",required = false)Long type,
+                        Model model){
+
+        //获取所有分类
+        List<Type> typeList = typeService.getTypeList();
         //获取首页博客列表分页信息
-        PageInfo<BlogVO> pageInfo = blogService.pageIndex(pageNum, 12);
+        PageInfo<TypeBlogVO> pageInfo = blogService.pageIndex(type, pageNum, 12);
         //获取推荐列表
         List<BlogVO> recommendList = blogService.getRecommendList();
         //获取音乐列表
@@ -77,6 +84,7 @@ public class IndexController {
         // 获取留言总数
         Long blogMessageTotal = messageService.count();
 
+        model.addAttribute("typeList",typeList);
         model.addAttribute("page",pageInfo);
         model.addAttribute("recommendList",recommendList);
         model.addAttribute("musicList",musicList);

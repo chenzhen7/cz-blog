@@ -216,7 +216,10 @@
         <div class="row justify-content-between">
             <!--博文列表-->
             <div class="col-md-9">
-                <h5 class="fw-bold cz-spanborder"><span>博文列表</span></h5>
+                <h5 class="fw-bold cz-spanborder-span">
+                    <span class="">博文列表</span>
+                    <span class="cz-type-spanborder-span">博文列表</span>
+                </h5>
 
                 <!--博文-->
                 <div class="d-none d-md-block">
@@ -334,19 +337,19 @@
                     <ul class="pagination justify-content-center">
                         <li class="page-item" th:classappend="${page.hasPreviousPage} ? 'page-item' : 'page-item disabled' ">
                             <a class="page-link text-black" href="#">
-                                <span aria-hidden="true" th:href="@{/{pageNum}(pageNum=${page.prePage})}">上一页</span>
+                                <span aria-hidden="true" th:href="@{'/?pageNum=' + ${page.prePage}}">上一页</span>
                             </a>
                         </li>
 
                         <li class="page-item"
                             th:each="num : ${page.navigatepageNums}"
                             th:classappend="${page.pageNum == num} ? 'page-item active' : 'page-item'">
-                            <a class="page-link text-black" href="#" th:href="@{'/'+${num}}" th:text="${num}">1</a>
+                            <a class="page-link text-black" href="#" th:href="@{'/?pageNum=' + ${num}}" th:text="${num}">1</a>
                         </li>
 
                         <li class="page-item" th:classappend="${page.hasNextPage} ? 'page-item' : 'page-item disabled' ">
                             <a class="page-link text-black" href="#">
-                                <span aria-hidden="true" th:href="@{/{pageNum}(pageNum=${page.nextPage})}">下一页</span>
+                                <span aria-hidden="true" th:href="@{'/?pageNum=' + ${page.nextPage}}">下一页</span>
                             </a>
                         </li>
                     </ul>

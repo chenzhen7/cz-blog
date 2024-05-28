@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.chenzhen.blog.entity.dto.BlogDTO;
 import com.chenzhen.blog.entity.vo.BlogVO;
 import com.chenzhen.blog.entity.query.BaseQuery;
+import com.chenzhen.blog.entity.vo.TypeBlogVO;
 import com.chenzhen.blog.util.R;
 import com.github.pagehelper.PageInfo;
 
@@ -17,22 +18,29 @@ import java.util.List;
 */
 public interface BlogService extends IService<Blog> {
 
-    //分页显示[博客管理列表]
+
     PageInfo<BlogVO> pageAdminBlogs(BaseQuery query);
 
-    //分页显示[首页博客列表]
-    PageInfo<BlogVO> pageIndex(Integer pageNum,Integer pageSize);
+    /**
+     * 获取首页博客列表分页信息
+     * @param typeId 分类ID
+     * @param pageNum 页码
+     * @param pageSize 每页条数
+     * @return
+     */
+
+    PageInfo<TypeBlogVO> pageIndex(Long typeId, Integer pageNum, Integer pageSize);
 
     Boolean updateBlogTags(Long blogId, List<Long> tagIds);
 
     Boolean saveBlogTags(Long id, List<Long> tagIds);
 
-    //获取推荐列表
+
     List<BlogVO> getRecommendList();
 
     Blog getBlogDetail(Long id);
 
-    //所有博客浏览量总数
+
     Long getBlogViewTotal();
 
     R saveBlog(BlogDTO blogDTO);

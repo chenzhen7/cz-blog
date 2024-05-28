@@ -27,9 +27,7 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag>
         PageHelper.startPage(query.getPageNum(), 10);
         PageHelper.orderBy("create_time desc");
 
-        LambdaQueryWrapper<Tag> wrapper = new LambdaQueryWrapper<>();
-
-        List<Tag> list = list(wrapper);
+        List<Tag> list = list();
 
         return new PageInfo<>(list);
 

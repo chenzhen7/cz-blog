@@ -1,5 +1,6 @@
 package com.chenzhen.blog.mapper;
 import com.chenzhen.blog.entity.vo.BlogVO;
+import com.chenzhen.blog.entity.vo.TypeBlogVO;
 import org.apache.ibatis.annotations.Param;
 
 import com.chenzhen.blog.entity.pojo.Blog;
@@ -38,7 +39,7 @@ public interface BlogMapper extends BaseMapper<Blog> {
 
     Boolean deleteAllBlogTags(@Param("blogId")Long blogId);
 
-    List<BlogVO> pageBlogs();
+    List<TypeBlogVO> pageBlogs(@Param("typeId") Long typeId);
 
     List<BlogVO> getBlogListByBlogIds(@Param("blogIds") List<Long> blogIds);
 

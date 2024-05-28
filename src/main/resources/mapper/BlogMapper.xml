@@ -43,8 +43,15 @@
         </collection>
     </resultMap>
 
-    <sql id="selectBlogVo">
-        select b.id,b.title,b.content,b.description,b.first_picture,b.commentabled,b.appreciation,b.published,
+    <resultMap id="TypeBlogVOMap" type="com.chenzhen.blog.entity.vo.TypeBlogVO">
+        <id property="typeId" column="type_id" jdbcType="BIGINT"/>
+        <result property="typeName" column="type_name" jdbcType="VARCHAR"/>
+        <collection property="blogList" ofType="com.chenzhen.blog.entity.vo.BlogVO" select="selectBlogVo" column="type_id">
+        </collection>
+    </resultMap>
+
+    <sql id="BlogVoFields">
+        select b.id,b.type_id,b.title,b.content,b.description,b.first_picture,b.commentabled,b.appreciation,b.published,
                b.recommend,b.share_statement,b.copyright,b.views,b.comment_count,b.update_time,b.create_time
         from t_blog b
     </sql>
@@ -56,9 +63,13 @@
         where bt.blog_id = #{id}
     </select>
 
+    <select id="selectBlogVo" resultMap="BlogVoMap">
+        <include refid="BlogVoFields"/>
+        where b.type_id = #{type_id}
+    </select>
 
     <select id="getRecommendList" resultMap="BlogVoMap">
-        <include refid="selectBlogVo"/>
+        <include refid="BlogVoFields"/>
         where b.published = 1 and b.recommend = 1
         order by b.update_time  desc
         limit 4
@@ -89,16 +100,19 @@
     </select>
 
     <select id="pageAdminBlogs" resultMap="BlogVoMap">
-        <include refid="selectBlogVo"/>
+        <include refid="BlogVoFields"/>
     </select>
 
-    <select id="pageBlogs" resultMap="BlogVoMap">
-        <include refid="selectBlogVo"/>
+    <select id="pageBlogs" resultMap="TypeBlogVOMap">
+        <include refid="BlogVoFields"/>
         WHERE b.published = 1
+        <if test="typeId != null">
+            AND b.type_id = #{typeId}
+        </if>
     </select>
 
     <select id="getBlogVO" resultMap="BlogVoMap">
-        <include refid="selectBlogVo"/>
+        <include refid="BlogVoFields"/>
         WHERE b.id = #{id}
     </select>
 
@@ -118,7 +132,7 @@
     </select>
 
     <select id="getBlogListByBlogIds" resultMap="BlogVoMap">
-        <include refid="selectBlogVo"/>
+        <include refid="BlogVoFields"/>
         where b.id in
         <foreach collection="blogIds" item="blogId" separator="," open="(" close=")">
         #{blogId}
@@ -126,7 +140,7 @@
     </select>
 
     <select id="getBlogList" resultMap="BlogVoMap">
-        <include refid="selectBlogVo"/>
+        <include refid="BlogVoFields"/>
         where b.published = 1
         order by b.create_time desc
     </select>
