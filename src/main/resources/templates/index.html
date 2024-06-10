@@ -167,10 +167,7 @@
                 <div class="flex-md-row mb-4 mt-4 box-shadow h-xl-300" th:each="blog, iterStat : ${recommendList}" th:if="${iterStat.index > 0}">
                     <a class="cz-link" href="#" th:href="@{/blog/{id}(id=${blog.id})}">
                         <div class="mb-3 d-flex align-items-md-center">
-                            <div class="cz-recommendImage-container2">
-                                <img src="../static/images/me.jpg" th:src="@{${blog.firstPicture}}" >
-                            </div>
-                            <div class="ps-3 w-100">
+                            <div class="me-2 w-100">
                                 <h2 class="mb-2 h6 fw-bold">
                                     <div class="fw-bold" th:text="${blog.title}">最近推荐博文2</div>
                                 </h2>
@@ -202,6 +199,9 @@
                                         <span class="badge bg-secondary ms-1" th:each="tag : ${blog.tagList}" th:text="${tag.name}">Java</span>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="cz-recommendImage-container2" th:if="${blog.firstPicture != null && !blog.firstPicture.isEmpty()}">
+                                <img src="../static/images/me.jpg" th:src="@{${blog.firstPicture}}" >
                             </div>
                         </div>
                     </a>
@@ -271,8 +271,8 @@
 
                         </div>
                         <!--博文首图-->
-                        <div class="d-flex align-items-md-center">
-                            <img class="cz-blog-img" src="../static/images/recommendPicture.png" th:src="@{${blog.firstPicture}}">
+                        <div class="d-flex align-items-md-center" th:if="${blog.firstPicture != null && !blog.firstPicture.isEmpty()}">
+                            <img class="cz-blog-img" src="../static/images/recommendPicture.png" th:src="@{${blog.firstPicture}}" >
                         </div>
 
                     </div>
