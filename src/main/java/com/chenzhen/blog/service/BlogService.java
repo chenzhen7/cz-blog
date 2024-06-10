@@ -3,9 +3,9 @@ package com.chenzhen.blog.service;
 import com.chenzhen.blog.entity.pojo.Blog;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.chenzhen.blog.entity.dto.BlogDTO;
+import com.chenzhen.blog.entity.query.BlogQuery;
 import com.chenzhen.blog.entity.vo.BlogVO;
 import com.chenzhen.blog.entity.query.BaseQuery;
-import com.chenzhen.blog.entity.vo.TypeBlogVO;
 import com.chenzhen.blog.util.R;
 import com.github.pagehelper.PageInfo;
 
@@ -19,7 +19,7 @@ import java.util.List;
 public interface BlogService extends IService<Blog> {
 
 
-    PageInfo<BlogVO> pageAdminBlogs(BaseQuery query);
+    PageInfo<BlogVO> pageAdminBlogs(BlogQuery query);
 
     /**
      * 获取首页博客列表分页信息
@@ -29,7 +29,7 @@ public interface BlogService extends IService<Blog> {
      * @return
      */
 
-    PageInfo<TypeBlogVO> pageIndex(Long typeId, Integer pageNum, Integer pageSize);
+    PageInfo<BlogVO> pageIndex(Long typeId, Integer pageNum, Integer pageSize);
 
     Boolean updateBlogTags(Long blogId, List<Long> tagIds);
 

@@ -14,6 +14,10 @@ body{
     width: 100%;
 }
 
+a{
+    color: #0a001f;
+    text-decoration: none;
+}
 /*网站字体*/
 /*原则上你可以设置多个字体，然后在不同的部位使用不同的字体。*/
 @font-face{
@@ -1436,8 +1440,20 @@ body{
 .cz-spanborder span {
     border-bottom: 1px solid rgba(0, 0, 0, 0.44);
     display: inline-block;
-    padding-bottom: 20px;
+    padding-bottom: 15px;
     margin-bottom: -1px;
+}
+
+.cz-type-spanborder {
+    border-bottom: 1px solid #e8f3ec;
+    margin-bottom: 2rem;
+
+}
+.cz-type-span {
+    display: inline-block;
+    padding-bottom: 15px;
+    margin-bottom: -1px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.44);
 }
 
 .cz-blog-img{
@@ -2221,4 +2237,9 @@ body{
     100% {
         transform: scaleY(0.1);
     }
+}
+
+
+.text-shadow{
+    text-shadow: 10px 10px 0 rgba(16,16,16,0.38);
 }

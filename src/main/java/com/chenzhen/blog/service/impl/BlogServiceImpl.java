@@ -6,21 +6,21 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.chenzhen.blog.entity.pojo.BlogTag;
+import com.chenzhen.blog.entity.pojo.Tag;
 import com.chenzhen.blog.entity.pojo.Type;
-import com.chenzhen.blog.entity.vo.TypeBlogVO;
-import com.chenzhen.blog.mapper.TagMapper;
-import com.chenzhen.blog.mapper.ViewsMapper;
 import com.chenzhen.blog.entity.pojo.Blog;
 import com.chenzhen.blog.entity.dto.BlogDTO;
+import com.chenzhen.blog.entity.query.BlogQuery;
 import com.chenzhen.blog.entity.vo.BlogVO;
 import com.chenzhen.blog.entity.query.BaseQuery;
+import com.chenzhen.blog.mapper.TagMapper;
 import com.chenzhen.blog.service.BlogService;
 import com.chenzhen.blog.mapper.BlogMapper;
+import com.chenzhen.blog.service.TagService;
 import com.chenzhen.blog.service.TypeService;
-import com.chenzhen.blog.service.ViewsService;
 import com.chenzhen.blog.util.MarkdownUtil;
 import com.chenzhen.blog.util.R;
-import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.BeanUtils;
@@ -45,15 +45,31 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     private BlogMapper blogMapper;
     @Autowired
     private TypeService typeService;
+    @Autowired
+    private TagMapper tagMapper;
 
     @Override
-    public PageInfo<BlogVO> pageAdminBlogs(BaseQuery query) {
+    public PageInfo<BlogVO> pageAdminBlogs(BlogQuery query) {
         PageHelper.startPage(query.getPageNum(), 10);
         PageHelper.orderBy("create_time desc");
 
-        List<BlogVO> list = blogMapper.pageAdminBlogs();
-
-        return new PageInfo<>(list);
+        List<BlogVO> blogList = blogMapper.pageAdminBlogs(query);
+        if (CollUtil.isEmpty(blogList)){
+            return new PageInfo<>(blogList);
+        }
+        // 获取所有博客的 ID 列表
+        List<Long> blogIds = blogList.stream().map(BlogVO::getId).collect(Collectors.toList());
+        // 根据博客 ID 列表查询所有对应的标签
+        List<BlogTag> blogTags = tagMapper.getTagsByBlogIds(blogIds);
+        // 设置每个博客的标签
+        for (BlogVO blog : blogList) {
+            for (BlogTag blogTag : blogTags){
+                if (blogTag.getBlogId().equals(blog.getId())){
+                    blog.setTagList(blogTag.getTags());
+                }
+            }
+        }
+        return new PageInfo<>(blogList);
 
     }
 
@@ -205,9 +221,12 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     public Boolean updateBlogTags(Long blogId, List<Long> tagIds) {
         //删除原有关联关系
         blogMapper.deleteAllBlogTags(blogId);
+        //没有设置标签 直接返回
+        if (CollUtil.isEmpty(tagIds)){
+            return true;
+        }
         //插入新的关联关系
         blogMapper.saveBlogTags(blogId, tagIds);
-
         return true;
 
     }
@@ -217,20 +236,28 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     }
 
     @Override
-    public PageInfo<TypeBlogVO> pageIndex(Long typeId, Integer pageNum, Integer pageSize) {
+    public PageInfo<BlogVO> pageIndex(Long typeId, Integer pageNum, Integer pageSize) {
+        //开启分页
         PageHelper.startPage(pageNum, pageSize);
         PageHelper.orderBy("create_time desc");
-
-        //如果没有传分类Id 默认选第一个分类中的博文列表
-        if (typeId == null){
-            Type type = typeService.getOne(new QueryWrapper<Type>().orderByDesc("create_time").last("limit 1"));
-            if (type != null){
-                typeId = type.getId();
+        //1 获取该分类下的所有博文列表 typeId为空则获取所有
+        List<BlogVO> blogList = blogMapper.pageBlogs(typeId);
+        if (blogList.isEmpty()) {
+            return new PageInfo<>(blogList, 5);
+        }
+        //2 获取所有博客的 ID 列表
+        List<Long> blogIds = blogList.stream().map(BlogVO::getId).collect(Collectors.toList());
+        //3 根据博客 ID 列表查询所有对应的标签
+        List<BlogTag> blogTags = tagMapper.getTagsByBlogIds(blogIds);
+        //4 设置每个博客的标签
+        for (BlogVO blog : blogList) {
+            for (BlogTag blogTag : blogTags){
+                if (blogTag.getBlogId().equals(blog.getId())){
+                    blog.setTagList(blogTag.getTags());
+                }
             }
         }
-        //获取该分类下的所有博文列表 typeId为空则获取所有
-        List<TypeBlogVO> blogList = blogMapper.pageBlogs(typeId);
-        PageInfo<TypeBlogVO> pageInfo = new PageInfo<>(blogList, 5);
+        PageInfo<BlogVO> pageInfo = new PageInfo<>(blogList, 5);
         return pageInfo;
 
     }

@@ -23,12 +23,12 @@
 
           <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
             <li><a href="./blogs.html" th:href="@{/admin/blogs}" class="nav-link px-2 text-white" >文章管理</a></li>
-            <li><a href="./types.html" th:href="@{/admin/types}" class="nav-link px-2 text-white">分类管理</a></li>
+            <li><a href="./types.html" th:href="@{/admin/types}" class="nav-link px-2 text-secondary">分类管理</a></li>
             <li><a href="./tags.html" th:href="@{/admin/tags}" class="nav-link px-2 text-white">标签管理</a></li>
             <li><a href="./friendlinks.html" th:href="@{/admin/friendlinks}" class="nav-link px-2 text-white">友链管理</a></li>
             <li><a href="./musics.html" th:href="@{/admin/musics}" class="nav-link px-2 text-white">音乐管理</a></li>
             <li><a href="./sys-configs.html" th:href="@{/admin/sys-configs}" class="nav-link px-2 text-white">系统配置管理</a></li>
-            <li><a href="./users.html" th:href="@{/admin/users}" class="nav-link px-2 text-secondary">用户管理</a></li>
+            <li><a href="./users.html" th:href="@{/admin/users}" class="nav-link px-2 text-white">用户管理</a></li>
           </ul>
 
           <!--头像-->
@@ -51,7 +51,7 @@
       <div class="card">
         <div class="card-body">
           <!-- 添加按钮 -->
-          <el-button class="mb-3" type="primary" plain  @click="clickAdd">添加用户</el-button>
+          <el-button class="mb-3" type="primary" plain  @click="clickAdd">添加分类</el-button>
 
           <el-table
                   :data="list"
@@ -65,18 +65,8 @@
             </el-table-column>
 
             <el-table-column
-                    prop="username"
-                    label="账号">
-            </el-table-column>
-
-            <el-table-column
-                    prop="nickname"
-                    label="昵称">
-            </el-table-column>
-
-            <el-table-column
-                    prop="email"
-                    label="邮箱">
+                    prop="name"
+                    label="分类名">
             </el-table-column>
 
             <el-table-column
@@ -89,10 +79,9 @@
                     label="更新时间">
             </el-table-column>
 
-            <el-table-column label="操作" >
+            <el-table-column width="150" label="操作" >
               <template slot-scope="scope">
                 <el-button  size="mini" @click="clickEdit(scope.row.id)">编辑</el-button>
-                <el-button  size="mini" type="warning" @click="showUpdatePasswordDialog(scope.row.id)">修改密码</el-button>
                 <el-button  size="mini" type="danger" @click="clickDelete(scope.row.id)">删除</el-button>
               </template>
             </el-table-column>
@@ -124,23 +113,9 @@
         </el-form-item>
 
         <!-- 标签名 -->
-        <el-form-item label="账号" prop="username">
-          <el-input v-model="editForm.username"></el-input>
+        <el-form-item label="分类名" prop="name">
+          <el-input v-model="editForm.name"></el-input>
         </el-form-item>
-
-        <el-form-item label="昵称" prop="nickname">
-          <el-input v-model="editForm.nickname"></el-input>
-        </el-form-item>
-
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="editForm.email"></el-input>
-        </el-form-item>
-
-        <el-form-item label="密码" prop="password">
-          <el-input v-model="editForm.password"></el-input>
-        </el-form-item>
-
-
 
       </el-form>
       <!-- 按钮操作 -->
@@ -151,26 +126,6 @@
 
     </el-dialog>
 
-    <el-dialog title="修改密码" :visible="updatePasswordDialogVisible" @close="updatePasswordDialogVisible = false" :close-on-click-modal="false">
-      <!-- 表单内容 -->
-      <el-form :model="updatePasswordForm" label-width="150px">
-
-        <el-form-item label="旧密码" prop="oldPassword">
-          <el-input v-model="updatePasswordForm.oldPassword"></el-input>
-        </el-form-item>
-
-        <el-form-item label="新密码" prop="newPassword">
-          <el-input v-model="updatePasswordForm.newPassword"></el-input>
-        </el-form-item>
-
-      </el-form>
-      <!-- 按钮操作 -->
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="updatePasswordDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="clickUpdatePassword">保存</el-button>
-      </span>
-
-    </el-dialog>
   </div>
 </body>
 
@@ -195,12 +150,10 @@
             },
             // 表单显示
             dialogVisible: false,
-            updatePasswordDialogVisible: false,
             formLabelWidth: '120px',
             editForm:{
-            },
-            updatePasswordForm:{},
 
+            },
 
           }
 
@@ -208,7 +161,7 @@
         methods:{
           //获取分页数据
           fetchPage(){
-            axiosInstance.get(`/admin/users/page`,{
+            axiosInstance.get(`/admin/types/page`,{
               params: this.searchForm
             }).then(res => {
               if (res.code === 20000){
@@ -230,7 +183,7 @@
           clickSave(){
             if (this.editForm.id) {
               // 有ID更新
-              axiosInstance.put(`/admin/users`, this.editForm)
+              axiosInstance.put(`/admin/types`, this.editForm)
                       .then(resp => {
                         if(resp.code === 20000){
                           this.$message.success('更新成功');
@@ -244,7 +197,7 @@
                       });
             } else {
               // 无ID创建
-              axiosInstance.post('/admin/users', this.editForm)
+              axiosInstance.post('/admin/types', this.editForm)
                       .then(resp => {
                         if(resp.code === 20000){
                           this.$message.success('创建成功');
@@ -257,29 +210,11 @@
                       });
             }
           },
-          showUpdatePasswordDialog(id){
-            this.updatePasswordForm = {}
-            this.updatePasswordForm.id = id;
-            this.updatePasswordDialogVisible = true
-          },
-          clickUpdatePassword(id){
-            this.updatePassword(id)
-          },
-          updatePassword(id){
-            axiosInstance.post(`/admin/users/updatePassword`, this.updatePasswordForm)
-                    .then(resp => {
-                      if (resp.code === 20000){
-                        this.$message.success('密码修改成功');
-                        this.updatePasswordDialogVisible = false
-                      }
-
-                    })
-          },
           // 编辑
           clickEdit(id) {
-            axiosInstance.get(`/admin/users/${id}`)
+            axiosInstance.get(`/admin/types/${id}`)
                     .then(resp => {
-                      this.editForm = resp.data.user
+                      this.editForm = resp.data.tag
                     })
 
             this.dialogVisible = true;
@@ -301,7 +236,7 @@
           },
           // 删除
           delete(id) {
-            axiosInstance.delete(`/admin/users/${id}`)
+            axiosInstance.delete(`/admin/types/${id}`)
                     .then(() => {
                       this.fetchPage();
                     })

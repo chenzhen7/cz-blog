@@ -16,6 +16,5 @@ import java.util.List;
 @Data
 public class BlogDTO extends Blog {
     // 标签id列表
-    @NotEmpty
     private List<Long> tagIds;
 }

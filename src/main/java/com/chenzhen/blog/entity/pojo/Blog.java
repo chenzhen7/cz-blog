@@ -24,6 +24,11 @@ public class Blog extends BaseEntity implements Serializable {
     private Long id;
 
     /**
+     * 分类ID
+     */
+    private Long typeId;
+
+    /**
      * 博文标题
      */
     @NotBlank(message = "标题不能为空")

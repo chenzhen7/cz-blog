@@ -25,6 +25,7 @@
 
     <resultMap id="BlogVoMap" type="com.chenzhen.blog.entity.vo.BlogVO">
         <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="typeName" column="type_name" jdbcType="VARCHAR"/>
         <result property="title" column="title" jdbcType="VARCHAR"/>
         <result property="content" column="content" jdbcType="VARCHAR"/>
         <result property="description" column="description" jdbcType="VARCHAR"/>
@@ -39,16 +40,12 @@
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
         <result property="views" column="views" jdbcType="INTEGER"/>
         <result property="commentCount" column="comment_count" jdbcType="INTEGER"/>
-        <collection property="tagList" ofType="com.chenzhen.blog.entity.pojo.Tag" select="selectTag" column="id">
+        <collection property="tagList" ofType="com.chenzhen.blog.entity.pojo.Tag">
+            <id property="id" column="tag_id" jdbcType="BIGINT"/>
+            <result property="name" column="tag_name" jdbcType="VARCHAR"/>
         </collection>
     </resultMap>
 
-    <resultMap id="TypeBlogVOMap" type="com.chenzhen.blog.entity.vo.TypeBlogVO">
-        <id property="typeId" column="type_id" jdbcType="BIGINT"/>
-        <result property="typeName" column="type_name" jdbcType="VARCHAR"/>
-        <collection property="blogList" ofType="com.chenzhen.blog.entity.vo.BlogVO" select="selectBlogVo" column="type_id">
-        </collection>
-    </resultMap>
 
     <sql id="BlogVoFields">
         select b.id,b.type_id,b.title,b.content,b.description,b.first_picture,b.commentabled,b.appreciation,b.published,
@@ -63,10 +60,6 @@
         where bt.blog_id = #{id}
     </select>
 
-    <select id="selectBlogVo" resultMap="BlogVoMap">
-        <include refid="BlogVoFields"/>
-        where b.type_id = #{type_id}
-    </select>
 
     <select id="getRecommendList" resultMap="BlogVoMap">
         <include refid="BlogVoFields"/>
@@ -100,10 +93,39 @@
     </select>
 
     <select id="pageAdminBlogs" resultMap="BlogVoMap">
-        <include refid="BlogVoFields"/>
+        select distinct b.id,b.type_id,b.title,b.content,b.description,b.first_picture,b.commentabled,b.appreciation,b.published,
+               b.recommend,b.share_statement,b.copyright,b.views,b.comment_count,b.update_time,b.create_time,
+               type.name type_name
+        from t_blog b
+        left join t_type type on b.type_id = type.id
+        left join t_blog_tag bt on b.id = bt.blog_id
+        left join t_tag tag on bt.tag_id = tag.id
+        <where>
+            <if test="query.title != null and query.title != ''">
+                and b.title like concat('%',#{query.title},'%')
+            </if>
+            <if test="query.typeName != null and query.typeName != ''">
+                and type.name like concat('%',#{query.typeName},'%')
+            </if>
+            <if test="query.tagName != null and query.tagName != ''">
+                and tag.name like concat('%',#{query.tagName},'%')
+            </if>
+            <if test="query.published != null">
+                and b.published = #{query.published}
+            </if>
+            <if test="query.recommend != null">
+                and b.recommend = #{query.recommend}
+            </if>
+            <if test="query.copyright != null">
+                and b.copyright = #{query.copyright}
+            </if>
+        </where>
+
     </select>
 
-    <select id="pageBlogs" resultMap="TypeBlogVOMap">
+
+
+    <select id="pageBlogs" resultMap="BlogVoMap">
         <include refid="BlogVoFields"/>
         WHERE b.published = 1
         <if test="typeId != null">
@@ -156,12 +178,14 @@
     </select>
 
 
+
     <insert id="saveBlogTags">
         INSERT INTO t_blog_tag (blog_id, tag_id)
         VALUES
         <foreach collection="tagIds" item="tagId" separator=",">
             (#{blogId}, #{tagId})
         </foreach>
+
     </insert>
 
     <delete id="deleteAllBlogTags">

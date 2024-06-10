@@ -1,5 +1,6 @@
 package com.chenzhen.blog.mapper;
 
+import com.chenzhen.blog.entity.pojo.BlogTag;
 import com.chenzhen.blog.entity.pojo.Tag;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.chenzhen.blog.entity.vo.TagVO;
@@ -17,6 +18,8 @@ import java.util.List;
 public interface TagMapper extends BaseMapper<Tag> {
 
     List<TagVO> listTagsVO();
+
+    List<BlogTag> getTagsByBlogIds(List<Long> blogIds);
 }
 
 

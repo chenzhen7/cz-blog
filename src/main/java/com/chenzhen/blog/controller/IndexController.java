@@ -1,13 +1,13 @@
 package com.chenzhen.blog.controller;
 
+import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.chenzhen.blog.entity.enums.SysConfigEnum;
 import com.chenzhen.blog.entity.pojo.Music;
 import com.chenzhen.blog.entity.pojo.Type;
 import com.chenzhen.blog.entity.vo.CommentVO;
 import com.chenzhen.blog.entity.pojo.Blog;
 import com.chenzhen.blog.entity.vo.BlogVO;
-import com.chenzhen.blog.entity.vo.TypeBlogVO;
-import com.chenzhen.blog.mapper.ViewsMapper;
 import com.chenzhen.blog.service.*;
 import com.chenzhen.blog.util.R;
 import com.github.pagehelper.PageInfo;
@@ -55,8 +55,14 @@ public class IndexController {
 
         //获取所有分类
         List<Type> typeList = typeService.getTypeList();
+        //如果没有传分类Id 默认选第一个分类中的博文列表
+        if (type == null){
+            if (CollUtil.isNotEmpty(typeList)){
+                type = typeList.get(0).getId();
+            }
+        }
         //获取首页博客列表分页信息
-        PageInfo<TypeBlogVO> pageInfo = blogService.pageIndex(type, pageNum, 12);
+        PageInfo<BlogVO> pageInfo = blogService.pageIndex(type, pageNum, 12);
         //获取推荐列表
         List<BlogVO> recommendList = blogService.getRecommendList();
         //获取音乐列表
@@ -85,6 +91,7 @@ public class IndexController {
         Long blogMessageTotal = messageService.count();
 
         model.addAttribute("typeList",typeList);
+        model.addAttribute("nowType",type);
         model.addAttribute("page",pageInfo);
         model.addAttribute("recommendList",recommendList);
         model.addAttribute("musicList",musicList);

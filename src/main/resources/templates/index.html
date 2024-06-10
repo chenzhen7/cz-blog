@@ -20,7 +20,7 @@
 <!--导航-->
 <div class="cz-navbar">
     <div class="cz-pc-menu">
-        <a href="index.html" th:href="@{/}" class="cz-navbar-brand text-decoration-none"><strong th:text="${author}">ChenZhen</strong></a>
+        <a href="index.html" th:href="@{/}" class="cz-navbar-brand text-decoration-none "><strong th:text="${author}">ChenZhen</strong></a>
         <div class="cz-navbar-links fs-6 fw-light">
             <a href="index.html"    th:href="@{/}" class="cz-nav-link cz-active-link">首页</a>
             <a href="tags.html"     th:href="@{/tags}" class="cz-nav-link">标签</a>
@@ -107,8 +107,8 @@
      th:style="'background-image: url(' + @{/images/index.png} + ')'">
 
     <div class="m-bg-class_cover" align="center">
-        <p class="cz-index-title">- Chen Zhen's Blog -</p>
-        <p class="cz-index-title2">Welcome to my website ——by 陈震 （Chen Zhen）</p>
+        <p class="cz-index-title text-shadow">- Chen Zhen's Blog -</p>
+        <p class="cz-index-title2 text-shadow">Welcome to my website ——by 陈震 （Chen Zhen）</p>
     </div>
 </div>
 
@@ -216,9 +216,11 @@
         <div class="row justify-content-between">
             <!--博文列表-->
             <div class="col-md-9">
-                <h5 class="fw-bold cz-spanborder-span">
-                    <span class="">博文列表</span>
-                    <span class="cz-type-spanborder-span">博文列表</span>
+                <h5 class="fw-bolder cz-type-spanborder">
+                    <span th:if="${#lists.isEmpty(typeList)}" class="cz-type-span">博客列表</span>
+                    <span class="me-2" th:each="type : ${typeList}" th:if="${not #lists.isEmpty(typeList)}" th:classappend="${type.id == nowType} ? 'cz-type-span' : ''" >
+                        <a href="#" th:href="@{ '/?type=' + ${type.id}}" th:text="${type.name}" >生活</a>
+                    </span>
                 </h5>
 
                 <!--博文-->

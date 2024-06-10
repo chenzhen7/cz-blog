@@ -29,16 +29,6 @@ public class Type extends BaseEntity implements Serializable {
      */
     private String name;
 
-    /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
-
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

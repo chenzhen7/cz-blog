@@ -3,7 +3,6 @@ package com.chenzhen.blog.service;
 import com.chenzhen.blog.entity.pojo.Type;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.chenzhen.blog.entity.query.BaseQuery;
-import com.chenzhen.blog.entity.vo.TypeBlogVO;
 import com.github.pagehelper.PageInfo;
 
 import java.util.List;

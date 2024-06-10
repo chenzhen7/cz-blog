@@ -25,6 +25,7 @@
 
           <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
             <li><a href="./blogs.html" th:href="@{/admin/blogs}" class="nav-link px-2 text-secondary " >文章管理</a></li>
+            <li><a href="./types.html" th:href="@{/admin/types}" class="nav-link px-2 text-white">分类管理</a></li>
             <li><a href="./tags.html" th:href="@{/admin/tags}" class="nav-link px-2 text-white">标签管理</a></li>
             <li><a href="./friendlinks.html" th:href="@{/admin/friendlinks}" class="nav-link px-2 text-white">友链管理</a></li>
             <li><a href="./musics.html" th:href="@{/admin/musics}" class="nav-link px-2 text-white">音乐管理</a></li>
@@ -52,6 +53,47 @@
     <div v-show="!dialogVisible" class="container-fluid mt-5">
       <div class="card">
         <div class="card-body">
+
+          <el-form size="" :model="searchForm" ref="searchForm" inline>
+
+            <el-form-item label="博客标题">
+              <el-input v-model="searchForm.title"></el-input>
+            </el-form-item>
+
+            <el-form-item label="分类">
+              <el-input v-model="searchForm.typeName"></el-input>
+            </el-form-item>
+
+            <el-form-item label="标签">
+              <el-input v-model="searchForm.tagName"></el-input>
+            </el-form-item>
+
+            <el-form-item label="发布状态">
+              <el-select v-model="searchForm.published" placeholder="请选择">
+                <el-option label="已发布" value="1"></el-option>
+                <el-option label="草稿" value="0"></el-option>
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="推荐">
+              <el-select v-model="searchForm.recommend" placeholder="请选择">
+                <el-option label="是" value="1"></el-option>
+                <el-option label="否" value="0"></el-option>
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="版权">
+              <el-select v-model="searchForm.copyright" placeholder="请选择">
+                <el-option label="原创" value="1"></el-option>
+                <el-option label="转载" value="0"></el-option>
+              </el-select>
+            </el-form-item>
+            <!-- Search Button -->
+            <el-form-item>
+              <el-button type="primary" @click="fetchPage">搜索</el-button>
+            </el-form-item>
+          </el-form>
+
           <!-- 添加按钮 -->
           <el-button class="mb-3" type="primary" plain  @click="clickAdd">添加文章</el-button>
 
@@ -79,6 +121,11 @@
                     >
             </el-table-column>
 
+            <el-table-column
+                    prop="typeName"
+                    label="分类"
+            >
+            </el-table-column>
 
             <el-table-column  label="标签" prop="tagList">
               <template slot-scope="scope">
@@ -167,38 +214,58 @@
 
             <div class="row">
               <div class="col-6">
-                <!--标签-->
-                <el-form-item label="标签">
-                  <el-select class="w-100"  v-model="editForm.tagIds" multiple placeholder="标签" >
-                    <el-option
-                            v-for="item in tagList"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                    </el-option>
-                  </el-select>
-                </el-form-item>
+                <div class="row">
+                  <div class="col-6">
+                    <!--标签-->
+                    <el-form-item label="标签">
+                      <el-select class="w-100"  v-model="editForm.tagIds" multiple placeholder="标签" >
+                        <el-option
+                                v-for="item in tagList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                        </el-option>
+                      </el-select>
+                    </el-form-item>
+                  </div>
+                  <div class="col-6">
+                    <!--分类-->
+                    <el-form-item label="分类">
+                      <el-select class="w-100"  v-model="editForm.typeId" placeholder="分类" >
+                        <el-option
+                                v-for="item in typeList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                        </el-option>
+                      </el-select>
+                    </el-form-item>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <!--图片-->
+                  <el-form-item label="博客首图">
+                    <el-input v-model="editForm.firstPicture" placeholder="博客首图">
+                    </el-input>
+                  </el-form-item>
 
+                </div>
               </div>
               <div class="col-6">
-                <!--图片-->
-                <el-form-item label="博客首图">
-                  <el-input v-model="editForm.firstPicture" placeholder="博客首图">
+                <!--文章描述-->
+                <el-form-item label="文章描述">
+                  <el-input
+                          type="textarea"
+                          :rows="5"
+                          placeholder="请输入内容"
+                          v-model="editForm.description">
                   </el-input>
                 </el-form-item>
-
               </div>
+
             </div>
 
-            <!--文章描述-->
-            <el-form-item label="文章描述">
-              <el-input
-                      type="textarea"
-                      :rows="5"
-                      placeholder="请输入内容"
-                      v-model="editForm.description">
-              </el-input>
-            </el-form-item>
+
 
             <el-form-item label="">
               <div class="text-start ">
@@ -257,6 +324,7 @@
               appreciation: false
             },
             tagList:[],
+            typeList:[],
             contentEditor:null
           }
 
@@ -300,6 +368,13 @@
             axiosInstance.get(`/admin/tags/all`).then(res => {
               if (res.code === 20000){
                 this.tagList = res.data.tagList;
+              }
+            })
+          },
+          fetchTypeList(){
+            axiosInstance.get(`/admin/types/all`).then(res => {
+              if (res.code === 20000){
+                this.typeList = res.data.typeList;
               }
             })
           },
@@ -365,8 +440,8 @@
                       this.showDialog();
                       //3.赋值表单
                       this.editForm = resp.data.blog
-                      //4.最后给编辑器设置内容
-                      $("#md-content-textarea").val(this.editForm.content);
+                      //4.给编辑器设置内容
+                      $("#md-content-textarea").val(resp.data.blog.content);
                     })
 
           },
@@ -450,6 +525,7 @@
         mounted(){
           this.fetchPage()
           this.fetchTagList()
+          this.fetchTypeList()
         },
         created(){
           this.initMd()
