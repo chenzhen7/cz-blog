@@ -1793,20 +1793,29 @@ a{
     color: #888;
 }
 
-/*关于我*/
-.cz-about-me {
-    padding: 20px;
-}
 
 
-
-.cz-about-me img {
-    width: 60px;
-    height: 60px;
+.cz-about-me-img {
+    max-width: 200px;
+    height: 100%;
     object-fit: cover;
+    width: 100%;
+    position: relative;
+    line-height: 0;
+    object-position: center;
 }
 
-.cz-about-me p {
+.cz-about-me-img:after{
+    content: "";
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    right: -12px;
+    bottom: -12px;
+    border: 2px solid #101010;
+}
+
+.cz-about-me  {
     font-size: 16px;
     color: #555;
 }
@@ -2240,6 +2249,30 @@ a{
 }
 
 
-.text-shadow{
+.cz-text-shadow-1{
     text-shadow: 10px 10px 0 rgba(16,16,16,0.38);
+}
+
+.cz-text-shadow-2{
+    text-shadow: 4px 4px 0 rgba(16,16,16,0.18);
+}
+
+.mil-upper {
+    font-size: 16px;
+    line-height: 100%;
+    /*text-transform: uppercase;*/
+    font-weight: bolder;
+}
+
+.mil-progress-track {
+    border-bottom: solid 2px rgba(16, 16, 16, 0.18);
+    padding: 5px 0;
+    margin-left: 7px;
+}
+
+.mil-progress-track .mil-progress {
+    position: relative;
+    left: -7px;
+    height: 10px;
+    border-bottom: solid 2px #fa4729;
 }

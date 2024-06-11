@@ -74,8 +74,8 @@
 
 <!--顶部背景图片-->
 <div  alt="" class="cz-bg-section cz-bg-img"
-      style="height: 45vh;background-image:url('../static/images/about.png')"
-      th:style="'height: 45vh;background-image: url(' + @{/images/about.png} + ')'"
+      style="height: 35vh;background-image:url('../static/images/about.png')"
+      th:style="'height: 35vh;background-image: url(' + @{/images/about.png} + ')'"
 >
 
     <div class="m-bg-class_cover" align="center">
@@ -86,55 +86,77 @@
 </div>
 
 <!--个人资料描述-->
-<div class="container" style="margin-top: -4em;max-width: 1200px">
-    <div class="row ">
-        <div class="col-md-5 col-12 mb-3">
-            <div class="card rounded-4 shadow">
-                <div class="card-body fw-bold ">
-                    <div class="cz-about-me">
-                        <p>你好，很高兴认识你👋</p>
-                        <div class="d-flex align-items-center mb-4">
-                            <img src="../static/images/me.jpg"  th:src="@{/images/me.jpg}"  >
-                            <span class="cz-navbar-brand ps-3 fs-4"><strong th:text="${author}">ChenZhen</strong></span>
-                        </div>
-                        <p style="white-space: pre-line;" th:text="${intro}">我是陈震，欢迎来到我的博客！我热爱写作、探索技术和分享知识。</p>
-                    </div>
-                </div>
+<div class="container-sm mt-5 " style="max-width: 1000px">
+    <div class="d-flex justify-content-between align-items-center mb-5 ps-5" style="max-width: 600px">
+        <img class="cz-about-me-img" src="../static/images/me.jpg"  th:src="@{/images/me.jpg}"  >
+        <div class="cz-about-me">
+            <strong><span class="cz-text-green">HELLO</span> , MY NAME IS👋</strong>
+            <div class="  mb-4">
+                <span class="cz-navbar-brand fs-1 cz-text-shadow-2"><strong th:text="${author}">ChenZhen</strong></span>
             </div>
+            <p style="white-space: pre-line;" th:text="${intro}">我是陈震，欢迎来到我的博客！我热爱写作、探索技术和分享知识。我是陈震，欢迎来到我的博客！我热爱写作、探索技术和分享知识。</p>
         </div>
+        <!--            <div class="cz-tag-card">-->
+        <!--                <span>🏀 我的标签</span>-->
+        <!--                <div class="cz-tag-list">-->
+        <!--                    <div class="cz-tag" th:each="tag : ${tags}" th:text="${tag}">面向GPT编程</div>-->
+        <!--                </div>-->
+        <!--            </div>-->
 
-        <div class="col-md-7 col-12 mb-3">
-            <div class="card h-100 rounded-4 shadow">
-                <div class="card-body fw-bolder ">
-                    <div class="cz-tag-card">
-                        <span>🏀 我的标签</span>
-                        <div class="cz-tag-list">
-                            <div class="cz-tag" th:each="tag : ${tags}" th:text="${tag}">面向GPT编程</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
     </div>
-
-    <div class="row mb-3">
+    <!--简介-->
+    <div class="mb-3  ">
         <div class="col">
-            <div class="card rounded-4 shadow">
-                <div class="card-body fw-bold ">
-                    <span>🙂 content</span>
-                    <div class="cz-about-me" th:utext="${content}">
-                        <h4 class="fw-bold pb-3">初衷</h4>
-                        <p>做这个博客的初衷是为了找一个练手的springboot项目，而且当时看别人都有个人博客，自己也眼红了，于是便着手搭建博客。</p>
-                        <p>博客就相当于自己的学习笔记一样，将自己学到的东西写成博文的方式记录下来，可以加深你对知识点的理解，记录足迹，反映成长。写博客实际上是记录一个人思考和解决问题的成长过程。很久之后，你再翻看自己以前写的文章，你会感觉得到自己的变化和进步。</p>
-                        <p>技术是很容易遗忘的，你学习完一门新的技术，很可能现在懂了，但是过一段时间没用很快就会遗忘，当你把你学习的内容写成博客，不仅可以加深记忆和理解，如果遗忘了还可以回头看看，也能帮助和你一样处于同一阶段的人。</p>
-                        <h4 class="fw-bold pb-3">关于我</h4>
+            <div class=" cz-about-me " th:utext="${content}">
+                <p>做这个博客的初衷是为了找一个练手的springboot项目，而且当时看别人都有个人博客，自己也眼红了，于是便着手搭建博客。</p>
+                <p>博客就相当于自己的学习笔记一样，将自己学到的东西写成博文的方式记录下来，可以加深你对知识点的理解，记录足迹，反映成长。写博客实际上是记录一个人思考和解决问题的成长过程。很久之后，你再翻看自己以前写的文章，你会感觉得到自己的变化和进步。</p>
+                <p>技术是很容易遗忘的，你学习完一门新的技术，很可能现在懂了，但是过一段时间没用很快就会遗忘，当你把你学习的内容写成博客，不仅可以加深记忆和理解，如果遗忘了还可以回头看看，也能帮助和你一样处于同一阶段的人。</p>
+            </div>
+        </div>
+    </div>
+    <div class="cz-about-me">
+        <span class="cz-navbar-brand fs-1 cz-text-shadow-2 mb-4"><strong>我的技能</strong></span>
+        <p class="mb-5"><small>我的技术栈</small></p>
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="row">
+                    <div class="col-xl-5 mb-5"
+                         th:each="tag,iterStat  : ${tags}"
+                         th:class="${iterStat.index % 4 == 0 || iterStat.index % 4 == 3 ? 'col-xl-5' : 'col-xl-7'} + ' mb-5'">
+                        <span class="mil-upper" th:text="${tag}">Java</span>
+                        <div class="mil-progress-track">
+                            <div class="mil-progress">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-7 mb-5">
+                        <span class="mil-upper">React / Next.js</span>
+                        <div class="mil-progress-track">
+                            <div class="mil-progress">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-7 mb-5">
+                        <span class="mil-upper">HTML5 / CSS3</span>
+                        <div class="mil-progress-track">
+                            <div class="mil-progress" >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-5 mb-5">
+                        <span class="mil-upper">Vue.js</span>
+                        <div class="mil-progress-track">
+                            <div class="mil-progress">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
+
+
 </div>
 
 <!--底部栏-->
