@@ -1805,6 +1805,12 @@ a{
     object-position: center;
 }
 
+@media (max-width: 768px){
+    .cz-about-me-img {
+        height: 100px;
+        width: 200px;
+    }
+}
 .cz-about-me-img:after{
     content: "";
     position: absolute;
@@ -1819,6 +1825,8 @@ a{
     font-size: 16px;
     color: #555;
 }
+
+
 
 .cz-tag-card {
     border-radius: 8px;
