@@ -86,12 +86,13 @@
 </div>
 
 <!--个人资料描述-->
-<div class="container-sm mt-5 " style="max-width: 1000px">
-    <div class="d-flex align-items-center mb-5  " >
+<div class="container-sm mt-5 " style="max-width: 1000px" align="center">
+    <div class="mb-5 " >
         <img class="cz-about-me-img" src="../static/images/me.jpg"  th:src="@{/images/me.jpg}"  >
+
         <div class="cz-about-me">
             <strong><span class="cz-text-green">HELLO</span> , MY NAME IS👋</strong>
-            <div class="  mb-4">
+            <div class="mb-2">
                 <span class="cz-navbar-brand fs-1 cz-text-shadow-2"><strong th:text="${author}">ChenZhen</strong></span>
             </div>
             <p style="white-space: pre-line;" th:text="${intro}">我是陈震，欢迎来到我的博客！我热爱写作、探索技术和分享知识。</p>
@@ -121,36 +122,17 @@
         <div class="row">
             <div class="col-12">
                 <div class="row">
-                    <div class="col-5 mb-5"
-                         th:each="tag,iterStat  : ${tags}"
-                         th:class="${iterStat.index % 4 == 0 || iterStat.index % 4 == 3 ? 'col-xl-5' : 'col-xl-7'} + ' mb-5'">
-                        <span class="mil-upper" th:text="${tag}">Java</span>
+                    <div class="col-3 mb-5"
+                         th:each="skill  : ${skills}"
+                         th:class="${skill.className} + ' mb-5'">
+                        <span class="mil-upper" th:text="${skill.skillName}">Java</span>
                         <div class="mil-progress-track">
                             <div class="mil-progress">
                             </div>
                         </div>
                     </div>
-                    <div class="col-7 mb-5">
-                        <span class="mil-upper">React / Next.js</span>
-                        <div class="mil-progress-track">
-                            <div class="mil-progress">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-7 mb-5">
-                        <span class="mil-upper">HTML5 / CSS3</span>
-                        <div class="mil-progress-track">
-                            <div class="mil-progress" >
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-5 mb-5">
-                        <span class="mil-upper">Vue.js</span>
-                        <div class="mil-progress-track">
-                            <div class="mil-progress">
-                            </div>
-                        </div>
-                    </div>
+
+
                 </div>
             </div>
         </div>

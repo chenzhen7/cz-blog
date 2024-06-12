@@ -1796,7 +1796,8 @@ a{
 
 
 .cz-about-me-img {
-    max-width: 200px;
+    max-width: 150px;
+    max-height: 150px;
     height: 100%;
     object-fit: cover;
     width: 100%;
@@ -1808,7 +1809,7 @@ a{
 @media (max-width: 768px){
     .cz-about-me-img {
         height: 100px;
-        width: 200px;
+        width: 100px;
     }
 }
 .cz-about-me-img:after{
