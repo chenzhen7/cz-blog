@@ -1,15 +1,12 @@
 package com.chenzhen.blog.controller;
 
 import com.chenzhen.blog.entity.enums.SysConfigEnum;
-import com.chenzhen.blog.entity.vo.SkillVO;
 import com.chenzhen.blog.service.SysConfigService;
 import com.chenzhen.blog.service.ViewsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-
-import java.util.List;
 
 /**
  * @author ChenZhen
@@ -36,7 +33,10 @@ public class AboutController {
         // 获取作者
         String author = sysConfigService.getByEnums(SysConfigEnum.AUTHOR).getValue();
         // 获取技能
-        List<SkillVO> skills = sysConfigService.getSkills();
+        //获取技能字符串
+        String skillStr = sysConfigService.getByEnums(SysConfigEnum.ABOUT_ME_SKILL).getValue();
+        //逗号分割
+        String[] skills = skillStr.split("[,，]");
 
         model.addAttribute("intro",intro);
         model.addAttribute("content",content);

@@ -4,10 +4,7 @@ import com.chenzhen.blog.entity.enums.SysConfigEnum;
 import com.chenzhen.blog.entity.pojo.SysConfig;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.chenzhen.blog.entity.query.BaseQuery;
-import com.chenzhen.blog.entity.vo.SkillVO;
 import com.github.pagehelper.PageInfo;
-
-import java.util.List;
 
 /**
 * @author Administrator
@@ -20,5 +17,4 @@ public interface SysConfigService extends IService<SysConfig> {
 
     SysConfig getByEnums(SysConfigEnum configEnum);
 
-    List<SkillVO> getSkills();
 }
