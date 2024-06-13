@@ -45,8 +45,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (user == null) {
             return R.error("用户名或密码错误");
         }
-        // 登录
-        StpUtil.login(user.getId());
+        // 登录 设置永不过期
+        StpUtil.login(user.getId(), true);
         //密码置空
         user.setPassword(null);
         // 保存用户
