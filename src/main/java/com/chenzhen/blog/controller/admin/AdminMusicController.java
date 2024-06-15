@@ -27,7 +27,7 @@ import java.io.IOException;
 @RequestMapping("/admin/musics")
 public class AdminMusicController {
 
-    @Value("${upload.directory}")
+    @Value("${upload.directory.music}")
     private String UPLOAD_DIR;
 
     @Autowired

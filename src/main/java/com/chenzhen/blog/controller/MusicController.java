@@ -22,7 +22,7 @@ import java.io.FileInputStream;
 @RequestMapping("/music")
 public class MusicController {
 
-    @Value("${upload.directory}")
+    @Value("${upload.directory.music}")
     private String UPLOAD_DIR;
 
     /**
