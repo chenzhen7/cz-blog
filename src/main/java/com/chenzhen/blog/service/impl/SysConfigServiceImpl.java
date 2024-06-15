@@ -42,6 +42,7 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
         wrapper.eq(SysConfig::getName, configEnum.getName());
         return sysConfigMapper.selectOne(wrapper);
     }
+
 }
 
 

@@ -20,7 +20,7 @@
 <!--导航-->
 <div class="cz-navbar">
     <div class="cz-pc-menu">
-        <a href="index.html" th:href="@{/}" class="cz-navbar-brand text-decoration-none"><strong th:text="${author}">ChenZhen</strong></a>
+        <a href="index.html" th:href="@{/}" class="cz-navbar-brand text-decoration-none "><strong th:text="${author}">ChenZhen</strong></a>
         <div class="cz-navbar-links fs-6 fw-light">
             <a href="index.html"    th:href="@{/}" class="cz-nav-link cz-active-link">首页</a>
             <a href="tags.html"     th:href="@{/tags}" class="cz-nav-link">标签</a>
@@ -107,8 +107,8 @@
      th:style="'background-image: url(' + @{/images/index.png} + ')'">
 
     <div class="m-bg-class_cover" align="center">
-        <p class="cz-index-title">- Chen Zhen's Blog -</p>
-        <p class="cz-index-title2">Welcome to my website ——by 陈震 （Chen Zhen）</p>
+        <p class="cz-index-title cz-text-shadow-1">- Chen Zhen's Blog -</p>
+        <p class="cz-index-title2 cz-text-shadow-1">Welcome to my website ——by 陈震 （Chen Zhen）</p>
     </div>
 </div>
 
@@ -167,10 +167,7 @@
                 <div class="flex-md-row mb-4 mt-4 box-shadow h-xl-300" th:each="blog, iterStat : ${recommendList}" th:if="${iterStat.index > 0}">
                     <a class="cz-link" href="#" th:href="@{/blog/{id}(id=${blog.id})}">
                         <div class="mb-3 d-flex align-items-md-center">
-                            <div class="cz-recommendImage-container2">
-                                <img src="../static/images/me.jpg" th:src="@{${blog.firstPicture}}" >
-                            </div>
-                            <div class="ps-3 w-100">
+                            <div class="me-2 w-100">
                                 <h2 class="mb-2 h6 fw-bold">
                                     <div class="fw-bold" th:text="${blog.title}">最近推荐博文2</div>
                                 </h2>
@@ -203,6 +200,9 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="cz-recommendImage-container2" th:if="${blog.firstPicture != null && !blog.firstPicture.isEmpty()}">
+                                <img src="../static/images/me.jpg" th:src="@{${blog.firstPicture}}" >
+                            </div>
                         </div>
                     </a>
                 </div>
@@ -216,7 +216,12 @@
         <div class="row justify-content-between">
             <!--博文列表-->
             <div class="col-md-9">
-                <h5 class="fw-bold cz-spanborder"><span>博文列表</span></h5>
+                <h5 class="fw-bolder cz-type-spanborder">
+                    <span th:if="${#lists.isEmpty(typeList)}" class="cz-type-span">博客列表</span>
+                    <span class="me-2" th:each="type : ${typeList}" th:if="${not #lists.isEmpty(typeList)}" th:classappend="${type.id == nowType} ? 'cz-type-span' : ''" >
+                        <a href="#" th:href="@{ '/?type=' + ${type.id}}" th:text="${type.name}" >生活</a>
+                    </span>
+                </h5>
 
                 <!--博文-->
                 <div class="d-none d-md-block">
@@ -266,8 +271,8 @@
 
                         </div>
                         <!--博文首图-->
-                        <div class="d-flex align-items-md-center">
-                            <img class="cz-blog-img" src="../static/images/recommendPicture.png" th:src="@{${blog.firstPicture}}">
+                        <div class="d-flex align-items-md-center" th:if="${blog.firstPicture != null && !blog.firstPicture.isEmpty()}">
+                            <img class="cz-blog-img" src="../static/images/recommendPicture.png" th:src="@{${blog.firstPicture}}" >
                         </div>
 
                     </div>
@@ -334,19 +339,19 @@
                     <ul class="pagination justify-content-center">
                         <li class="page-item" th:classappend="${page.hasPreviousPage} ? 'page-item' : 'page-item disabled' ">
                             <a class="page-link text-black" href="#">
-                                <span aria-hidden="true" th:href="@{/{pageNum}(pageNum=${page.prePage})}">上一页</span>
+                                <span aria-hidden="true" th:href="@{'/?pageNum=' + ${page.prePage}}">上一页</span>
                             </a>
                         </li>
 
                         <li class="page-item"
                             th:each="num : ${page.navigatepageNums}"
                             th:classappend="${page.pageNum == num} ? 'page-item active' : 'page-item'">
-                            <a class="page-link text-black" href="#" th:href="@{'/'+${num}}" th:text="${num}">1</a>
+                            <a class="page-link text-black" href="#" th:href="@{'/?pageNum=' + ${num}}" th:text="${num}">1</a>
                         </li>
 
                         <li class="page-item" th:classappend="${page.hasNextPage} ? 'page-item' : 'page-item disabled' ">
                             <a class="page-link text-black" href="#">
-                                <span aria-hidden="true" th:href="@{/{pageNum}(pageNum=${page.nextPage})}">下一页</span>
+                                <span aria-hidden="true" th:href="@{'/?pageNum=' + ${page.nextPage}}">下一页</span>
                             </a>
                         </li>
                     </ul>

@@ -13,7 +13,7 @@ public enum SysConfigEnum {
     /**
      * 关于我页面-我的标签
      */
-    ABOUT_ME_TAG("about_me_tag", "关于我页面-我的标签"),
+    ABOUT_ME_SKILL("about_me_skill", "关于我页面-我的技能"),
 
     /**
      * 关于我页面-内容

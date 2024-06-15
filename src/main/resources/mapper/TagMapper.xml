@@ -19,6 +19,17 @@
         <result property="blogCount" column="blog_count" jdbcType="INTEGER"/>
     </resultMap>
 
+    <resultMap id="BlogTagMap" type="com.chenzhen.blog.entity.pojo.BlogTag">
+        <id property="blogId" column="blog_id" jdbcType="INTEGER"/>
+        <collection property="tags" ofType="com.chenzhen.blog.entity.pojo.Tag">
+            <id property="id" column="id" jdbcType="INTEGER"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        </collection>
+
+    </resultMap>
+
     <sql id="Base_Column_List">
         id,name,create_time,
         update_time
@@ -29,6 +40,18 @@
                  LEFT JOIN t_blog_tag bt ON t.id = bt.tag_id
                  LEFT JOIN t_blog b ON b.id = bt.blog_id
         GROUP BY t.id
+
+    </select>
+    <select id="getTagsByBlogIds" resultMap="BlogTagMap">
+        SELECT bt.blog_id,t.id,t.name,t.create_time,t.update_time
+        FROM t_tag t
+            LEFT JOIN t_blog_tag bt ON t.id = bt.tag_id
+        <where>
+            bt.blog_id IN
+            <foreach collection="blogIds" item="blogId" separator="," open="(" close=")">
+                #{blogId}
+            </foreach>
+        </where>
 
     </select>
 </mapper>

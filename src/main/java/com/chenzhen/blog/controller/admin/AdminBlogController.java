@@ -2,6 +2,7 @@ package com.chenzhen.blog.controller.admin;
 
 import com.chenzhen.blog.entity.dto.BlogDTO;
 import com.chenzhen.blog.entity.query.BaseQuery;
+import com.chenzhen.blog.entity.query.BlogQuery;
 import com.chenzhen.blog.service.BlogService;
 import com.chenzhen.blog.util.R;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class AdminBlogController {
     //跳转[博客列表]页面
     @ResponseBody
     @GetMapping("/page")
-    public R blogs(BaseQuery query){
+    public R blogs(BlogQuery query){
         return R.success().data("page",blogService.pageAdminBlogs(query));
     }
 

@@ -65,7 +65,7 @@ public class EmailServiceImpl implements EmailService {
             }else{
                 //如果不是根评论
                 //给回复者[回复的对象]发一份提醒邮件
-                Message parentMessage = messageMapper.selectById(message.getParentMessageId());//获取父评论
+                Message parentMessage = messageMapper.selectById(message.getParentMessageId());
                 Mail mail = new Mail(null,parentMessage.getEmail(),parentMessage.getNickname(),
                         parentMessage.getContent(),message.getNickname(),message.getContent(),
                         "/message","您在《ChenZhen的客栈-留言板》中的评论有了新的回复！");
@@ -80,12 +80,12 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async("asyncThreadPoolTaskExecutor")  //设置为一个异步方法
     public void sendMail(User user, Comment comment) throws MessagingException {
-
-        String title = blogMapper.getTitleById(comment.getBlogId()); //评论所在的博文标题
+        //评论所在的博文标题
+        String title = blogMapper.getTitleById(comment.getBlogId());
         //如果评论是管理员发布且非根评论，则该评论为管理员的回复，则给[回复的对象]发一封提醒邮件
         if (user != null && comment.getParentCommentId() != null){
             //获取父评论
-            Comment parentComment = commentMapper.selectById(comment.getParentCommentId() );//获取父评论
+            Comment parentComment = commentMapper.selectById(comment.getParentCommentId() );
             //如果父评论是管理员，不发邮件
             if (parentComment.isAdminComment()){
                 return;
@@ -110,7 +110,7 @@ public class EmailServiceImpl implements EmailService {
             }else{
                 //如果不是根评论
                 //给回复者[回复的对象]发一份提醒邮件
-                Comment parentComment = commentMapper.selectById(comment.getParentCommentId());//获取父评论
+                Comment parentComment = commentMapper.selectById(comment.getParentCommentId());
                 Mail mail = new Mail(null,parentComment.getEmail(),parentComment.getNickname(),
                         parentComment.getContent(),comment.getNickname(),comment.getContent(),
                         "/blog/" + comment.getBlogId(),"您在ChenZhen的博客《" + title + "》中的评论有了新的回复！");

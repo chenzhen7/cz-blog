@@ -30,17 +30,17 @@ public class AboutController {
         String intro = sysConfigService.getByEnums(SysConfigEnum.ABOUT_ME_INTRODUCTION).getValue();
         // 获取内容
         String content = sysConfigService.getByEnums(SysConfigEnum.ABOUT_ME_CONTENT).getValue();
-        // 获取标签
-        String tagStr = sysConfigService.getByEnums(SysConfigEnum.ABOUT_ME_TAG).getValue();
         // 获取作者
         String author = sysConfigService.getByEnums(SysConfigEnum.AUTHOR).getValue();
-
+        // 获取技能
+        //获取技能字符串
+        String skillStr = sysConfigService.getByEnums(SysConfigEnum.ABOUT_ME_SKILL).getValue();
         //逗号分割
-        String[] tags = tagStr.split("[,，]");
+        String[] skills = skillStr.split("[,，]");
 
         model.addAttribute("intro",intro);
         model.addAttribute("content",content);
-        model.addAttribute("tags",tags);
+        model.addAttribute("skills",skills);
         model.addAttribute("author",author);
 
         // 更新总浏览量

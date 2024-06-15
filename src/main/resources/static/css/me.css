@@ -14,6 +14,10 @@ body{
     width: 100%;
 }
 
+a{
+    color: #0a001f;
+    text-decoration: none;
+}
 /*网站字体*/
 /*原则上你可以设置多个字体，然后在不同的部位使用不同的字体。*/
 @font-face{
@@ -1436,8 +1440,20 @@ body{
 .cz-spanborder span {
     border-bottom: 1px solid rgba(0, 0, 0, 0.44);
     display: inline-block;
-    padding-bottom: 20px;
+    padding-bottom: 15px;
     margin-bottom: -1px;
+}
+
+.cz-type-spanborder {
+    border-bottom: 1px solid #e8f3ec;
+    margin-bottom: 2rem;
+
+}
+.cz-type-span {
+    display: inline-block;
+    padding-bottom: 15px;
+    margin-bottom: -1px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.44);
 }
 
 .cz-blog-img{
@@ -1777,23 +1793,41 @@ body{
     color: #888;
 }
 
-/*关于我*/
-.cz-about-me {
-    padding: 20px;
-}
 
 
-
-.cz-about-me img {
-    width: 60px;
-    height: 60px;
+.cz-about-me-img {
+    max-width: 150px;
+    max-height: 150px;
+    height: 100%;
     object-fit: cover;
+    width: 100%;
+    position: relative;
+    line-height: 0;
+    object-position: center;
 }
 
-.cz-about-me p {
+@media (max-width: 768px){
+    .cz-about-me-img {
+        height: 100px;
+        width: 100px;
+    }
+}
+.cz-about-me-img:after{
+    content: "";
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    right: -12px;
+    bottom: -12px;
+    border: 2px solid #101010;
+}
+
+.cz-about-me  {
     font-size: 16px;
     color: #555;
 }
+
+
 
 .cz-tag-card {
     border-radius: 8px;
@@ -2221,4 +2255,33 @@ body{
     100% {
         transform: scaleY(0.1);
     }
+}
+
+
+.cz-text-shadow-1{
+    text-shadow: 10px 10px 0 rgba(16,16,16,0.38);
+}
+
+.cz-text-shadow-2{
+    text-shadow: 4px 4px 0 rgba(16,16,16,0.18);
+}
+
+.mil-upper {
+    font-size: 16px;
+    line-height: 100%;
+    /*text-transform: uppercase;*/
+    font-weight: bolder;
+}
+
+.mil-progress-track {
+    border-bottom: solid 2px rgba(16, 16, 16, 0.18);
+    padding: 5px 0;
+    margin-left: 7px;
+}
+
+.mil-progress-track .mil-progress {
+    position: relative;
+    left: -7px;
+    height: 10px;
+    border-bottom: solid 2px #fa4729;
 }

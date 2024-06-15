@@ -18,7 +18,9 @@ public class SaTokenConfigure implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new SaInterceptor(handle -> StpUtil.checkLogin()))
+                // 拦截 /admin/** 路径下的所有请求用于检查登录状态
                 .addPathPatterns("/admin/**")
+                // 排除 /admin 和 /admin/login 路径
                 .excludePathPatterns("/admin","/admin/login");
     }
 }
