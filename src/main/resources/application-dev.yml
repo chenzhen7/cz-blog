@@ -12,4 +12,6 @@ spring:
       max-lifetime: 120000
 
 upload:
-  directory: D:\cz-blog-upload\
+  directory:
+    file: D:\cz-blog-upload\file\
+    music: D:\cz-blog-upload\
