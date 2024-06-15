@@ -32,4 +32,4 @@ pagehelper:
   params: count=countSql
 
 #默认封面路径
-default-cover-path: /static/images/default_cover.jpg
+default-cover-path: /images/default_cover.jpg
