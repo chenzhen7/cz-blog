@@ -80,7 +80,7 @@
 
 <img class="cz-bg-section object-fit-cover" style="height: 55vh;" src="../static/images/blog.jpg" th:src="@{${blog.firstPicture}}" alt="">
 <div class="text-overlay text-center">
-    <p class="cz-page-title container">文章标题</p>
+    <p class="cz-page-title container" th:text="${blog.title}">文章标题</p>
     <p class="cz-page-title2 fw-normal">Welcome to my website ——by 陈震 （Chen Zhen）</p>
 </div>
 

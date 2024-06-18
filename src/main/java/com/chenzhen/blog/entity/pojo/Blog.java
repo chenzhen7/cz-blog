@@ -49,7 +49,6 @@ public class Blog extends BaseEntity implements Serializable {
     /**
      * 博文首图
      */
-    @NotBlank(message = "首图不能为空")
     private String firstPicture;
 
     /**
