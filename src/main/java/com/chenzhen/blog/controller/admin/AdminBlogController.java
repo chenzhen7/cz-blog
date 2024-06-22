@@ -6,6 +6,7 @@ import com.chenzhen.blog.service.BlogService;
 import com.chenzhen.blog.util.R;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -28,6 +29,13 @@ public class AdminBlogController {
     @GetMapping("")
     public String blog(){
         return "admin/blogs";
+    }
+
+    @GetMapping("/edit")
+    public String edit(){
+//        BlogDTO blog = blogService.getBlogDTO(id);
+//        model.addAttribute("blog",blog);
+        return "admin/blog-edit";
     }
 
     //跳转[博客列表]页面

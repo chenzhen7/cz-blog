@@ -82,11 +82,13 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     @Override
     public BlogDTO getBlogDTO(Long id) {
         Blog blog = blogMapper.selectById(id);
+        if (blog == null){
+            return null;
+        }
         BlogDTO blogDTO = new BlogDTO();
         BeanUtils.copyProperties(blog, blogDTO);
 
         List<Tag> tagList = tagMapper.getTagsByBlogId(blog.getId());
-
         //设置标签ID列表
         List<Long> tagIds = new ArrayList<>();
         tagList.forEach(tag -> {

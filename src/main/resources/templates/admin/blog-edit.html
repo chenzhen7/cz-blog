@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="referrer" content="no-referrer"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>博客管理</title>
+  <link href="../static/images/favicon.ico" th:href="@{/images/favicon.ico}" rel="icon" type="image/x-ico">
+  <link rel="stylesheet" href="../../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"  />
+  <link rel="stylesheet" href="../../static/css/me.css" th:href="@{/css/me.css}">
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="../../static/css/element-ui-index.css" th:href="@{/css/element-ui-index.css}">
+  <link rel="stylesheet" href="../../static/lib/editormd/css/editormd.min.css"  th:href="@{/lib/editormd/css/editormd.min.css}">
+
+
+</head>
+<body class="admin-body">
+
+  <div id="app">
+    <!--    编辑/添加 博文-->
+    <div class="container-fluid  p-5" >
+          <el-form label-width="80px" >
+            <div class="row mb-3">
+              <div class="col-2">
+                <!--版权-->
+                <el-select class="w-100" v-model="editForm.copyright" placeholder="版权" >
+                  <el-option label="原创" :value="1"></el-option>
+                  <el-option label="转载" :value="0"></el-option>
+                </el-select>
+              </div>
+              <div class="col-10 ">
+                <!--标题-->
+                <el-input v-model="editForm.title"  placeholder="标题">
+                </el-input>
+              </div>
+            </div>
+
+            <!--markdown编辑器-->
+            <div id="md-content">
+              <textarea  id="md-content-textarea" name="content" placeholder="博客内容" style="display: none;">
+              </textarea>
+            </div>
+
+            <div class="row">
+              <div class="col-6">
+                <div class="row">
+                  <div class="col-6">
+                    <!--标签-->
+                    <el-form-item label="标签">
+                      <el-select class="w-100"  v-model="editForm.tagIds" multiple placeholder="标签" >
+                        <el-option
+                                v-for="item in tagList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                        </el-option>
+                      </el-select>
+                    </el-form-item>
+                  </div>
+                  <div class="col-6">
+                    <!--分类-->
+                    <el-form-item label="分类">
+                      <el-select class="w-100"  v-model="editForm.typeId" placeholder="分类" >
+                        <el-option
+                                v-for="item in typeList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                        </el-option>
+                      </el-select>
+                    </el-form-item>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <!--图片-->
+                  <el-form-item label="博客首图">
+                    <el-input v-model="editForm.firstPicture" placeholder="博客首图">
+                    </el-input>
+                  </el-form-item>
+
+                </div>
+              </div>
+              <div class="col-6">
+                <!--文章描述-->
+                <el-form-item label="文章描述">
+                  <el-input
+                          type="textarea"
+                          :rows="5"
+                          placeholder="请输入内容"
+                          v-model="editForm.description">
+                  </el-input>
+                </el-form-item>
+              </div>
+
+            </div>
+
+
+
+            <el-form-item label="">
+              <div class="text-start ">
+                <el-checkbox v-model="editForm.recommend">推荐</el-checkbox>
+                <el-checkbox v-model="editForm.shareStatement">转载声明</el-checkbox>
+                <el-checkbox v-model="editForm.commentabled">评论</el-checkbox>
+                <el-checkbox v-model="editForm.appreciation">是否开启赞赏</el-checkbox>
+              </div>
+            </el-form-item>
+
+            <div class="text-end">
+              <el-button type="info" @click="clickBack()">返回</el-button>
+              <el-button @click="clickSave(false)" >存为草稿</el-button>
+              <el-button type="primary" @click="clickSave(true)">发布</el-button>
+            </div>
+
+            <div class="mb-5"></div>
+          </el-form>
+
+    </div>
+
+
+  </div>
+</body>
+
+  <script src="../../static/lib/jquery-3.2.1/jquery-3.2.1.min.js" th:src="@{/lib/jquery-3.2.1/jquery-3.2.1.min.js}"></script>
+  <!-- import Vue before Element -->
+  <script src="../../static/lib/vue.js"                   th:src="@{/lib/vue.js}"></script>
+  <!-- import JavaScript -->
+  <script src="../../static/lib/element-ui-index.js"      th:src="@{/lib/element-ui-index.js}"></script>
+  <script src="../../static/lib/axios.min.js"             th:src="@{/lib/axios.min.js}"></script>
+  <script src="../../static/lib/axiosInstance.js"         th:src="@{/lib/axiosInstance.js}"></script>
+  <script src="../../static/lib/editormd/editormd.min.js" th:src="@{/lib/editormd/editormd.min.js}"></script>
+
+  <script >
+
+      new Vue({
+        el: '#app',
+        data: function() {
+          return {
+            list: [],
+            total: 0, // 总记录数
+            searchForm: {
+              pageNum: 1, // 当前页
+              pageSize: 10  // 每页显示条数
+            },
+            // 表单显示
+            dialogVisible: false,
+            formLabelWidth: '120px',
+            editForm:{
+              tagList:[],
+
+              recommend: false,
+              shareStatement: false,
+              commentabled: false,
+              appreciation: false
+            },
+            typeList:[],
+            contentEditor:null
+          }
+
+        },
+        methods:{
+          getDetail(id) {
+            axiosInstance.get(`/admin/blogs/${id}`)
+                    .then(resp => {
+                      //1.清空表单
+                      this.editForm = {}
+                      //3.赋值表单
+                      this.editForm = resp.data.blog
+                      //4.给编辑器设置内容
+                      $("#md-content-textarea").val(resp.data.blog.content);
+                    })
+
+          },
+          fetchTagList(){
+            axiosInstance.get(`/admin/tags/all`).then(res => {
+              if (res.code === 20000){
+                this.tagList = res.data.tagList;
+              }
+            })
+          },
+          fetchTypeList(){
+            axiosInstance.get(`/admin/types/all`).then(res => {
+              if (res.code === 20000){
+                this.typeList = res.data.typeList;
+              }
+            })
+          },
+          clickBack(){
+            history.back();
+          },
+          // 保存
+          clickSave(published){
+            this.editForm.published = published;
+            //拿到节点id为md-content-textarea的文本
+            this.editForm.content = $("#md-content-textarea").val();
+            if (this.editForm.id) {
+              // 有ID更新
+              axiosInstance.put(`/admin/blogs`, this.editForm)
+                      .then(resp => {
+                        if(resp.code === 20000){
+                          this.$message.success('更新成功');
+                          this.dialogVisible = false;
+                          this.fetchPage();
+                        }
+
+                      })
+                      .catch(error => {
+                        console.error(error);
+                      });
+            } else {
+              // 无ID创建
+              axiosInstance.post('/admin/blogs', this.editForm)
+                      .then(resp => {
+                        if(resp.code === 20000){
+                          this.$message.success('创建成功');
+                          this.dialogVisible = false;
+                          this.editForm = {};
+                          this.fetchPage();
+                        }
+                      })
+                      .catch(error => {
+                        console.error(error);
+                      });
+            }
+            //返回列表
+            location.href = "/admin/blogs";
+
+          },
+          initMd(){
+
+            $(function() {
+              this.contentEditor = editormd("md-content", {
+                // 配置参数...
+                width   : "100%",
+                height  : "640",
+                syncScrolling : "single",
+                // path    : "../../static/lib/editormd/lib/", // 静态地址
+                path    : "/lib/editormd/lib/",//（动态地址，服务启动后，必须用这个）
+                markdown : "",
+                // codeFold : true,
+                // //syncScrolling : false,
+                saveHTMLToTextarea : true,    // 保存 HTML 到 Textarea
+                // searchReplace : true,
+                // //watch : false,                // 关闭实时预览
+                // htmlDecode : "style,script,iframe|on*",// 开启 HTML 标签解析，为了安全性，默认不开启 开启后会有奇怪的bug，建议不开启
+                // toolbar  : false,             //关闭工具栏
+                // //previewCodeHighlight : false, // 关闭预览 HTML 的代码块高亮，默认开启
+                // emoji : true,
+                // taskList : true,
+                tocm            : true,         // Using [TOCM]
+                tex : true,                   // 开启科学公式TeX语言支持，默认关闭
+                flowChart : true,             // 开启流程图支持，默认关闭
+                sequenceDiagram : true,       // 开启时序/序列图支持，默认关闭,
+                // //dialogLockScreen : false,   // 设置弹出层对话框不锁屏，全局通用，默认为true
+                // //dialogShowMask : false,     // 设置弹出层对话框显示透明遮罩层，全局通用，默认为true
+                // //dialogDraggable : false,    // 设置弹出层对话框不可拖动，全局通用，默认为true
+                // //dialogMaskOpacity : 0.4,    // 设置透明遮罩层的透明度，全局通用，默认值为0.1
+                // //dialogMaskBgColor : "#000", // 设置透明遮罩层的背景颜色，全局通用，默认为#fff
+                // imageUpload : true,
+                // imageFormats : ["jpg", "jpeg", "gif", "png", "bmp", "webp"]
+
+              });
+            });
+          },
+          logout(){
+            axiosInstance.get('/admin/logout').then(res => {
+              if (res.code === 20000){
+                location.href = "/admin";
+              }
+            })
+          }
+
+        },
+        mounted(){
+          // 从地址栏解析tagIds参数
+          var urlParams = new URLSearchParams(window.location.search);
+          var idParam = urlParams.get('id');
+          this.getDetail(idParam)
+          this.fetchTagList()
+          this.fetchTypeList()
+        },
+        created(){
+          this.initMd()
+        }
+      })
+
+
+
+
+  </script>
+
+</html>

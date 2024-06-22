@@ -186,109 +186,6 @@
 
     </div>
 
-    <!--    编辑/添加 博文-->
-    <div v-show="dialogVisible" class="container-fluid mt-5" >
-      <div class="card ">
-        <div class="card-body">
-          <el-form label-width="80px" >
-            <div class="row mb-3">
-              <div class="col-2">
-                <!--版权-->
-                <el-select class="w-100" v-model="editForm.copyright" placeholder="版权" >
-                  <el-option label="原创" :value="1"></el-option>
-                  <el-option label="转载" :value="0"></el-option>
-                </el-select>
-              </div>
-              <div class="col-10 ">
-                <!--标题-->
-                <el-input v-model="editForm.title"  placeholder="标题">
-                </el-input>
-              </div>
-            </div>
-
-            <!--markdown编辑器-->
-            <div id="md-content">
-              <textarea  id="md-content-textarea" name="content" placeholder="博客内容" style="display: none;">
-              </textarea>
-            </div>
-
-            <div class="row">
-              <div class="col-6">
-                <div class="row">
-                  <div class="col-6">
-                    <!--标签-->
-                    <el-form-item label="标签">
-                      <el-select class="w-100"  v-model="editForm.tagIds" multiple placeholder="标签" >
-                        <el-option
-                                v-for="item in tagList"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                        </el-option>
-                      </el-select>
-                    </el-form-item>
-                  </div>
-                  <div class="col-6">
-                    <!--分类-->
-                    <el-form-item label="分类">
-                      <el-select class="w-100"  v-model="editForm.typeId" placeholder="分类" >
-                        <el-option
-                                v-for="item in typeList"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                        </el-option>
-                      </el-select>
-                    </el-form-item>
-                  </div>
-                </div>
-                <div class="col-12">
-                  <!--图片-->
-                  <el-form-item label="博客首图">
-                    <el-input v-model="editForm.firstPicture" placeholder="博客首图">
-                    </el-input>
-                  </el-form-item>
-
-                </div>
-              </div>
-              <div class="col-6">
-                <!--文章描述-->
-                <el-form-item label="文章描述">
-                  <el-input
-                          type="textarea"
-                          :rows="5"
-                          placeholder="请输入内容"
-                          v-model="editForm.description">
-                  </el-input>
-                </el-form-item>
-              </div>
-
-            </div>
-
-
-
-            <el-form-item label="">
-              <div class="text-start ">
-                <el-checkbox v-model="editForm.recommend">推荐</el-checkbox>
-                <el-checkbox v-model="editForm.shareStatement">转载声明</el-checkbox>
-                <el-checkbox v-model="editForm.commentabled">评论</el-checkbox>
-                <el-checkbox v-model="editForm.appreciation">是否开启赞赏</el-checkbox>
-              </div>
-            </el-form-item>
-
-            <div class="text-end">
-              <el-button type="info" @click="dialogVisible = false">返回</el-button>
-              <el-button @click="clickSave(false)" >存为草稿</el-button>
-              <el-button type="primary" @click="clickSave(true)">发布</el-button>
-            </div>
-
-            <div class="mb-5"></div>
-          </el-form>
-        </div>
-      </div>
-
-    </div>
-
 
   </div>
 </body>
@@ -385,66 +282,13 @@
             this.fetchPage();
           },
           clickAdd(){
-            //恢复表单初始值
-            this.editForm = {
-              recommend: false,
-              shareStatement: false,
-              commentabled: false,
-              appreciation: false
-            }
-            this.showDialog();
-            $("#md-content-textarea").val("");
-
-          },
-          // 保存
-          clickSave(published){
-            this.editForm.published = published;
-            //拿到节点id为md-content-textarea的文本
-            this.editForm.content = $("#md-content-textarea").val();
-            if (this.editForm.id) {
-              // 有ID更新
-              axiosInstance.put(`/admin/blogs`, this.editForm)
-                      .then(resp => {
-                        if(resp.code === 20000){
-                          this.$message.success('更新成功');
-                          this.dialogVisible = false;
-                          this.fetchPage();
-                        }
-
-                      })
-                      .catch(error => {
-                        console.error(error);
-                      });
-            } else {
-              // 无ID创建
-              axiosInstance.post('/admin/blogs', this.editForm)
-                      .then(resp => {
-                        if(resp.code === 20000){
-                          this.$message.success('创建成功');
-                          this.dialogVisible = false;
-                          this.editForm = {};
-                          this.fetchPage();
-                        }
-                      })
-                      .catch(error => {
-                        console.error(error);
-                      });
-            }
+            //跳转
+            location.href = '/admin/blogs/edit';
           },
           // 编辑
           clickEdit(id) {
-            axiosInstance.get(`/admin/blogs/${id}`)
-                    .then(resp => {
-                      //1.清空表单
-                      this.editForm = {}
-                      //2.渲染markdown编辑器
-                      this.showDialog();
-                      //3.赋值表单
-                      this.editForm = resp.data.blog
-                      //4.给编辑器设置内容
-                      $("#md-content-textarea").val(resp.data.blog.content);
-                    })
-
+            //跳转
+            location.href = '/admin/blogs/edit?id=' + id;
           },
           //点击删除
           clickDelete(id){
