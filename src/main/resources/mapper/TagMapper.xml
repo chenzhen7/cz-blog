@@ -54,4 +54,10 @@
         </where>
 
     </select>
+    <select id="getTagsByBlogId" resultType="com.chenzhen.blog.entity.pojo.Tag">
+        SELECT t.id,t.name,t.create_time,t.update_time
+        FROM t_tag t
+        LEFT JOIN t_blog_tag bt ON t.id = bt.tag_id
+        where bt.blog_id = #{blogId}
+    </select>
 </mapper>

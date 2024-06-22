@@ -1,11 +1,10 @@
 package com.chenzhen.blog.service;
 
+import com.chenzhen.blog.entity.dto.BlogDTO;
 import com.chenzhen.blog.entity.pojo.Blog;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.chenzhen.blog.entity.dto.BlogDTO;
 import com.chenzhen.blog.entity.query.BlogQuery;
 import com.chenzhen.blog.entity.vo.BlogVO;
-import com.chenzhen.blog.entity.query.BaseQuery;
 import com.chenzhen.blog.util.R;
 import com.github.pagehelper.PageInfo;
 

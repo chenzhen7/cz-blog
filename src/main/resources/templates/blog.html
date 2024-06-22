@@ -77,20 +77,79 @@
     </div>
 </div>
 
+<!--空白填充-->
+<div class="" style="padding-top: 10vh"></div>
 
-<img class="cz-bg-section object-fit-cover" style="height: 55vh;" src="../static/images/blog.jpg" th:src="@{${blog.firstPicture}}" alt="">
-<div class="text-overlay text-center">
-    <p class="cz-page-title container" th:text="${blog.title}">文章标题</p>
-    <p class="cz-page-title2 fw-normal">Welcome to my website ——by 陈震 （Chen Zhen）</p>
+<!--顶部博文信息 移动端不显示-->
+<div class="container d-none d-md-block" style="max-width: 1200px;padding-top: 5vh;">
+    <div class="row justify-content-between  mb-5">
+        <div class="col-md-5 pt-6 pb-6 pr-6 align-self-center">
+            <h1 class="cz-blog-title cz-text-shadow-3" th:text="${blog.title}">文章标题</h1>
+
+            <p class="mb-3 fw-light cz-text-shadow-4" th:text="${blog.description}">
+                分析师告诉 CNBC，如果该协议获得英国议会通过，英镑汇率可能会升至 1.35 美元至 1.40 美元之间。
+            </p>
+
+            <div class="mb-3">
+                <ul class="cz-blog-tag-menu fs-5 ms-0 ps-0">
+                    <li th:each="tag : ${tagList}">
+                        <a class="cz-tag-link" href="#">
+                            <span class="cz-text-green">#</span>
+                            <span  th:text="${tag.name}">实用教程</span>
+                        </a>
+                    </li>
+                    <li th:each="tag : ${tagList}">
+                        <a class="cz-tag-link" href="#">
+                            <span class="cz-text-green">#</span>
+                            <span th:text="${tag.name}">实用教程</span>
+                        </a>
+                    </li>
+                    <li th:each="tag : ${tagList}">
+                        <a class="cz-tag-link" href="#">
+                            <span class="cz-text-green">#</span>
+                            <span th:text="${tag.name}">实用教程</span>
+                        </a>
+                    </li> <li th:each="tag : ${tagList}">
+                    <a class="cz-tag-link" href="#">
+                        <span class="cz-text-green">#</span>
+                        <span th:text="${tag.name}">实用教程</span>
+                    </a>
+                </li> <li th:each="tag : ${tagList}">
+                    <a class="cz-tag-link" href="#">
+                        <span class="cz-text-green">#</span>
+                        <span th:text="${tag.name}">实用教程</span>
+                    </a>
+                </li> <li th:each="tag : ${tagList}">
+                    <a class="cz-tag-link" href="#">
+                        <span class="cz-text-green">#</span>
+                        <span th:text="${tag.name}">实用教程</span>
+                    </a>
+                </li>
+
+                </ul>
+            </div>
+            <div class="d-flex align-items-center ">
+                <img class="rounded-circle " src="../static/images/me.jpg" th:src="@{/images/me.jpg}"  width="50">
+                <small class="ml-2">
+                    <span th:text="${author}">ChenZhen</span>
+                    <span th:text="${blog.createTime}" class="text-muted d-block">2023-12-12 17:52</span>
+                </small>
+            </div>
+        </div>
+        <div class="col-md-7 mil-post-cover pe-0 ps-0 ">
+            <img class="cz-blog-title-img border border-1 rounded-3 " alt="cover" src="../static/images/blog.jpg" th:src="${blog.firstPicture}">
+        </div>
+    </div>
 </div>
 
+
 <!--中间内容-->
-<div id="waypoint" class="container-md mt-5">
+<div id="waypoint" class="container-md mt-3">
     <div class="row">
         <!--左边-->
         <div class="col-xxl-9 col-12">
             <!--文章内容-->
-            <div class="mb-3 shadow border">
+            <div class="mb-3">
                 <!--中间主要内容部分-->
                 <div id="content" class="markdown-body js-toc-content" th:utext="${blog.content}" >
                     <h1>
@@ -101,20 +160,20 @@
                                                               aria-hidden="true"><span class="octicon octicon-link"></span></a>Headers
                 </h2>
                     <pre lang="no-highlight"><code># H1
-## H2
-### H3
-#### H4
-##### H5
-###### H6
+    ## H2
+    ### H3
+    #### H4
+    ##### H5
+    ###### H6
 
-Alternatively, for H1 and H2, an underline-ish style:
+    Alternatively, for H1 and H2, an underline-ish style:
 
-Alt-H1
-======
+    Alt-H1
+    ======
 
-Alt-H2
-------
-</code></pre>
+    Alt-H2
+    ------
+    </code></pre>
                         <h1><a id="user-content-h1" class="anchor" href="#h1" aria-hidden="true"><span class="octicon octicon-link"></span></a>H1
                         </h1>
                         <h2><a id="user-content-h2" class="anchor" href="#h2" aria-hidden="true"><span class="octicon octicon-link"></span></a>H2
@@ -138,12 +197,12 @@ Alt-H2
                     </h2>
                         <pre lang="no-highlight"><code>Emphasis, aka italics, with *asterisks* or _underscores_.
 
-Strong emphasis, aka bold, with **asterisks** or __underscores__.
+    Strong emphasis, aka bold, with **asterisks** or __underscores__.
 
-Combined emphasis with **asterisks and _underscores_**.
+    Combined emphasis with **asterisks and _underscores_**.
 
-Strikethrough uses two tildes. ~~Scratch this.~~
-</code></pre>
+    Strikethrough uses two tildes. ~~Scratch this.~~
+    </code></pre>
                         <p>Emphasis, aka italics, with <em>asterisks</em> or <em>underscores</em>.</p>
                         <p>Strong emphasis, aka bold, with <strong>asterisks</strong> or <strong>underscores</strong>.</p>
                         <p>Combined emphasis with <strong>asterisks and <em>underscores</em></strong>.</p>
@@ -155,22 +214,22 @@ Strikethrough uses two tildes. ~~Scratch this.~~
                                                                 aria-hidden="true"><span class="octicon octicon-link"></span></a>Lists</h2>
                         <p>(In this example, leading and trailing spaces are shown with with dots: ⋅)</p>
                         <pre lang="no-highlight"><code>1. First ordered list item
-2. Another item
-⋅⋅* Unordered sub-list.
-1. Actual numbers don't matter, just that it's a number
-⋅⋅1. Ordered sub-list
-4. And another item.
+    2. Another item
+    ⋅⋅* Unordered sub-list.
+    1. Actual numbers don't matter, just that it's a number
+    ⋅⋅1. Ordered sub-list
+    4. And another item.
 
-⋅⋅⋅You can have properly indented paragraphs within list items. Notice the blank line above, and the leading spaces (at least one, but we'll use three here to also align the raw Markdown).
+    ⋅⋅⋅You can have properly indented paragraphs within list items. Notice the blank line above, and the leading spaces (at least one, but we'll use three here to also align the raw Markdown).
 
-⋅⋅⋅To have a line break without a paragraph, you will need to use two trailing spaces.⋅⋅
-⋅⋅⋅Note that this line is separate, but within the same paragraph.⋅⋅
-⋅⋅⋅(This is contrary to the typical GFM line break behaviour, where trailing spaces are not required.)
+    ⋅⋅⋅To have a line break without a paragraph, you will need to use two trailing spaces.⋅⋅
+    ⋅⋅⋅Note that this line is separate, but within the same paragraph.⋅⋅
+    ⋅⋅⋅(This is contrary to the typical GFM line break behaviour, where trailing spaces are not required.)
 
-* Unordered list can use asterisks
-- Or minuses
-+ Or pluses
-</code></pre>
+    * Unordered list can use asterisks
+    - Or minuses
+    + Or pluses
+    </code></pre>
                         <ol>
                             <li>First ordered list item</li>
                             <li>Another item
@@ -286,9 +345,9 @@ Strikethrough uses two tildes. ~~Scratch this.~~
                             </li>
                             <li><p>Preformatted text in a list item:</p>
                                 <pre><code>Skip a line and indent eight spaces.
-That's four spaces for the list
-and four to trigger the code block.
-</code></pre>
+    That's four spaces for the list
+    and four to trigger the code block.
+    </code></pre>
                             </li>
                         </ol>
                         <h2><a id="user-content-inline-html" class="anchor" href="#inline-html" aria-hidden="true"><span
@@ -300,22 +359,22 @@ and four to trigger the code block.
                         <p>There are two ways to create links.</p>
                         <pre lang="no-highlight"><code>[I'm an inline-style link](https://www.google.com)
 
-[I'm an inline-style link with title](https://www.google.com "Google's Homepage")
+    [I'm an inline-style link with title](https://www.google.com "Google's Homepage")
 
-[I'm a reference-style link][Arbitrary case-insensitive reference text]
+    [I'm a reference-style link][Arbitrary case-insensitive reference text]
 
-[I'm a relative reference to a repository file](../blob/master/LICENSE)
+    [I'm a relative reference to a repository file](../blob/master/LICENSE)
 
-[You can use numbers for reference-style link definitions][1]
+    [You can use numbers for reference-style link definitions][1]
 
-Or leave it empty and use the [link text itself]
+    Or leave it empty and use the [link text itself]
 
-Some text to show that the reference links can follow later.
+    Some text to show that the reference links can follow later.
 
-[arbitrary case-insensitive reference text]: https://www.mozilla.org
-[1]: http://slashdot.org
-[link text itself]: http://www.reddit.com
-</code></pre>
+    [arbitrary case-insensitive reference text]: https://www.mozilla.org
+    [1]: http://slashdot.org
+    [link text itself]: http://www.reddit.com
+    </code></pre>
                         <p><a name="user-content-links"></a><a href="https://www.google.com">I'm an inline-style link</a></p>
                         <p><a href="https://www.google.com" title="Google's Homepage">I'm an inline-style link with title</a></p>
                         <p><a href="https://www.mozilla.org">I'm a reference-style link</a></p>
@@ -330,14 +389,14 @@ Some text to show that the reference links can follow later.
                     </h2>
                         <pre lang="no-highlight"><code>Here's our logo (hover to see the title text):
 
-Inline-style:
-![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+    Inline-style:
+    ![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
 
-Reference-style:
-![alt text][logo]
+    Reference-style:
+    ![alt text][logo]
 
-[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"
-</code></pre>
+    [logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"
+    </code></pre>
                         <p>Here's our logo (hover to see the title text):</p>
                         <p>Inline-style:
                             <img src="https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png" alt="alt text"
@@ -356,36 +415,36 @@ Reference-style:
                             list, and how to write the language names, see the </a><a
                                 href="http://softwaremaniacs.org/media/soft/highlight/test.html">highlight.js demo page</a>.</p>
                         <pre lang="no-highlight"><code>Inline `code` has `back-ticks around` it.
-</code></pre>
+    </code></pre>
                         <p>Inline <code>code</code> has <code>back-ticks around</code> it.</p>
                         <p>Blocks of code are either fenced by lines with three back-ticks <code>```</code>, or are indented with four spaces. I
                             recommend only using the fenced code blocks -- they're easier and only they support syntax highlighting.</p>
                         <pre lang="no-highlight"><code>```javascript
-var s = "JavaScript syntax highlighting";
-alert(s);
-```
+    var s = "JavaScript syntax highlighting";
+    alert(s);
+    ```
 
-```python
-s = "Python syntax highlighting"
-print s
-```
+    ```python
+    s = "Python syntax highlighting"
+    print s
+    ```
 
-```
-No language indicated, so no syntax highlighting.
-But let's throw in a &lt;b&gt;tag&lt;/b&gt;.
-```
-</code></pre>
+    ```
+    No language indicated, so no syntax highlighting.
+    But let's throw in a &lt;b&gt;tag&lt;/b&gt;.
+    ```
+    </code></pre>
                         <div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> s <span class="pl-k">=</span> <span
                                 class="pl-s"><span class="pl-pds">"</span>JavaScript syntax highlighting<span class="pl-pds">"</span></span>;
-<span class="pl-c1">alert</span>(s);</pre>
+    <span class="pl-c1">alert</span>(s);</pre>
                         </div>
                         <div class="highlight highlight-source-python"><pre>s <span class="pl-k">=</span> <span class="pl-s"><span
                                 class="pl-pds">"</span>Python syntax highlighting<span class="pl-pds">"</span></span>
-<span class="pl-k">print</span> s</pre>
+    <span class="pl-k">print</span> s</pre>
                         </div>
                         <pre><code>No language indicated, so no syntax highlighting in Markdown Here (varies on Github).
-But let's throw in a &lt;b&gt;tag&lt;/b&gt;.
-</code></pre>
+    But let's throw in a &lt;b&gt;tag&lt;/b&gt;.
+    </code></pre>
                         <p><a name="user-content-tables"></a></p><a name="user-content-tables">
                     </a><h2><a name="user-content-tables"></a><a id="user-content-tables" class="anchor" href="#tables"
                                                                  aria-hidden="true"><span class="octicon octicon-link"></span></a>Tables
@@ -395,19 +454,19 @@ But let's throw in a &lt;b&gt;tag&lt;/b&gt;.
                             application.</p>
                         <pre lang="no-highlight"><code>Colons can be used to align columns.
 
-| Tables        | Are           | Cool  |
-| ------------- |:-------------:| -----:|
-| col 3 is      | right-aligned |  |
-| col 2 is      | centered      |    |
-| zebra stripes | are neat      |     |
+    | Tables        | Are           | Cool  |
+    | ------------- |:-------------:| -----:|
+    | col 3 is      | right-aligned |  |
+    | col 2 is      | centered      |    |
+    | zebra stripes | are neat      |     |
 
-The outer pipes (|) are optional, and you don't need to make the raw Markdown line up prettily. You can also use inline Markdown.
+    The outer pipes (|) are optional, and you don't need to make the raw Markdown line up prettily. You can also use inline Markdown.
 
-Markdown | Less | Pretty
---- | --- | ---
-*Still* | `renders` | **nicely**
-1 | 2 | 3
-</code></pre>
+    Markdown | Less | Pretty
+    --- | --- | ---
+    *Still* | `renders` | **nicely**
+    1 | 2 | 3
+    </code></pre>
                         <p>Colons can be used to align columns.</p>
                         <table>
                             <thead>
@@ -463,12 +522,12 @@ Markdown | Less | Pretty
                                                                       aria-hidden="true"><span class="octicon octicon-link"></span></a>Blockquotes
                     </h2>
                         <pre lang="no-highlight"><code>&gt; Blockquotes are very handy in email to emulate reply text.
-&gt; This line is part of the same quote.
+    &gt; This line is part of the same quote.
 
-Quote break.
+    Quote break.
 
-&gt; This is a very long line that will still be quoted properly when it wraps. Oh boy let's keep writing to make sure this is long enough to actually wrap for everyone. Oh, you can *put* **Markdown** into a blockquote.
-</code></pre>
+    &gt; This is a very long line that will still be quoted properly when it wraps. Oh boy let's keep writing to make sure this is long enough to actually wrap for everyone. Oh, you can *put* **Markdown** into a blockquote.
+    </code></pre>
                         <blockquote>
                             <p>Blockquotes are very handy in email to emulate reply text.
                                 This line is part of the same quote.</p>
@@ -490,8 +549,8 @@ Quote break.
 
     &lt;dt&gt;Markdown in HTML&lt;/dt&gt;
     &lt;dd&gt;Does *not* work **very** well. Use HTML &lt;em&gt;tags&lt;/em&gt;.&lt;/dd&gt;
-&lt;/dl&gt;
-</code></pre>
+    &lt;/dl&gt;
+    </code></pre>
                         <dl>
                             <dt>Definition list</dt>
                             <dd>Is something people use sometimes.</dd>
@@ -504,18 +563,18 @@ Quote break.
                         Rule</h2>
                         <pre><code>Three or more...
 
----
+    ---
 
-Hyphens
+    Hyphens
 
-***
+    ***
 
-Asterisks
+    Asterisks
 
-___
+    ___
 
-Underscores
-</code></pre>
+    Underscores
+    </code></pre>
                         <p>Three or more...</p>
                         <hr>
                         <p>Hyphens</p>
@@ -533,11 +592,11 @@ Underscores
                         <p>Here are some things to try out:</p>
                         <pre><code>Here's a line for us to start with.
 
-This line is separated from the one above by two newlines, so it will be a *separate paragraph*.
+    This line is separated from the one above by two newlines, so it will be a *separate paragraph*.
 
-This line is also a separate paragraph, but...
-This line is only separated by a single newline, so it's a separate line in the *same paragraph*.
-</code></pre>
+    This line is also a separate paragraph, but...
+    This line is only separated by a single newline, so it's a separate line in the *same paragraph*.
+    </code></pre>
                         <p>Here's a line for us to start with.</p>
                         <p>This line is separated from the one above by two newlines, so it will be a <em>separate paragraph</em>.</p>
                         <p>This line is also begins a separate paragraph, but...
@@ -550,12 +609,12 @@ This line is only separated by a single newline, so it's a separate line in the 
                         videos</h2>
                         <p>They can't be added directly but you can add an image with a link to the video like this:</p>
                         <pre lang="no-highlight"><code>&lt;a href="http://www.youtube.com/watch?feature=player_embedded&amp;v=YOUTUBE_VIDEO_ID_HERE
-" target="_blank"&gt;&lt;img src="http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg"
-alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /&gt;&lt;/a&gt;
-</code></pre>
+    " target="_blank"&gt;&lt;img src="http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg"
+    alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /&gt;&lt;/a&gt;
+    </code></pre>
                         <p>Or, in pure Markdown, but losing the image sizing and border:</p>
                         <pre lang="no-highlight"><code>[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](http://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HERE)
-</code></pre>
+    </code></pre>
                         <p>Referencing a bug by #bugID in your git commit links it to the slip. For example #1.</p>
                         <h2><a id="user-content-task-list" class="anchor" href="#task-list" aria-hidden="true"><span
                                 class="octicon octicon-link"></span></a>Task List</h2>
@@ -632,8 +691,8 @@ alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /&gt;&lt;/a&gt;
                             And an image <a href="/tylerlong/github-markdown-css-demo/blob/master/src" target="_blank"><img
                                     src="/tylerlong/github-markdown-css-demo/raw/master/src" alt="alt" style="max-width:100%;"></a>.</p>
                         <pre><code>Code goes here.
-Lots of it...
-</code></pre>
+    Lots of it...
+    </code></pre>
                         <blockquote>
                             <p>A list within a blockquote:</p>
                             <ul>
@@ -823,7 +882,7 @@ Lots of it...
 
                     </div>
 
-                    <div class="mb-3 p-4 bg-white" th:if="${blog.shareStatement}">
+                <div class="mb-3 p-4 bg-white" th:if="${blog.shareStatement}">
                         <div class="mb-3"><strong>© 版权声明</strong></div>
                         <div class="cz-copyright-content">
                             <p>作者：ChenZhen</p>
@@ -835,12 +894,19 @@ Lots of it...
                     </div>
 
             </div>
+        </div>
+        <!--右边-->
+        <div class="col-xxl-3 d-xxl-block d-none">
+            <!--目录-->
+            <div class=" mb-3 overflow-hidden cz-toc-sticky">
+                <div class="cz-toc js-toc"></div>
+            </div>
+        </div>
 
-
+        <div class="p-5">
             <!--相关推荐-->
-            <div class="card  mb-3 shadow">
+            <div class="card shadow mb-3">
                 <div class="card-body border-1">
-
                     <a href="" class="cz-link" th:href=" '/blog/' + ${similarBlog.id}" th:each="similarBlog : ${similarBlogs}">
                         <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
                             <div>
@@ -869,7 +935,6 @@ Lots of it...
                         </div>
 
                     </a>
-
                 </div>
             </div>
 
@@ -1041,16 +1106,6 @@ Lots of it...
                         </ul>
                     </nav>
                 </div>
-            </div>
-
-
-        </div>
-
-        <!--右边-->
-        <div class="col-xxl-3 d-xxl-block d-none">
-            <!--目录-->
-            <div class="border mb-3 shadow overflow-hidden cz-toc-sticky">
-                <div class="cz-toc js-toc"></div>
             </div>
         </div>
 

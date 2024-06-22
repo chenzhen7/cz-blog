@@ -133,10 +133,7 @@
         </if>
     </select>
 
-    <select id="getBlogVO" resultMap="BlogVoMap">
-        <include refid="BlogVoFields"/>
-        WHERE b.id = #{id}
-    </select>
+
 
     <select id="getBlogIdsByTagIds" resultType="long">
         SELECT DISTINCT id

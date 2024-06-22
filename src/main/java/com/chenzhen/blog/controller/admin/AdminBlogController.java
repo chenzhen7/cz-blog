@@ -1,7 +1,6 @@
 package com.chenzhen.blog.controller.admin;
 
 import com.chenzhen.blog.entity.dto.BlogDTO;
-import com.chenzhen.blog.entity.query.BaseQuery;
 import com.chenzhen.blog.entity.query.BlogQuery;
 import com.chenzhen.blog.service.BlogService;
 import com.chenzhen.blog.util.R;

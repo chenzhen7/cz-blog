@@ -20,6 +20,9 @@ public interface TagMapper extends BaseMapper<Tag> {
     List<TagVO> listTagsVO();
 
     List<BlogTag> getTagsByBlogIds(List<Long> blogIds);
+
+    List<Tag> getTagsByBlogId(Long blogId);
+
 }
 
 

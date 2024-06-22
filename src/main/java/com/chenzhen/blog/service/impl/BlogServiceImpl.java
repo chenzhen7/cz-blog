@@ -4,20 +4,16 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.chenzhen.blog.entity.dto.BlogDTO;
 import com.chenzhen.blog.entity.pojo.BlogTag;
 import com.chenzhen.blog.entity.pojo.Tag;
-import com.chenzhen.blog.entity.pojo.Type;
 import com.chenzhen.blog.entity.pojo.Blog;
-import com.chenzhen.blog.entity.dto.BlogDTO;
 import com.chenzhen.blog.entity.query.BlogQuery;
 import com.chenzhen.blog.entity.vo.BlogVO;
-import com.chenzhen.blog.entity.query.BaseQuery;
 import com.chenzhen.blog.mapper.TagMapper;
 import com.chenzhen.blog.service.BlogService;
 import com.chenzhen.blog.mapper.BlogMapper;
-import com.chenzhen.blog.service.TagService;
 import com.chenzhen.blog.service.TypeService;
 import com.chenzhen.blog.util.MarkdownUtil;
 import com.chenzhen.blog.util.R;
@@ -85,15 +81,15 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
 
     @Override
     public BlogDTO getBlogDTO(Long id) {
-        BlogVO blogVO = blogMapper.getBlogVO(id);
+        Blog blog = blogMapper.selectById(id);
         BlogDTO blogDTO = new BlogDTO();
-        BeanUtils.copyProperties(blogVO, blogDTO);
-        if (blogVO.getTagList() == null) {
-            return blogDTO;
-        }
+        BeanUtils.copyProperties(blog, blogDTO);
+
+        List<Tag> tagList = tagMapper.getTagsByBlogId(blog.getId());
+
         //设置标签ID列表
-        ArrayList<Long> tagIds = new ArrayList<>();
-        blogVO.getTagList().forEach(tag -> {
+        List<Long> tagIds = new ArrayList<>();
+        tagList.forEach(tag -> {
             tagIds.add(tag.getId());
         });
         blogDTO.setTagIds(tagIds);
@@ -276,6 +272,13 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     public Blog getBlogDetail(Long id) {
 
         Blog blog = getOne(new LambdaQueryWrapper<Blog>().eq(Blog::getId, id).eq(Blog::getPublished, 1));
+        //属性复制
+        BlogVO blogVO = new BlogVO();
+        BeanUtils.copyProperties(blog, blogVO);
+        //获得博文标签
+        List<Tag> tags = tagMapper.getTagsByBlogId(blog.getId());
+        //设置标签
+        blogVO.setTagList(tags);
         //Markdown语法转html
         String html = MarkdownUtil.markdownToHtmlExtensions(blog.getContent());
         blog.setContent(html);

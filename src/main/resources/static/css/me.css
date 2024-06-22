@@ -1353,6 +1353,62 @@ a{
 }
 
 
+.cz-blog-title{
+    padding-left: 0;
+    padding-right: 0;
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.2em;
+    /*font-family : 华文楷体;*/
+    font-family: "Work Sans","Helvetica Neue",helvetica,arial,sans-serif;
+}
+
+/* 响应式样式 - 小屏幕设备 */
+@media (max-width: 768px) {
+    .cz-blog-title {
+        padding-left: 0;
+        padding-right: 0;
+        font-size: 32px; /* 调整字号 */
+        line-height: 1.2em; /* 调整行高 */
+    }
+}
+
+.cz-blog-title-img{
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+    max-height: 100%;
+}
+.mil-post-cover {
+    position: relative;
+}
+
+
+.cz-blog-tag-menu{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    list-style: none;
+
+}
+
+.cz-blog-tag-menu a {
+    text-decoration: none;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    font-weight: 900;
+    color: #262626;
+
+}
+
+.cz-blog-tag-menu a:hover {
+    color: #03a87c;
+}
+
+
 
 .cz-index-title2{
     font-size: 25px;
@@ -1875,7 +1931,6 @@ a{
     box-sizing: border-box;
     margin: 0 auto;
     padding: 15px;
-    background-color: #ffffff;
 }
 
 .cz-toc-sticky{
@@ -2263,8 +2318,18 @@ a{
 }
 
 .cz-text-shadow-2{
+    text-shadow: 6px 6px 0 rgba(16,16,16,0.28);
+}
+
+.cz-text-shadow-3{
     text-shadow: 4px 4px 0 rgba(16,16,16,0.18);
 }
+
+.cz-text-shadow-4{
+    text-shadow: 2px 2px 0 rgba(16,16,16,0.08);
+}
+
+
 
 .mil-upper {
     font-size: 16px;
