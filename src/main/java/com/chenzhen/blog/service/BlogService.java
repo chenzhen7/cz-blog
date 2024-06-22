@@ -37,8 +37,7 @@ public interface BlogService extends IService<Blog> {
 
     List<BlogVO> getRecommendList();
 
-    Blog getBlogDetail(Long id);
-
+    BlogVO getBlogDetail(Long id);
 
     Long getBlogViewTotal();
 

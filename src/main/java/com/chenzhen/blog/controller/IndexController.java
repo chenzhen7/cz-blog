@@ -118,7 +118,7 @@ public class IndexController {
     @GetMapping("/blog/{id}")
     public String blog(@PathVariable("id")Long id,Model model){
         //获取文章详情
-        Blog blog = blogService.getBlogDetail(id);
+        BlogVO blog = blogService.getBlogDetail(id);
         //获取相似推荐文章
         List<Blog> similarBlogs = blogService.getSimilarBlogs(blog.getId());
         //获取所有评论

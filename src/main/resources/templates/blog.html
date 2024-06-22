@@ -92,40 +92,12 @@
 
             <div class="mb-3">
                 <ul class="cz-blog-tag-menu fs-5 ms-0 ps-0">
-                    <li th:each="tag : ${tagList}">
-                        <a class="cz-tag-link" href="#">
+                    <li th:each="tag : ${blog.tagList}">
+                        <a class="cz-tag-link" href="#" th:href="${'/tags?tagIds=' + tag.id}">
                             <span class="cz-text-green">#</span>
                             <span  th:text="${tag.name}">实用教程</span>
                         </a>
                     </li>
-                    <li th:each="tag : ${tagList}">
-                        <a class="cz-tag-link" href="#">
-                            <span class="cz-text-green">#</span>
-                            <span th:text="${tag.name}">实用教程</span>
-                        </a>
-                    </li>
-                    <li th:each="tag : ${tagList}">
-                        <a class="cz-tag-link" href="#">
-                            <span class="cz-text-green">#</span>
-                            <span th:text="${tag.name}">实用教程</span>
-                        </a>
-                    </li> <li th:each="tag : ${tagList}">
-                    <a class="cz-tag-link" href="#">
-                        <span class="cz-text-green">#</span>
-                        <span th:text="${tag.name}">实用教程</span>
-                    </a>
-                </li> <li th:each="tag : ${tagList}">
-                    <a class="cz-tag-link" href="#">
-                        <span class="cz-text-green">#</span>
-                        <span th:text="${tag.name}">实用教程</span>
-                    </a>
-                </li> <li th:each="tag : ${tagList}">
-                    <a class="cz-tag-link" href="#">
-                        <span class="cz-text-green">#</span>
-                        <span th:text="${tag.name}">实用教程</span>
-                    </a>
-                </li>
-
                 </ul>
             </div>
             <div class="d-flex align-items-center ">

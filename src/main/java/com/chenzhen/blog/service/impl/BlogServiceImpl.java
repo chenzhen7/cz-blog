@@ -271,23 +271,25 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
 
     @Transactional
     @Override
-    public Blog getBlogDetail(Long id) {
+    public BlogVO getBlogDetail(Long id) {
 
         Blog blog = getOne(new LambdaQueryWrapper<Blog>().eq(Blog::getId, id).eq(Blog::getPublished, 1));
         //属性复制
         BlogVO blogVO = new BlogVO();
         BeanUtils.copyProperties(blog, blogVO);
+
+
         //获得博文标签
         List<Tag> tags = tagMapper.getTagsByBlogId(blog.getId());
         //设置标签
         blogVO.setTagList(tags);
         //Markdown语法转html
         String html = MarkdownUtil.markdownToHtmlExtensions(blog.getContent());
-        blog.setContent(html);
+        blogVO.setContent(html);
         //更新浏览次数+1
         getBaseMapper().updateViews(blog.getId());
 
-        return blog;
+        return blogVO;
     }
 
 
