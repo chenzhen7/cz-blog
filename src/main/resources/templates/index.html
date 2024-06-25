@@ -216,10 +216,10 @@
         <div class="row justify-content-between">
             <!--博文列表-->
             <div class="col-md-9">
-                <h5 class="fw-bolder cz-type-spanborder">
+                <h5 class="fw-bolder cz-type-spanborder" id="type">
                     <span th:if="${#lists.isEmpty(typeList)}" class="cz-type-span">博客列表</span>
                     <span class="me-2" th:each="type : ${typeList}" th:if="${not #lists.isEmpty(typeList)}" th:classappend="${type.id == nowType} ? 'cz-type-span' : ''" >
-                        <a href="#" th:href="@{ '/?type=' + ${type.id}}" th:text="${type.name}" >生活</a>
+                        <a href="#" th:href="@{ '/?type=' + ${type.id} + '#type'}" th:text="${type.name}" >生活</a>
                     </span>
                 </h5>
 
