@@ -108,11 +108,14 @@
                 </small>
             </div>
         </div>
-        <div class="col-md-7 mil-post-cover pe-0 ps-0 ">
+        <div class="col-md-7 mil-post-cover pe-0 ps-0 " th:if="${blog.firstPicture != null && !blog.firstPicture.isEmpty()}">
             <img class="cz-blog-title-img border border-1 rounded-3 " alt="cover" src="../static/images/blog.jpg" th:src="${blog.firstPicture}">
         </div>
     </div>
 </div>
+
+<!--移动端显示 标题-->
+<h1 class="cz-blog-title cz-text-shadow-3 d-md-none text-center" th:text="${blog.title}">文章标题</h1>
 
 
 <!--中间内容-->
@@ -854,7 +857,7 @@
 
                     </div>
 
-                <div class="mb-3 p-4 bg-white" th:if="${blog.shareStatement}">
+                <div class="mb-3 p-md-4 bg-white" th:if="${blog.shareStatement}">
                         <div class="mb-3"><strong>© 版权声明</strong></div>
                         <div class="cz-copyright-content">
                             <p>作者：ChenZhen</p>
@@ -875,7 +878,7 @@
             </div>
         </div>
 
-        <div class="p-5">
+        <div class="p-md-5">
             <!--相关推荐-->
             <div class="card shadow mb-3">
                 <div class="card-body border-1">
