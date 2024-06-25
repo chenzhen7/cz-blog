@@ -196,10 +196,10 @@
               axiosInstance.put(`/admin/blogs`, this.editForm)
                       .then(resp => {
                         if(resp.code === 20000){
-                          this.$message.success('更新成功');
-                          this.dialogVisible = false;
-                          this.fetchPage();
+                          //返回列表
+                          location.href = "/admin/blogs";
                         }
+
 
                       })
                       .catch(error => {
@@ -210,18 +210,15 @@
               axiosInstance.post('/admin/blogs', this.editForm)
                       .then(resp => {
                         if(resp.code === 20000){
-                          this.$message.success('创建成功');
-                          this.dialogVisible = false;
-                          this.editForm = {};
-                          this.fetchPage();
+                          //返回列表
+                          location.href = "/admin/blogs";
                         }
                       })
                       .catch(error => {
                         console.error(error);
                       });
             }
-            //返回列表
-            location.href = "/admin/blogs";
+
 
           },
           initMd(){
