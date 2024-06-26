@@ -158,15 +158,21 @@
         },
         methods:{
           getDetail(id) {
-            axiosInstance.get(`/admin/blogs/${id}`)
-                    .then(resp => {
-                      //1.清空表单
-                      this.editForm = {}
-                      //3.赋值表单
-                      this.editForm = resp.data.blog
-                      //4.给编辑器设置内容
-                      $("#md-content-textarea").val(resp.data.blog.content);
-                    })
+            if (!id){
+              this.editForm = {}
+              this.initMd()
+              return
+            }
+            axiosInstance.get(`/admin/blogs/${id}`).then(resp => {
+              //1.清空表单
+              this.editForm = {}
+              //3.赋值表单
+              this.editForm = resp.data.blog
+              //4.给编辑器设置内容
+              $("#md-content-textarea").val(resp.data.blog.content);
+
+              this.initMd()
+            })
 
           },
           fetchTagList(){
@@ -275,7 +281,6 @@
           this.fetchTypeList()
         },
         created(){
-          this.initMd()
         }
       })
 
