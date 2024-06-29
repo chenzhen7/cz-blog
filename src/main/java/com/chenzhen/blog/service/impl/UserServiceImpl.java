@@ -51,6 +51,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         user.setPassword(null);
         // 保存用户
         session.setAttribute("user",user);
+        // 设置永不过期
+        session.setMaxInactiveInterval(0);
         // 第3步，返回token给前端
         return R.success();
 
