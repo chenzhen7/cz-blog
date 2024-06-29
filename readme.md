@@ -79,16 +79,18 @@ Markdown编辑器：editormd
 地址：[https://www.chenzhen.space/](https://www.chenzhen.space/)
 
 ## 首页1
-![在这里插入图片描述](images/首页1.png)
+![在这里插入图片描述](images/首页-1.png)
+
 ## 首页2
-![在这里插入图片描述](images/首页2.png)
+![在这里插入图片描述](images/首页-2.png)
+
 ## 首页3
-![在这里插入图片描述](images/首页3.jpg)
+![在这里插入图片描述](images/首页-3.jpg)
 ## 音乐播放器
 ![在这里插入图片描述](images/音乐播放器.jpg)
 ## 文章详情页1
 文章内容和目录
-![在这里插入图片描述](images/文章详情页1.png)
+![在这里插入图片描述](images/文章详情页-1.png)
 ## 文章详情页2
 底部推荐文章和文章评论区
 ![在这里插入图片描述](images/文章详情页2.png)
@@ -104,18 +106,20 @@ Markdown编辑器：editormd
 友链申请，后台审核后可以留下友链
 ![在这里插入图片描述](images/友链2.png)
 ## 关于我
-![在这里插入图片描述](images/关于我.png)
+![在这里插入图片描述](images/关于我1.png)
 ## 后台登录界面
 ![在这里插入图片描述](images/后台登录界面.png)
 ## 文章管理
 ![在这里插入图片描述](images/文章管理.png)
+
+![在这里插入图片描述](images/系统参数管理.png)
 ## 编辑文章
 主流markdown编辑器
 ![在这里插入图片描述](images/编辑文章.png)
 ## 移动端响应式布局
 ![在这里插入图片描述](images/移动端-首页.png)
 
-![在这里插入图片描述](images/移动端-首页.png)
+![在这里插入图片描述](images/移动端-首页2.png)
 
 ![在这里插入图片描述](images/移动端-博客页.png)
 
