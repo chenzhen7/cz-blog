@@ -288,7 +288,7 @@
                             </h2>
 
                             <!--博文首图-->
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center" th:if="${blog.firstPicture != null && !blog.firstPicture.isEmpty()}">
                                 <img class="cz-blog-img" src="../static/images/recommendPicture.png" th:src="@{${blog.firstPicture}}">
                             </div>
 

@@ -82,7 +82,8 @@
 
 <!--时间轴-->
 <div class="container mt-5" style="max-width: 1170px;">
-  <div class="cz-timeline">
+
+  <div class="cz-timeline d-none d-md-block">
       <a class="cz-timeline-item " href="#" th:href="@{/blog/{id}(id=${memory.id})}" th:each="memory : ${memoryList}">
         <div class="cz-timeline-content d-flex justify-content-between ">
           <div>
@@ -92,12 +93,34 @@
               这是第一篇文章的内容摘要或描述。可以添加更多细节和内容。
             </div>
           </div>
-          <div class="d-flex align-items-center">
+          <div class="d-flex align-items-center" th:if="${memory.firstPicture != null && !memory.firstPicture.isEmpty()}">
             <img height="100" width="200" src="../static/images/recommendPicture.png" th:src="@{${memory.firstPicture}}">
           </div>
         </div>
       </a>
   </div>
+
+  <!--移动端展示-->
+  <div class="cz-timeline d-md-none">
+    <a class="cz-timeline-item " href="#" th:href="@{/blog/{id}(id=${memory.id})}" th:each="memory : ${memoryList}">
+      <div class="cz-timeline-content ">
+        <div class="cz-timeline-date" th:text="${#temporals.format(memory.createTime)}">2023-01-01 17:52</div>
+        <div class="d-flex justify-content-between mb-1">
+          <div class="cz-timeline-title text-break" th:text="${memory.title}">文章标题 1</div>
+          <div class="d-flex align-items-center" th:if="${memory.firstPicture != null && !memory.firstPicture.isEmpty()}">
+            <img height="100" width="200" src="../static/images/recommendPicture.png" th:src="@{${memory.firstPicture}}">
+          </div>
+        </div>
+        <div class="cz-timeline-description text-break" th:text="${memory.description}">
+            这是第一篇文章的内容摘要或描述。可以添加更多细节和内容。
+        </div>
+
+      </div>
+
+    </a>
+  </div>
+
+
 </div>
 
 <!--底部栏-->
