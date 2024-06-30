@@ -4,7 +4,10 @@ import com.chenzhen.blog.entity.dto.FriendlinkAuditDTO;
 import com.chenzhen.blog.entity.pojo.Friend;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.chenzhen.blog.entity.query.FriendlinkQuery;
+import com.chenzhen.blog.util.R;
 import com.github.pagehelper.PageInfo;
+
+import javax.mail.MessagingException;
 
 /**
 * @author MIS
@@ -19,4 +22,6 @@ public interface FriendService extends IService<Friend> {
     Boolean pass(Long id);
 
     Boolean reject(FriendlinkAuditDTO auditDTO);
+
+    R applyFriendLink(Friend friend) throws MessagingException;
 }

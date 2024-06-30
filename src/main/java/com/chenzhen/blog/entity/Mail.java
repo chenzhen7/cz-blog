@@ -1,6 +1,7 @@
 package com.chenzhen.blog.entity;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.util.Date;
 
@@ -12,10 +13,11 @@ import java.util.Date;
  * @WeXin(WeChat) ShockChen7
  */
 @Data
+@Accessors(chain = true)
 public class Mail {
 
     //发件人邮箱账号（固定为我自己 即博主本人）
-    private String sendMailAccount;
+    private String from;
     //收件人邮箱账号
     private String acceptMailAccount;
     //收件人姓名
@@ -29,22 +31,22 @@ public class Mail {
     //评论发生的地方链接（回复者是在哪里回复收件人的）
     private String address;
     //邮件主题
-    private String theme;
+    private String subject;
     //发送时间
-    private Date sendTime = new Date();
+    private Date sendDate = new Date();
 
     public Mail() {
     }
 
-    public Mail(String sendMailAccount, String acceptMailAccount, String name, String comment, String respondent, String reply, String address, String theme) {
-        this.sendMailAccount = sendMailAccount;
+    public Mail(String from, String acceptMailAccount, String name, String comment, String respondent, String reply, String address, String subject) {
+        this.from = from;
         this.acceptMailAccount = acceptMailAccount;
         this.name = name;
         this.comment = comment;
         this.respondent = respondent;
         this.reply = reply;
         this.address = address;
-        this.theme = theme;
+        this.subject = subject;
     }
 
 

@@ -2,7 +2,6 @@ package com.chenzhen.blog.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.chenzhen.blog.entity.enums.SysConfigEnum;
-import com.chenzhen.blog.mapper.ViewsMapper;
 import com.chenzhen.blog.entity.pojo.Friend;
 import com.chenzhen.blog.service.FriendService;
 import com.chenzhen.blog.service.SysConfigService;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.mail.MessagingException;
 import java.util.List;
 
 /**
@@ -53,7 +53,7 @@ public class FriendLinkController {
 
     @PostMapping("/apply-friendlink")
     @ResponseBody
-    public R applyFriendlink(Friend friend){
-        return friendService.save(friend) ? R.success() : R.error("新增失败");
+    public R applyFriendlink(Friend friend) throws MessagingException {
+        return friendService.applyFriendLink(friend);
     }
 }
