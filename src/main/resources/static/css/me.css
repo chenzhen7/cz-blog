@@ -1812,44 +1812,98 @@ a{
     flex-wrap: wrap;
 }
 
-.cz-friend {
-    display: flex;
-    align-items: center;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 10px;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.cz-friend:hover{
-    transform: translateY(-10px);
-}
-
-.cz-friend a{
-}
-
 .cz-friend-avatar img {
     width: 45px;
     height: 45px;
-    border-radius: 50%;
     margin-right: 15px;
-    border: 1px solid #ccc;
 
 }
 
-.cz-friend-details h5 {
-    margin: 0;
-    margin-bottom: 5px;
+.cz-friendlink-input {
+    height: 60px;
+    width: 100%;
+    border: 0;
+    background-color: #f3f3f3;
+    padding: 0 30px;
+    font-family: "Jost", sans-serif;
+    font-size: 16px;
+    color: #101010;
 }
 
-.cz-friend-details p {
-    margin: 0;
+.cz-friendlink-textarea {
+    padding: 15px 30px;
+    height: 120px;
+    width: 100%;
+    border: 0;
+    background-color: #f3f3f3;
+    font-family: "Jost", sans-serif;
+    font-size: 16px;
+    color: #101010;
+    resize: none;
+}
+
+.cz-friendlink-button{
+    white-space: nowrap;
+    width: auto;
+    display: inline-flex;
+    background-color: #03a87c;
+    height: 60px;
+    padding: 0 40px;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    font-weight: 700;
     font-size: 14px;
-    color: #888;
+    text-decoration: none;
+    border: solid 2px #03a87c;
+    color: #fff;
+    box-shadow: 7px 7px 0 0 rgba(3,168,124,0.18);
+    transition: .4s cubic-bezier(0,0,0.3642,1);
+    cursor: pointer;
+}
+
+.cz-friendlink-button:hover {
+    box-shadow: 0 0 0 0 rgb(3, 168, 124);
+}
+
+.cz-friendlink-card{
+    position: relative;
+    padding: 30px;
+    border: solid 2px #101010;
+    transition: .4s cubic-bezier(0,0,0.3642,1);
+}
+
+.cz-friendlink-card:hover {
+    transform: scale(0.93);
 }
 
 
+.cz-friendlink-card::before {
+    content: "";
+    position: absolute;
+    left: 5px;
+    right: -9px;
+    top: 5px;
+    bottom: -9px;
+    border: 2px solid rgba(16, 16, 16, 0.18);
+    pointer-events: none;
+
+}
+
+.cz-friendlink-card::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 70px;
+    height: 70px;
+    z-index: -1;
+    --dot-size: 2px;
+    --dot-space: 10px;
+    background: linear-gradient(90deg, #fff calc(var(--dot-space) - var(--dot-size)), transparent 1%) center / var(--dot-space) var(--dot-space), linear-gradient(#fff calc(var(--dot-space) - var(--dot-size)), transparent 1%) center / var(--dot-space) var(--dot-space), #101010;
+    opacity: .3;
+    pointer-events: none;
+}
 
 .cz-about-me-img {
     max-width: 150px;
