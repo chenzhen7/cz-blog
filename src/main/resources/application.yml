@@ -11,12 +11,23 @@ spring:
     static-path-pattern: /**
   mail:
     host: smtp.qq.com  # 配置 smtp 服务器地址
-    port: 25  # smtp 服务器端口
+    port: 465  # smtp 服务器端口 默认25（阿里云不支持25）
     username:  #配置你的邮箱地址
     password:  #配置申请到的授权码
     protocol: smtp #协议
     comment-reminder-template: mail  #设置要解析发送的html模板（需要你将mail.html文件放到/resources/templates下面）
     friend-link-reminder-template: mail-friendlink  #友链提醒邮件模板
+    properties:
+      mail:
+        smtp:
+          auth: true
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+            fallback: false
+          starttls:
+            enable: true
+            required: true
   servlet:
     multipart:
       max-file-size: 100MB
