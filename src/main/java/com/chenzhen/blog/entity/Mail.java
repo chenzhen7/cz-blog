@@ -16,7 +16,7 @@ import java.util.Date;
 @Accessors(chain = true)
 public class Mail {
 
-    //发件人邮箱账号（固定为我自己 即博主本人）
+    //发件人邮箱账号
     private String from;
     //收件人邮箱账号
     private String acceptMailAccount;
