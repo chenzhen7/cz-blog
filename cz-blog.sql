@@ -96,6 +96,7 @@ CREATE TABLE `t_friend`  (
   `blog_description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '博客描述',
   `picture_address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '图片地址',
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '审核通知邮箱地址',
+  `net_status` int(4) DEFAULT NULL COMMENT '友链网络状态【0.网络状态良好 1.状态一般 2.网络异常 3.网络超时】',
   `status` int(2) NULL DEFAULT 0 COMMENT '审核状态【0.审核中 1.通过 -1.不通过】',
   `reason` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '审核失败理由',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
