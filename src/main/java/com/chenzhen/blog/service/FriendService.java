@@ -24,4 +24,7 @@ public interface FriendService extends IService<Friend> {
     Boolean reject(FriendlinkAuditDTO auditDTO);
 
     R applyFriendLink(Friend friend) throws MessagingException;
+
+    void friendNetworkMonitorTask();
+
 }

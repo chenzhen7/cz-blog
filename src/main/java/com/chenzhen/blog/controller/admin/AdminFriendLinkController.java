@@ -75,6 +75,17 @@ public class AdminFriendLinkController {
         return friendService.reject(auditDTO) ? R.success() : R.error("拒绝失败");
     }
 
+    /**
+     * 手动触发定时任务
+     * @return
+     */
+    @ResponseBody
+    @GetMapping("/task")
+    public R friendNetworkMonitorTask() {
+        friendService.friendNetworkMonitorTask();
+        return R.success();
+    }
+
 
 
 }

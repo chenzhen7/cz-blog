@@ -1,6 +1,10 @@
 package com.chenzhen.blog.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpStatus;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chenzhen.blog.entity.Mail;
@@ -13,6 +17,7 @@ import com.chenzhen.blog.util.MailUtil;
 import com.chenzhen.blog.util.R;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -26,6 +31,7 @@ import java.util.List;
 * @createDate 2022-09-11 18:21:11
 */
 @Service
+@Slf4j
 public class FriendServiceImpl extends ServiceImpl<FriendMapper, Friend>
     implements FriendService{
 
@@ -109,6 +115,88 @@ public class FriendServiceImpl extends ServiceImpl<FriendMapper, Friend>
 
         return R.success();
     }
+
+    @Override
+    public void friendNetworkMonitorTask() {
+
+        List<Friend> friends = list(new LambdaQueryWrapper<Friend>().eq(Friend::getStatus, Friend.Status.PASS));
+        for (Friend friend : friends) {
+            //获取网络状态
+            Integer netStatus = getNetStatus(friend);
+            log.info("友链={},网络状态={}", friend.getBlogName(), netStatus);
+            //更新状态
+            friend.setNetStatus(netStatus);
+            updateById(friend);
+        }
+    }
+
+    /**
+     * 获取友链网络状态
+     * @param friend
+     * @return
+     */
+    private Integer getNetStatus(Friend friend) {
+        HttpResponse response = null;
+        try {
+            long start = System.currentTimeMillis();
+            response = HttpRequest
+                    .get(friend.getBlogAddress())
+                    .timeout(30 * 1000)
+                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36")
+                    .header("Accept" , "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
+                    .execute();
+            long end = System.currentTimeMillis();
+            long cost = end - start;
+            log.info("友链={},访问耗时={}", friend.getBlogName(), cost + "ms");
+            if (response == null) {
+                return Friend.NetStatus.ERROR;
+            }
+            //处理重定向请求
+            if (response.getStatus() == HttpStatus.HTTP_MOVED_TEMP || response.getStatus() == HttpStatus.HTTP_MOVED_PERM
+                    || response.getStatus() == HttpStatus.HTTP_SEE_OTHER || response.getStatus() == HttpStatus.HTTP_TEMP_REDIRECT
+                    || response.getStatus() ==HttpStatus.HTTP_PERMANENT_REDIRECT ) {
+                response = executeRedirect(friend.getBlogName(), response);
+            }
+            if (response == null || response.getStatus() != 200) {
+                return Friend.NetStatus.ERROR;
+            }
+            //小于5秒
+            if (cost < 5 * 1000) {
+                return Friend.NetStatus.GOOD;
+            }
+            //大于5 小于10秒
+            if (cost < 10 * 1000) {
+                return Friend.NetStatus.SLOW;
+            }
+            //大于10 小于30秒
+            if (cost < 30 * 1000) {
+                return Friend.NetStatus.TIMEOUT;
+            }
+        }catch (Exception e) {
+            log.error("友链={}，访问出现异常,response={}", friend.getBlogName(),response);
+            e.printStackTrace();
+
+            return Friend.NetStatus.ERROR;
+        }
+
+        return Friend.NetStatus.ERROR;
+    }
+
+    private static HttpResponse executeRedirect(String blogName,HttpResponse response) {
+
+            String newUrl = response.header("Location");
+            log.info("友链：{}，重定向到: {}", blogName,newUrl);
+            response = HttpRequest
+                    .get(newUrl)
+                    .timeout(30 * 1000)
+                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36")
+                    .header("Accept" , "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
+                    .execute();
+
+            return response;
+    }
+
+
 
 
 }

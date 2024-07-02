@@ -1868,7 +1868,7 @@ a{
 
 .cz-friendlink-card{
     position: relative;
-    padding: 30px;
+    padding: 30px 10px 30px 30px;
     border: solid 2px #101010;
     transition: .4s cubic-bezier(0,0,0.3642,1);
 }
@@ -1893,7 +1893,7 @@ a{
 .cz-friendlink-card::after {
     content: "";
     position: absolute;
-    top: 10px;
+    bottom: 10px;
     right: 10px;
     width: 70px;
     height: 70px;

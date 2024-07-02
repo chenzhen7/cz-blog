@@ -5,8 +5,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+//开启定时任务
+@EnableScheduling
 @EnableAsync//开启异步
 //@EnableCaching//开启基于缓存的注解
 //在主应用程序类上使用@EnableConfigurationProperties注解来启用配置属性：

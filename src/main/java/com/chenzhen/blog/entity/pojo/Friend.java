@@ -39,6 +39,9 @@ public class Friend extends BaseEntity implements Serializable {
     // 博客介绍
     private String blogDescription;
 
+    //网络状态（0.可访问 1.网络超时 ）
+    private Integer netStatus;
+
     // 审核状态【0.审核中 1.通过 -1.不通过】
     private Integer status;
 
@@ -61,6 +64,17 @@ public class Friend extends BaseEntity implements Serializable {
         int PASS = 1;
         //拒绝
         int REJECT = -1;
+    }
+
+    public interface NetStatus {
+        //网络状态良好
+        int GOOD = 0;
+        //状态一般
+        int SLOW = 1;
+        //网络异常
+        int TIMEOUT = 2;
+        //网络超时
+        int ERROR = 3;
     }
 
 }

@@ -70,6 +70,7 @@
             <h4 class="fw-bold mb-3 cz-text-shadow-3">❌无法访问或单方面取消</h4>
             不定时排查，长期不更新文章、无法访问或单方面取消，将会移除链接，恕不告知😵
 
+
         </div>
         <div class="col-7">
             <label class="fw-bold mb-3">
@@ -137,10 +138,17 @@
                             <div class="cz-friend-avatar">
                                 <img src="../static/images/me.jpg" th:src="@{${friendlink.pictureAddress}}" alt="">
                             </div>
-                            <strong class="fs-5 cz-text-shadow-4" th:text="${friendlink.blogName}">ChenZhen的博客</strong>
+                            <strong class="fs-5 cz-text-shadow-4" th:text="${friendlink.blogName}">
+                                ChenZhen的博客
+                            </strong>
                         </div>
-
                         <div class="fw-light" th:text="${friendlink.blogDescription}">个人博客，分享技术文章、自建ChatGPT提示库、在线聊天网页</div>
+<!--                        右上角-->
+                        <div class=" position-absolute top-0 end-0 p-2">
+                            <svg th:if="${friendlink.netStatus == 0}" width="20" height="20" xmlns="http://www.w3.org/2000/svg" tabindex="0" aria-labelledby="uptime-tooltip"><rect width="20" height="20" fill="#10a37f"></rect></svg>
+                            <svg th:if="${friendlink.netStatus == 1}" width="20" height="20" xmlns="http://www.w3.org/2000/svg" tabindex="0" aria-labelledby="uptime-tooltip"><rect width="20" height="20" fill="#e0ab3c"></rect></svg>
+                            <svg th:if="${friendlink.netStatus == 2 || friendlink.netStatus == 3}" width="20" height="20" xmlns="http://www.w3.org/2000/svg" tabindex="0" aria-labelledby="uptime-tooltip"><rect width="20" height="20" fill="#ef4146"></rect></svg>
+                        </div>
                     </div>
                 </a>
             </div>
