@@ -115,7 +115,7 @@
                 </svg>
                 你的邮箱地址<span>（审核通过之后会提醒哦）</span>
             </label>
-            <input type="text" class="cz-friendlink-input mb-4" name="name">
+            <input name="email" type="email" class="cz-friendlink-input mb-4" >
 
 
             <button type="submit" class="cz-friendlink-button" onclick="applyFriend()">申请友链</button>
@@ -190,6 +190,8 @@
         let blogAddress = $("input[name='blogAddress']").val();
         let pictureAddress = $("input[name='pictureAddress']").val();
         let blogDescription = $("textarea[name='blogDescription']").val();
+        let email = $("input[name='email']").val();
+
 
         //校验
         if (!blogName.trim()) {
@@ -212,7 +214,8 @@
             blogName: blogName,
             blogAddress: blogAddress,
             pictureAddress: pictureAddress,
-            blogDescription: blogDescription
+            blogDescription: blogDescription,
+            email: email
         };
         // 发送 AJAX 请求
         $.ajax({
