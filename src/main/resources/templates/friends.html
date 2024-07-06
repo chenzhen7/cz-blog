@@ -60,13 +60,23 @@
 
             <h4 class="mb-3 fw-bold cz-text-shadow-3">👋申请格式</h4>
             <p>
-                博客标题：ChenZhen的客栈
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" class="icon-md-heavy"><path fill="currentColor" fill-rule="evenodd" d="M7 5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-2v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h2zm2 2h5a3 3 0 0 1 3 3v5h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1zM5 9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z" clip-rule="evenodd"></path></svg>
+                博客标题：<span id="blogTitle">ChenZhen的客栈</span>
+                <svg type="button" onclick="copyContent('blogTitle')" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" ><path fill="currentColor" fill-rule="evenodd" d="M7 5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-2v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h2zm2 2h5a3 3 0 0 1 3 3v5h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1zM5 9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z" clip-rule="evenodd"></path></svg>
             </p>
-            <p>博客地址：https://www.chenzhen.space/</p>
-            <p>图片地址：https://www.chenzhen.space/images/me.jpg</p>
 
-            <p class="mb-5">博客描述：个人博客，分享技术文章、生活文章、自建ChatGPT提示库、AI应用大全</p>
+            <p>
+                博客地址：<span id="blogAddress">https://www.chenzhen.space/</span>
+                <svg type="button" onclick="copyContent('blogAddress')" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M7 5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-2v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h2zm2 2h5a3 3 0 0 1 3 3v5h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1zM5 9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z" clip-rule="evenodd"></path></svg>
+            </p>
+            <p>
+                图片地址：<span id="blogPicture">https://www.chenzhen.space/images/me.jpg</span>
+                <svg type="button" onclick="copyContent('blogPicture')" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M7 5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-2v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h2zm2 2h5a3 3 0 0 1 3 3v5h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1zM5 9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z" clip-rule="evenodd"></path></svg>
+            </p>
+
+            <p class="mb-5">
+                博客描述：<span id="blogDescription">个人博客，分享技术文章、生活文章、自建ChatGPT提示库、AI应用大全</span>
+                <svg type="button" onclick="copyContent('blogDescription')" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" ><path fill="currentColor" fill-rule="evenodd" d="M7 5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-2v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h2zm2 2h5a3 3 0 0 1 3 3v5h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1zM5 9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z" clip-rule="evenodd"></path></svg>
+            </p>
             <h4 class="fw-bold mb-3 cz-text-shadow-3">❌无法访问或单方面取消</h4>
             不定时排查，长期不更新文章、无法访问或单方面取消，将会移除链接，恕不告知😵
 
@@ -182,6 +192,7 @@
 <script>
 
 
+
     // 移动设备导航栏样式切换
     // 获取菜单切换按钮和移动设备菜单列表的引用
     const menuToggleBtn = document.querySelector('.cz-menu-toggle-btn');
@@ -191,7 +202,25 @@
         // 切换移动设备菜单列表的显示状态
         mobileMenu.classList.toggle('show');
     });
+    //复制内容
+    function copyContent(elementId) {
+        // 获取要复制的元素
+        const text = document.getElementById(elementId).textContent;
+        // 创建一个临时的文本框
+        const tempInput = document.createElement('input');
+        // 将文本内容赋值给临时文本框
+        tempInput.value = text;
+        // 将临时文本框添加到页面中
+        document.body.appendChild(tempInput);
+        // 选中临时文本框中的内容
+        tempInput.select();
+        // 执行复制操作
+        document.execCommand('copy');
+        // 删除临时文本框
+        document.body.removeChild(tempInput);
 
+
+    }
     //申请友链
     function applyFriend () {
         let blogName = $("input[name='blogName']").val();
