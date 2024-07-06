@@ -14,133 +14,184 @@
 </head>
 <body class="admin-body">
 
-  <div id="app">
-    <!--顶部栏-->
-    <header class="p-3 text-bg-dark">
-      <div class="container">
-        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-           <span class="fs-4 me-5">ChenZhen</span>
-
-          <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-            <li><a href="./blogs.html" th:href="@{/admin/blogs}" class="nav-link px-2 text-white" >文章管理</a></li>
-            <li><a href="./types.html" th:href="@{/admin/types}" class="nav-link px-2 text-white">分类管理</a></li>
-            <li><a href="./tags.html" th:href="@{/admin/tags}" class="nav-link px-2 text-white">标签管理</a></li>
-            <li><a href="./friendlinks.html" th:href="@{/admin/friendlinks}" class="nav-link px-2 text-white">友链管理</a></li>
-            <li><a href="./musics.html" th:href="@{/admin/musics}" class="nav-link px-2 text-secondary">音乐管理</a></li>
-            <li><a href="./sys-configs.html" th:href="@{/admin/sys-configs}" class="nav-link px-2 text-white">系统配置管理</a></li>
-            <li><a href="./users.html" th:href="@{/admin/users}" class="nav-link px-2 text-white">用户管理</a></li>
-          </ul>
-
-          <!--头像-->
-          <img class="me-2 img-fluid rounded-5" width="40" height="40" src="../../static/images/me.jpg" th:src="@{${session.user.avatar}}">
-          <!--名字-->
-          <span class="me-3" th:src="@{${session.user.nickname}}" >ChenZhen</span>
-
-          <div class="text-end">
-            <a href="#" @click="logout" class="btn btn-outline-light me-2">注销</a>
-          </div>
-
-
-        </div>
+  <div id="app" class="d-flex flex-nowrap vh-100">
+    <!--侧边栏-->
+    <div class="d-flex flex-column flex-shrink-0 p-3 bg-white" style="width: 280px;height: 100vh">
+      <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+        <svg class="bi pe-none me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
+        <span class="fs-4"><strong>ChenZhen</strong></span>
+      </a>
+      <hr>
+      <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+          <a href="./blogs.html" th:href="@{/admin/blogs}" class="nav-link link-dark" aria-current="page">
+            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#home"></use></svg>
+            文章管理
+          </a>
+        </li>
+        <li>
+          <a href="./types.html" th:href="@{/admin/types}" class="nav-link link-dark">
+            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#speedometer2"></use></svg>
+            分类管理
+          </a>
+        </li>
+        <li>
+          <a href="./tags.html" th:href="@{/admin/tags}" class="nav-link link-dark">
+            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#table"></use></svg>
+            标签管理
+          </a>
+        </li>
+        <li>
+          <a href="./friendlinks.html" th:href="@{/admin/friendlinks}" class="nav-link link-dark">
+            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#grid"></use></svg>
+            友链管理
+          </a>
+        </li>
+        <li>
+          <a href="./musics.html" th:href="@{/admin/musics}" class="nav-link active">
+            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
+            音乐管理
+          </a>
+        </li>
+        <li>
+          <a href="./sys-configs.html" th:href="@{/admin/sys-configs}" class="nav-link link-dark">
+            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
+            系统配置管理
+          </a>
+        </li>
+        <li>
+          <a href="./users.html" th:href="@{/admin/users}" class="nav-link link-dark">
+            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
+            用户管理
+          </a>
+        </li>
+      </ul>
+      <hr>
+      <div class="dropdown">
+        <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+          <strong>mdo</strong>
+        </a>
+        <ul class="dropdown-menu text-small shadow">
+          <li><a class="dropdown-item" href="#">New project...</a></li>
+          <li><a class="dropdown-item" href="#">Settings</a></li>
+          <li><a class="dropdown-item" href="#">Profile</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="#">Sign out</a></li>
+        </ul>
       </div>
-    </header>
-
-
-    <!--列表-->
-    <div class="container mt-5">
-      <div class="card">
-        <div class="card-body">
-          <!-- 添加按钮 -->
-          <el-button class="mb-3" type="primary" plain  @click="clickAdd">上传</el-button>
-
-          <el-table
-                  :data="list"
-                  stripe
-                  border
-                  style="width: 100%">
-            <el-table-column
-                    prop="id"
-                    label="ID"
-                    width="150">
-            </el-table-column>
-
-            <el-table-column width="120" label="封面" prop="coverPath">
-              <template slot-scope="scope">
-                <img :src="scope.row.coverPath" alt="" width="100%">
-              </template>
-            </el-table-column>
-
-            <el-table-column
-                    prop="title"
-                    label="歌名">
-            </el-table-column>
-
-            <el-table-column
-                    prop="artist"
-                    label="歌手名">
-            </el-table-column>
-
-
-            <el-table-column
-                    prop="createTime"
-                    label="创建时间">
-            </el-table-column>
-
-            <el-table-column
-                    prop="updateTime"
-                    label="更新时间">
-            </el-table-column>
-
-            <el-table-column width="150" label="操作" >
-              <template slot-scope="scope">
-                <el-button  size="mini" @click="clickEdit(scope.row.id)">编辑</el-button>
-                <el-button  size="mini" type="danger" @click="clickDelete(scope.row.id)">删除</el-button>
-              </template>
-            </el-table-column>
-
-          </el-table>
-
-          <!-- 分页 -->
-          <el-pagination
-                  class="mt-5"
-                  @current-change="handleCurrentChange"
-                  :current-page="searchForm.pageNum"
-                  :page-sizes="[10, 20, 30, 40]"
-                  :page-size="searchForm.pageSize"
-                  :total="total"
-          ></el-pagination>
-        </div>
-      </div>
-
     </div>
 
+    <div class="w-100 overflow-y-auto">
+        <!--    顶部栏-->
+        <header class="p-2 text-bg-dark">
+        <div class="container">
+          <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-end">
+            <!--头像-->
+            <img class="me-2 img-fluid rounded-5" width="40" height="40" src="../../static/images/me.jpg" th:src="@{${session.user.avatar}}">
+            <!--名字-->
+            <span class="me-3" th:src="@{${session.user.nickname}}" >ChenZhen</span>
+            <div>
+              <a href="#" @click="logout" class="btn btn-outline-light me-2">注销</a>
+            </div>
 
-    <!-- 创建或编辑的表单 -->
-    <el-dialog title="上传" :visible="dialogVisible" @close="dialogVisible = false" :close-on-click-modal="false">
-      <!-- 表单内容 -->
-      <el-form :model="editForm" label-width="150px">
+          </div>
+        </div>
+      </header>
+       <!--列表-->
+       <div class="container-fluid mt-3 mb-3">
+         <div class="card">
+           <div class="card-body">
+             <!-- 添加按钮 -->
+             <el-button class="mb-3" type="primary" plain  @click="clickAdd">上传</el-button>
 
-        <el-form-item label="文件路径" >
-          <el-upload
-                  ref="upload"
-                  action="/admin/musics/upload"
-                  :file-list="fileList"
-                  :on-success="handleAvatarSuccess"
-                  :before-upload="beforeUpload"
-                  :with-credentials="true"
-                  :auto-upload="false"
-                  :multiple="true">
-            <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
-            <div slot="tip" class="el-upload__tip">只能上传音频文件，且不超过100M</div>
-          </el-upload>
-        </el-form-item>
+             <el-table
+                     :data="list"
+                     stripe
+                     border
+                     style="width: 100%">
+               <el-table-column
+                       prop="id"
+                       label="ID"
+                       width="150">
+               </el-table-column>
+
+               <el-table-column width="120" label="封面" prop="coverPath">
+                 <template slot-scope="scope">
+                   <img :src="scope.row.coverPath" alt="" width="100%">
+                 </template>
+               </el-table-column>
+
+               <el-table-column
+                       prop="title"
+                       label="歌名">
+               </el-table-column>
+
+               <el-table-column
+                       prop="artist"
+                       label="歌手名">
+               </el-table-column>
 
 
-      </el-form>
+               <el-table-column
+                       prop="createTime"
+                       label="创建时间">
+               </el-table-column>
+
+               <el-table-column
+                       prop="updateTime"
+                       label="更新时间">
+               </el-table-column>
+
+               <el-table-column width="150" label="操作" >
+                 <template slot-scope="scope">
+                   <el-button  size="mini" @click="clickEdit(scope.row.id)">编辑</el-button>
+                   <el-button  size="mini" type="danger" @click="clickDelete(scope.row.id)">删除</el-button>
+                 </template>
+               </el-table-column>
+
+             </el-table>
+
+             <!-- 分页 -->
+             <el-pagination
+                     class="mt-5"
+                     @current-change="handleCurrentChange"
+                     :current-page="searchForm.pageNum"
+                     :page-sizes="[10, 20, 30, 40]"
+                     :page-size="searchForm.pageSize"
+                     :total="total"
+             ></el-pagination>
+           </div>
+         </div>
+
+       </div>
+       <!-- 创建或编辑的表单 -->
+       <el-dialog title="上传" :visible="dialogVisible" @close="dialogVisible = false" :close-on-click-modal="false">
+       <!-- 表单内容 -->
+       <el-form :model="editForm" label-width="150px">
+
+         <el-form-item label="文件路径" >
+           <el-upload
+                   ref="upload"
+                   action="/admin/musics/upload"
+                   :file-list="fileList"
+                   :on-success="handleAvatarSuccess"
+                   :before-upload="beforeUpload"
+                   :with-credentials="true"
+                   :auto-upload="false"
+                   :multiple="true">
+             <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+             <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
+             <div slot="tip" class="el-upload__tip">只能上传音频文件，且不超过100M</div>
+           </el-upload>
+         </el-form-item>
 
 
-    </el-dialog>
+       </el-form>
+
+
+     </el-dialog>
+   </div>
 
   </div>
 </body>

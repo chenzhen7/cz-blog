@@ -14,303 +14,358 @@
 </head>
 <body class="admin-body">
 
-<div id="app">
-  <!--顶部栏-->
-  <header class="p-3 text-bg-dark">
-    <div class="container">
-      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-        <span class="fs-4 me-5">ChenZhen</span>
+<div id="app" class="d-flex flex-nowrap vh-100">
+  <!--侧边栏-->
+  <div class="d-flex flex-column flex-shrink-0 p-3 bg-white" style="width: 280px;height: 100vh">
+    <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+      <svg class="bi pe-none me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
+      <span class="fs-4"><strong>ChenZhen</strong></span>
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item">
+        <a href="./blogs.html" th:href="@{/admin/blogs}" class="nav-link link-dark" aria-current="page">
+          <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#home"></use></svg>
+          文章管理
+        </a>
+      </li>
+      <li>
+        <a href="./types.html" th:href="@{/admin/types}" class="nav-link link-dark">
+          <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#speedometer2"></use></svg>
+          分类管理
+        </a>
+      </li>
+      <li>
+        <a href="./tags.html" th:href="@{/admin/tags}" class="nav-link link-dark">
+          <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#table"></use></svg>
+          标签管理
+        </a>
+      </li>
+      <li>
+        <a href="./friendlinks.html" th:href="@{/admin/friendlinks}" class="nav-link active">
+          <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#grid"></use></svg>
+          友链管理
+        </a>
+      </li>
+      <li>
+        <a href="./musics.html" th:href="@{/admin/musics}" class="nav-link link-dark">
+          <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
+          音乐管理
+        </a>
+      </li>
+      <li>
+        <a href="./sys-configs.html" th:href="@{/admin/sys-configs}" class="nav-link link-dark">
+          <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
+          系统配置管理
+        </a>
+      </li>
+      <li>
+        <a href="./users.html" th:href="@{/admin/users}" class="nav-link link-dark">
+          <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
+          用户管理
+        </a>
+      </li>
+    </ul>
+    <hr>
+    <div class="dropdown">
+      <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+        <strong>mdo</strong>
+      </a>
+      <ul class="dropdown-menu text-small shadow">
+        <li><a class="dropdown-item" href="#">New project...</a></li>
+        <li><a class="dropdown-item" href="#">Settings</a></li>
+        <li><a class="dropdown-item" href="#">Profile</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="#">Sign out</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="w-100 overflow-y-auto">
+    <!--    顶部栏-->
+    <header class="p-2 text-bg-dark">
+      <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-end">
+          <!--头像-->
+          <img class="me-2 img-fluid rounded-5" width="40" height="40" src="../../static/images/me.jpg" th:src="@{${session.user.avatar}}">
+          <!--名字-->
+          <span class="me-3" th:src="@{${session.user.nickname}}" >ChenZhen</span>
+          <div>
+            <a href="#" @click="logout" class="btn btn-outline-light me-2">注销</a>
+          </div>
 
-        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-          <li><a href="./blogs.html" th:href="@{/admin/blogs}" class="nav-link px-2 text-white" >文章管理</a></li>
-          <li><a href="./types.html" th:href="@{/admin/types}" class="nav-link px-2 text-white">分类管理</a></li>
-          <li><a href="./tags.html" th:href="@{/admin/tags}" class="nav-link px-2 text-white">标签管理</a></li>
-          <li><a href="./friendlinks.html" th:href="@{/admin/friendlinks}" class="nav-link px-2 text-secondary">友链管理</a></li>
-          <li><a href="./musics.html" th:href="@{/admin/musics}" class="nav-link px-2 text-white">音乐管理</a></li>
-          <li><a href="./sys-configs.html" th:href="@{/admin/sys-configs}" class="nav-link px-2 text-white">系统配置管理</a></li>
-          <li><a href="./users.html" th:href="@{/admin/users}" class="nav-link px-2 text-white">用户管理</a></li>
-        </ul>
-
-        <!--头像-->
-        <img class="me-2 img-fluid rounded-5" width="40" height="40" src="../../static/images/me.jpg" th:src="@{${session.user.avatar}}">
-        <!--名字-->
-        <span class="me-3" th:src="@{${session.user.nickname}}" >ChenZhen</span>
-
-        <div class="text-end">
-          <a href="#" @click="logout" class="btn btn-outline-light me-2">注销</a>
         </div>
-
-
       </div>
-    </div>
-  </header>
-  <!--列表-->
-  <div class="container mt-5">
-    <div class="card">
-      <div class="card-body">
-        <!-- 添加按钮 -->
-        <el-button class="mb-3" type="primary" plain  @click="clickAdd">添加友链</el-button>
+    </header>
+    <!--列表-->
+    <div class="container-fluid mt-3 mb-3">
+      <div class="card">
+        <div class="card-body">
+          <!-- 添加按钮 -->
+          <el-button class="mb-3" type="primary" plain  @click="clickAdd">添加友链</el-button>
 
-        <!-- 切换导航栏 -->
-        <el-tabs v-model="activeTab" @tab-click="handleTabClick">
-
-
-          <el-tab-pane label="已审核通过" name="PASS">
-            <!-- 表格 -->
-            <el-table
-                    :data="list"
-                    stripe
-                    border
-                    style="width: 100%">
-              <el-table-column
-                      prop="id"
-                      label="ID"
-                      width="150">
-              </el-table-column>
-
-              <el-table-column width="120" label="图片" prop="pictureAddress">
-                <template slot-scope="scope">
-                  <img :src="scope.row.pictureAddress" alt="" width="100%">
-                </template>
-              </el-table-column>
-
-              <el-table-column
-                      prop="blogName"
-                      label="博客名称">
-              </el-table-column>
-
-              <el-table-column
-                      prop="blogAddress"
-                      label="博客地址">
-              </el-table-column>
-
-              <el-table-column
-                      prop="pictureAddress"
-                      label="图片地址">
-              </el-table-column>
-
-              <el-table-column
-                      prop="blogDescription"
-                      label="博客描述">
-              </el-table-column>
-
-              <el-table-column
-                      prop="email"
-                      label="邮箱">
-              </el-table-column>
-
-              <el-table-column
-                      prop="updateTime"
-                      label="更新时间">
-              </el-table-column>
-
-              <el-table-column width="150" label="操作">
-                <template slot-scope="scope">
-                  <el-button  size="mini" @click="clickEdit(scope.row.id)">编辑</el-button>
-                  <el-button  size="mini" type="danger" @click="clickDelete(scope.row.id)">删除</el-button>
-                </template>
-              </el-table-column>
-
-            </el-table>
-          </el-tab-pane>
-
-          <el-tab-pane label="未审核" name="AUDITING">
-            <!-- 表格 -->
-            <el-table
-                    :data="list"
-                    stripe
-                    border
-                    style="width: 100%">
-              <el-table-column
-                      prop="id"
-                      label="ID"
-                      width="150">
-              </el-table-column>
-
-              <el-table-column width="120" label="图片" prop="pictureAddress">
-                <template slot-scope="scope">
-                  <img :src="scope.row.pictureAddress" alt="" width="100%">
-                </template>
-              </el-table-column>
-
-              <el-table-column
-                      prop="blogName"
-                      label="博客名称">
-              </el-table-column>
-
-              <el-table-column
-                      prop="blogAddress"
-                      label="博客地址">
-              </el-table-column>
-
-              <el-table-column
-                      prop="pictureAddress"
-                      label="图片地址">
-              </el-table-column>
-
-              <el-table-column
-                      prop="email"
-                      label="邮箱">
-              </el-table-column>
-
-              <el-table-column
-                      prop="updateTime"
-                      label="更新时间">
-              </el-table-column>
-
-              <el-table-column width="200" label="操作">
-                <template slot-scope="scope">
-                  <el-button  size="mini" @click="passAudit(scope.row.id)">审核通过</el-button>
-                  <el-button  size="mini" type="danger" @click="clickReject(scope.row.id)">审核拒绝</el-button>
-                </template>
-              </el-table-column>
-
-            </el-table>
-          </el-tab-pane>
-
-          <el-tab-pane label="未通过" name="REJECT">
-            <!-- 表格 -->
-            <el-table
-                    :data="list"
-                    stripe
-                    border
-                    style="width: 100%">
-              <el-table-column
-                      prop="id"
-                      label="ID"
-                      width="150">
-              </el-table-column>
-
-              <el-table-column width="120" label="图片" prop="pictureAddress">
-                <template slot-scope="scope">
-                  <img :src="scope.row.pictureAddress" alt="" width="100%">
-                </template>
-              </el-table-column>
-
-              <el-table-column
-                      prop="blogName"
-                      label="博客名称">
-              </el-table-column>
-
-              <el-table-column
-                      prop="blogAddress"
-                      label="博客地址">
-              </el-table-column>
-
-              <el-table-column
-                      prop="pictureAddress"
-                      label="图片地址">
-              </el-table-column>
-
-              <el-table-column
-                      prop="email"
-                      label="通知邮箱">
-              </el-table-column>
-
-              <el-table-column
-                      prop="reason"
-                      label="拒绝原因">
-              </el-table-column>
+          <!-- 切换导航栏 -->
+          <el-tabs v-model="activeTab" @tab-click="handleTabClick">
 
 
-              <el-table-column
-                      prop="updateTime"
-                      label="更新时间">
-              </el-table-column>
+            <el-tab-pane label="已审核通过" name="PASS">
+              <!-- 表格 -->
+              <el-table
+                      :data="list"
+                      stripe
+                      border
+                      style="width: 100%">
+                <el-table-column
+                        prop="id"
+                        label="ID"
+                        width="150">
+                </el-table-column>
 
-              <el-table-column width="150" label="操作">
-                <template slot-scope="scope">
-                  <el-button  size="mini" @click="clickEdit(scope.row.id)">编辑</el-button>
-                  <el-button  size="mini" type="danger" @click="clickDelete(scope.row.id)">删除</el-button>
-                </template>
-              </el-table-column>
+                <el-table-column width="120" label="图片" prop="pictureAddress">
+                  <template slot-scope="scope">
+                    <img :src="scope.row.pictureAddress" alt="" width="100%">
+                  </template>
+                </el-table-column>
 
-            </el-table>
-          </el-tab-pane>
+                <el-table-column
+                        prop="blogName"
+                        label="博客名称">
+                </el-table-column>
+
+                <el-table-column
+                        prop="blogAddress"
+                        label="博客地址">
+                </el-table-column>
+
+                <el-table-column
+                        prop="pictureAddress"
+                        label="图片地址">
+                </el-table-column>
+
+                <el-table-column
+                        prop="blogDescription"
+                        label="博客描述">
+                </el-table-column>
+
+                <el-table-column
+                        prop="email"
+                        label="邮箱">
+                </el-table-column>
+
+                <el-table-column
+                        prop="updateTime"
+                        label="更新时间">
+                </el-table-column>
+
+                <el-table-column width="150" label="操作">
+                  <template slot-scope="scope">
+                    <el-button  size="mini" @click="clickEdit(scope.row.id)">编辑</el-button>
+                    <el-button  size="mini" type="danger" @click="clickDelete(scope.row.id)">删除</el-button>
+                  </template>
+                </el-table-column>
+
+              </el-table>
+            </el-tab-pane>
+
+            <el-tab-pane label="未审核" name="AUDITING">
+              <!-- 表格 -->
+              <el-table
+                      :data="list"
+                      stripe
+                      border
+                      style="width: 100%">
+                <el-table-column
+                        prop="id"
+                        label="ID"
+                        width="150">
+                </el-table-column>
+
+                <el-table-column width="120" label="图片" prop="pictureAddress">
+                  <template slot-scope="scope">
+                    <img :src="scope.row.pictureAddress" alt="" width="100%">
+                  </template>
+                </el-table-column>
+
+                <el-table-column
+                        prop="blogName"
+                        label="博客名称">
+                </el-table-column>
+
+                <el-table-column
+                        prop="blogAddress"
+                        label="博客地址">
+                </el-table-column>
+
+                <el-table-column
+                        prop="pictureAddress"
+                        label="图片地址">
+                </el-table-column>
+
+                <el-table-column
+                        prop="email"
+                        label="邮箱">
+                </el-table-column>
+
+                <el-table-column
+                        prop="updateTime"
+                        label="更新时间">
+                </el-table-column>
+
+                <el-table-column width="200" label="操作">
+                  <template slot-scope="scope">
+                    <el-button  size="mini" @click="passAudit(scope.row.id)">审核通过</el-button>
+                    <el-button  size="mini" type="danger" @click="clickReject(scope.row.id)">审核拒绝</el-button>
+                  </template>
+                </el-table-column>
+
+              </el-table>
+            </el-tab-pane>
+
+            <el-tab-pane label="未通过" name="REJECT">
+              <!-- 表格 -->
+              <el-table
+                      :data="list"
+                      stripe
+                      border
+                      style="width: 100%">
+                <el-table-column
+                        prop="id"
+                        label="ID"
+                        width="150">
+                </el-table-column>
+
+                <el-table-column width="120" label="图片" prop="pictureAddress">
+                  <template slot-scope="scope">
+                    <img :src="scope.row.pictureAddress" alt="" width="100%">
+                  </template>
+                </el-table-column>
+
+                <el-table-column
+                        prop="blogName"
+                        label="博客名称">
+                </el-table-column>
+
+                <el-table-column
+                        prop="blogAddress"
+                        label="博客地址">
+                </el-table-column>
+
+                <el-table-column
+                        prop="pictureAddress"
+                        label="图片地址">
+                </el-table-column>
+
+                <el-table-column
+                        prop="email"
+                        label="通知邮箱">
+                </el-table-column>
+
+                <el-table-column
+                        prop="reason"
+                        label="拒绝原因">
+                </el-table-column>
 
 
-        </el-tabs>
+                <el-table-column
+                        prop="updateTime"
+                        label="更新时间">
+                </el-table-column>
+
+                <el-table-column width="150" label="操作">
+                  <template slot-scope="scope">
+                    <el-button  size="mini" @click="clickEdit(scope.row.id)">编辑</el-button>
+                    <el-button  size="mini" type="danger" @click="clickDelete(scope.row.id)">删除</el-button>
+                  </template>
+                </el-table-column>
+
+              </el-table>
+            </el-tab-pane>
 
 
-        <!-- 分页 -->
-        <el-pagination
-                class="mt-5"
-                @current-change="handleCurrentChange"
-                :current-page="searchForm.pageNum"
-                :page-sizes="[10, 20, 30, 40]"
-                :page-size="searchForm.pageSize"
-                :total="total"
-        ></el-pagination>
+          </el-tabs>
+
+
+          <!-- 分页 -->
+          <el-pagination
+                  class="mt-5"
+                  @current-change="handleCurrentChange"
+                  :current-page="searchForm.pageNum"
+                  :page-sizes="[10, 20, 30, 40]"
+                  :page-size="searchForm.pageSize"
+                  :total="total"
+          ></el-pagination>
+        </div>
       </div>
-    </div>
 
-    <!-- 创建或编辑的表单 -->
-    <el-dialog title="添加/编辑" :visible="dialogVisible" @close="dialogVisible = false" :close-on-click-modal="false">
-      <!-- 表单内容 -->
-      <el-form :model="editForm" label-width="150px">
-        <!-- ID -->
-        <el-form-item label="ID">
-          <el-input v-model="editForm.id" disabled></el-input>
-        </el-form-item>
+      <!-- 创建或编辑的表单 -->
+      <el-dialog title="添加/编辑" :visible="dialogVisible" @close="dialogVisible = false" :close-on-click-modal="false">
+        <!-- 表单内容 -->
+        <el-form :model="editForm" label-width="150px">
+          <!-- ID -->
+          <el-form-item label="ID">
+            <el-input v-model="editForm.id" disabled></el-input>
+          </el-form-item>
 
-        <!-- 博客名称 -->
-        <el-form-item label="博客名" prop="blogName">
-          <el-input v-model="editForm.blogName"></el-input>
-        </el-form-item>
+          <!-- 博客名称 -->
+          <el-form-item label="博客名" prop="blogName">
+            <el-input v-model="editForm.blogName"></el-input>
+          </el-form-item>
 
-        <!-- 博客地址 -->
-        <el-form-item label="博客地址" prop="blogAddress">
-          <el-input v-model="editForm.blogAddress"></el-input>
-        </el-form-item>
+          <!-- 博客地址 -->
+          <el-form-item label="博客地址" prop="blogAddress">
+            <el-input v-model="editForm.blogAddress"></el-input>
+          </el-form-item>
 
-        <!-- 图片地址 -->
-        <el-form-item label="图片地址" prop="pictureAddress">
-          <el-input v-model="editForm.pictureAddress"></el-input>
-        </el-form-item>
+          <!-- 图片地址 -->
+          <el-form-item label="图片地址" prop="pictureAddress">
+            <el-input v-model="editForm.pictureAddress"></el-input>
+          </el-form-item>
 
-        <!-- 博客描述 -->
-        <el-form-item label="博客描述" prop="blogDescription">
-          <el-input v-model="editForm.blogDescription"></el-input>
-        </el-form-item>
-
+          <!-- 博客描述 -->
+          <el-form-item label="博客描述" prop="blogDescription">
+            <el-input v-model="editForm.blogDescription"></el-input>
+          </el-form-item>
 
 
 
-      </el-form>
-      <!-- 按钮操作 -->
-      <span slot="footer" class="dialog-footer">
+
+        </el-form>
+        <!-- 按钮操作 -->
+        <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" @click="clickSave">保存</el-button>
       </span>
 
-    </el-dialog>
+      </el-dialog>
 
 
-    <!-- 拒绝审核表单 -->
-    <el-dialog title="拒绝审核" :visible="dialogVisible_reject" @close="dialogVisible_reject = false" :close-on-click-modal="false">
-      <!-- 表单内容 -->
-      <el-form :model="editForm" label-width="150px">
-        <!-- ID -->
-        <el-form-item label="ID">
-          <el-input v-model="rejectForm.id" disabled></el-input>
-        </el-form-item>
+      <!-- 拒绝审核表单 -->
+      <el-dialog title="拒绝审核" :visible="dialogVisible_reject" @close="dialogVisible_reject = false" :close-on-click-modal="false">
+        <!-- 表单内容 -->
+        <el-form :model="editForm" label-width="150px">
+          <!-- ID -->
+          <el-form-item label="ID">
+            <el-input v-model="rejectForm.id" disabled></el-input>
+          </el-form-item>
 
-        <!--拒绝理由-->
-        <el-form-item label="拒绝理由" prop="reason">
-          <el-input v-model="rejectForm.reason"></el-input>
-        </el-form-item>
+          <!--拒绝理由-->
+          <el-form-item label="拒绝理由" prop="reason">
+            <el-input v-model="rejectForm.reason"></el-input>
+          </el-form-item>
 
 
-      </el-form>
-      <!-- 按钮操作 -->
-      <span slot="footer" class="dialog-footer">
+        </el-form>
+        <!-- 按钮操作 -->
+        <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible_reject = false">取消</el-button>
         <el-button type="primary" @click="rejectAudit()">拒绝审核</el-button>
       </span>
 
-    </el-dialog>
+      </el-dialog>
 
+    </div>
   </div>
+
 
 </div>
 </body>
