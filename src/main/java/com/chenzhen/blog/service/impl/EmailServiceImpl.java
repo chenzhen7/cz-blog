@@ -1,9 +1,9 @@
 package com.chenzhen.blog.service.impl;
 
 import com.chenzhen.blog.entity.pojo.Comment;
-import com.chenzhen.blog.mapper.BlogMapper;
-import com.chenzhen.blog.mapper.CommentMapper;
-import com.chenzhen.blog.mapper.MessageMapper;
+import com.chenzhen.blog.entity.mapper.BlogMapper;
+import com.chenzhen.blog.entity.mapper.CommentMapper;
+import com.chenzhen.blog.entity.mapper.MessageMapper;
 import com.chenzhen.blog.entity.Mail;
 import com.chenzhen.blog.entity.pojo.Message;
 import com.chenzhen.blog.entity.pojo.User;

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.chenzhen.blog.mapper.MessageMapper">
+<mapper namespace="com.chenzhen.blog.entity.mapper.MessageMapper">
 
 
     <resultMap id="BaseResultVoMap" type="com.chenzhen.blog.entity.vo.MessageVO">

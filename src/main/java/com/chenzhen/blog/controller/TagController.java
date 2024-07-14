@@ -1,8 +1,6 @@
 package com.chenzhen.blog.controller;
 
 import cn.hutool.core.util.ArrayUtil;
-import com.chenzhen.blog.entity.enums.SysConfigEnum;
-import com.chenzhen.blog.mapper.ViewsMapper;
 import com.chenzhen.blog.entity.vo.BlogVO;
 import com.chenzhen.blog.entity.vo.TagVO;
 import com.chenzhen.blog.service.BlogService;
@@ -48,7 +46,7 @@ public class TagController {
         //将当前标签Id列表转为字符串，用逗号分隔，方便页面拼接url
         String tagIdsUrlString = ArrayUtil.isNotEmpty(tagIds)? ArrayUtil.join(tagIds,",") : "";
         // 获取作者
-        String author = sysConfigService.getByEnums(SysConfigEnum.AUTHOR).getValue();
+        String author = sysConfigService.list().get(0).getAuthor();
 
         model.addAttribute("tagList",tagList);
         model.addAttribute("page",pageInfo);

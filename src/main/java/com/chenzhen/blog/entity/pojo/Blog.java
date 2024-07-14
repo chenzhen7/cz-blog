@@ -9,6 +9,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 
@@ -41,14 +42,16 @@ public class Blog extends BaseEntity implements Serializable {
     private String content;
 
     /**
-     * 博文描述
+     * 博文描述（不能超过200字）
      */
     @NotBlank(message = "描述不能为空")
+    @Size(max = 200, message = "描述不能超过200字")
     private String description;
 
     /**
      * 博文首图
      */
+    @Size(max = 200, message = "首图不能超过200字")
     private String firstPicture;
 
     /**

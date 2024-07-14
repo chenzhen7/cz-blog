@@ -1,9 +1,8 @@
 package com.chenzhen.blog.controller;
 
 import cn.hutool.core.collection.CollUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.chenzhen.blog.entity.enums.SysConfigEnum;
 import com.chenzhen.blog.entity.pojo.Music;
+import com.chenzhen.blog.entity.pojo.SysConfig;
 import com.chenzhen.blog.entity.pojo.Type;
 import com.chenzhen.blog.entity.vo.CommentVO;
 import com.chenzhen.blog.entity.pojo.Blog;
@@ -67,18 +66,8 @@ public class IndexController {
         List<BlogVO> recommendList = blogService.getRecommendList();
         //获取音乐列表
         List<Music> musicList = musicService.list();
-        // 获取作者
-        String author = sysConfigService.getByEnums(SysConfigEnum.AUTHOR).getValue();
-        // 获取个人简介
-        String profile = sysConfigService.getByEnums(SysConfigEnum.SITE_PROFILE).getValue();
-        // 获取位置
-        String location = sysConfigService.getByEnums(SysConfigEnum.SITE_LOCATION).getValue();
-        // 获取邮箱
-        String email = sysConfigService.getByEnums(SysConfigEnum.SITE_EMAIL).getValue();
-        // 获取QQ
-        String qq = sysConfigService.getByEnums(SysConfigEnum.SITE_QQ).getValue();
-        // 获取微信
-        String wechat = sysConfigService.getByEnums(SysConfigEnum.SITE_WECHAT).getValue();
+        //获取系统配置
+        SysConfig sysConfig = sysConfigService.list().get(0);
         // 获取博客今日总浏览量
         Long blogViewTotal = viewsService.getTotalViews();
         // 获取博客昨日浏览量
@@ -95,12 +84,12 @@ public class IndexController {
         model.addAttribute("page",pageInfo);
         model.addAttribute("recommendList",recommendList);
         model.addAttribute("musicList",musicList);
-        model.addAttribute("author",author);
-        model.addAttribute("profile",profile);
-        model.addAttribute("location",location);
-        model.addAttribute("email",email);
-        model.addAttribute("qq",qq);
-        model.addAttribute("wechat",wechat);
+        model.addAttribute("author",sysConfig.getAuthor());
+        model.addAttribute("profile",sysConfig.getSiteProfile());
+        model.addAttribute("location",sysConfig.getSiteLocation());
+        model.addAttribute("email",sysConfig.getSiteEmail());
+        model.addAttribute("qq",sysConfig.getSiteQq());
+        model.addAttribute("wechat",sysConfig.getSiteWechat());
 
         model.addAttribute("blogViewTotal",blogViewTotal);
         model.addAttribute("blogViewYesterday",blogViewYesterday);
@@ -124,7 +113,7 @@ public class IndexController {
         //获取所有评论
         PageInfo<CommentVO> commentList = commentService.pageCommentList(id,1);
         // 获取作者
-        String author = sysConfigService.getByEnums(SysConfigEnum.AUTHOR).getValue();
+        String author = sysConfigService.list().get(0).getAuthor();
 
 
         model.addAttribute("blog",blog);

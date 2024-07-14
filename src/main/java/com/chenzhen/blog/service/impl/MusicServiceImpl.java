@@ -3,7 +3,7 @@ package com.chenzhen.blog.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chenzhen.blog.entity.pojo.Music;
 import com.chenzhen.blog.entity.query.BaseQuery;
-import com.chenzhen.blog.mapper.MusicMapper;
+import com.chenzhen.blog.entity.mapper.MusicMapper;
 import com.chenzhen.blog.service.MusicService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;

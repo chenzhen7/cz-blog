@@ -1,8 +1,6 @@
 package com.chenzhen.blog.controller;
 
-import com.chenzhen.blog.entity.enums.SysConfigEnum;
-import com.chenzhen.blog.mapper.BlogMapper;
-import com.chenzhen.blog.mapper.ViewsMapper;
+import com.chenzhen.blog.entity.mapper.BlogMapper;
 import com.chenzhen.blog.entity.vo.BlogVO;
 import com.chenzhen.blog.service.SysConfigService;
 import com.chenzhen.blog.service.ViewsService;
@@ -41,7 +39,7 @@ public class ArchivesController {
             }
         }
         // 获取作者
-        String author = sysConfigService.getByEnums(SysConfigEnum.AUTHOR).getValue();
+        String author = sysConfigService.list().get(0).getAuthor();
 
 
         model.addAttribute("memoryList",memoryList);

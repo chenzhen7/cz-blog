@@ -1,12 +1,11 @@
 package com.chenzhen.blog.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chenzhen.blog.entity.pojo.Views;
 import com.chenzhen.blog.service.ViewsService;
-import com.chenzhen.blog.mapper.ViewsMapper;
+import com.chenzhen.blog.entity.mapper.ViewsMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

@@ -159,16 +159,19 @@
         methods:{
           getDetail(id) {
             if (!id){
-              this.editForm = {}
+              this.editForm = {
+                recommend: false,
+                shareStatement: false,
+                commentabled: false,
+                appreciation: false
+              }
               this.initMd()
               return
             }
             axiosInstance.get(`/admin/blogs/${id}`).then(resp => {
-              //1.清空表单
-              this.editForm = {}
-              //3.赋值表单
+              //1.拿到数据
               this.editForm = resp.data.blog
-              //4.给编辑器设置内容
+              //2.初始化markdown编辑器
               $("#md-content-textarea").val(resp.data.blog.content);
 
               this.initMd()

@@ -1,7 +1,6 @@
 package com.chenzhen.blog.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.chenzhen.blog.entity.enums.SysConfigEnum;
 import com.chenzhen.blog.entity.pojo.Friend;
 import com.chenzhen.blog.service.FriendService;
 import com.chenzhen.blog.service.SysConfigService;
@@ -40,7 +39,7 @@ public class FriendLinkController {
         // 获取审核状态为已通过的友链
         List<Friend> list = friendService.list(new LambdaQueryWrapper<Friend>().eq(Friend::getStatus, Friend.Status.PASS));
         // 获取作者
-        String author = sysConfigService.getByEnums(SysConfigEnum.AUTHOR).getValue();
+        String author = sysConfigService.list().get(0).getAuthor();
 
         model.addAttribute("friendlinks",list);
         model.addAttribute("author",author);

@@ -2,24 +2,16 @@ package com.chenzhen.blog.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chenzhen.blog.entity.pojo.Comment;
-import com.chenzhen.blog.entity.pojo.Message;
-import com.chenzhen.blog.entity.pojo.User;
 import com.chenzhen.blog.entity.vo.CommentVO;
-import com.chenzhen.blog.mapper.BlogMapper;
-import com.chenzhen.blog.entity.*;
+import com.chenzhen.blog.entity.mapper.BlogMapper;
 import com.chenzhen.blog.service.CommentService;
-import com.chenzhen.blog.mapper.CommentMapper;
-import com.chenzhen.blog.util.MailUtil;
+import com.chenzhen.blog.entity.mapper.CommentMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**

@@ -10,6 +10,23 @@
   <link rel="stylesheet" href="../../static/css/me.css" th:href="@{/css/me.css}">
   <!-- 引入样式 -->
   <link rel="stylesheet" href="../../static/css/element-ui-index.css" th:href="@{/css/element-ui-index.css}">
+  <style>
+    .el-tag + .el-tag {
+      margin-left: 10px;
+    }
+    .button-new-tag {
+      /*margin-left: 10px;*/
+      height: 32px;
+      line-height: 30px;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    .input-new-tag {
+      width: 190px;
+      /*margin-left: 10px;*/
+      vertical-align: bottom;
+    }
+  </style>
 
 </head>
 <body class="admin-body">
@@ -100,105 +117,75 @@
       <!--列表-->
       <div class="container-fluid mt-3 mb-3">
         <div class="card">
-          <div class="card-body">
-            <!-- 添加按钮 -->
-            <el-button class="mb-3" type="primary" plain  @click="clickAdd">添加标签</el-button>
+          <div class="card-body" >
+            <div class="container-md " style="max-width: 1000px" >
+              <el-form ref="form" :model="form" label-width="180px"  class="mt-5" >
+                <el-form-item label="站长名称">
+                  <el-input v-model="form.author" placeholder="请输入站长名称"></el-input>
+                </el-form-item>
 
-            <el-table
-                    :data="list"
-                    stripe
-                    border
-                    style="width: 100%">
-              <el-table-column
-                      prop="id"
-                      label="ID"
-                      width="150">
-              </el-table-column>
+                <el-form-item label="站点概览-个人简介（可以使用HTML标签）">
+                  <el-input type="textarea" :rows="4" v-model="form.siteProfile" placeholder="请输入站点概览-个人简介"></el-input>
+                </el-form-item>
 
-              <el-table-column
-                      prop="name"
-                      label="参数名">
-              </el-table-column>
+                <el-form-item label="站点概览-位置">
+                  <el-input v-model="form.siteLocation" placeholder="请输入位置"></el-input>
+                </el-form-item>
 
-              <el-table-column
-                      prop="description"
-                      label="描述">
-              </el-table-column>
+                <el-form-item label="站点概览-邮箱">
+                  <el-input v-model="form.siteEmail" placeholder="请输入邮箱"></el-input>
+                </el-form-item>
 
-              <el-table-column
-                      prop="value"
-                      label="参数值">
-                <template slot-scope="scope">
-                  {{ scope.row.value.length > 50 ? scope.row.value.substring(0, 50) + '...' : scope.row.value }}
-                </template>
-              </el-table-column>
+                <el-form-item label="站点概览-QQ">
+                  <el-input v-model="form.siteQq" placeholder="请输入QQ号"></el-input>
+                </el-form-item>
 
-              <el-table-column
-                      prop="createTime"
-                      label="创建时间">
-              </el-table-column>
+                <el-form-item label="站点概览-微信">
+                  <el-input v-model="form.siteWechat" placeholder="请输入微信号"></el-input>
+                </el-form-item>
 
-              <el-table-column
-                      prop="updateTime"
-                      label="更新时间">
-              </el-table-column>
+                <el-form-item label="关于我页面-自我介绍">
+                  <el-input type="textarea" :rows="4" v-model="form.aboutMeIntroduction" placeholder="关于我页面-自我介绍"></el-input>
+                </el-form-item>
 
-              <el-table-column width="150" label="操作" >
-                <template slot-scope="scope">
-                  <el-button  size="mini" @click="clickEdit(scope.row.id)">编辑</el-button>
-                  <el-button  size="mini" type="danger" @click="clickDelete(scope.row.id)">删除</el-button>
-                </template>
-              </el-table-column>
+                <el-form-item label="关于我页面-内容（可以使用HTML标签）">
+                  <el-input type="textarea" :rows="4" v-model="form.aboutMeContent" placeholder="关于我页面-内容"></el-input>
+                </el-form-item>
 
-            </el-table>
+                <el-form-item label="关于我页面-我的技能">
+                  <el-tag
+                          :key="skill"
+                          v-for="skill in form.aboutMeSkills"
+                          closable
+                          :disable-transitions="false"
+                          @close="handleClose(skill)">
+                    {{skill}}
+                  </el-tag>
+                  <el-input
+                          class="input-new-tag"
+                          v-if="inputVisible"
+                          v-model="inputValue"
+                          ref="saveTagInput"
+                          size="small"
+                          @keyup.enter.native="handleInputConfirm"
+                          @blur="handleInputConfirm"
+                  >
+                  </el-input>
+                  <el-button v-else class="button-new-tag" size="small" @click="showInput">+ 新增技能</el-button>
+                </el-form-item>
 
-            <!-- 分页 -->
-            <el-pagination
-                    class="mt-5"
-                    @current-change="handleCurrentChange"
-                    :current-page="searchForm.pageNum"
-                    :page-sizes="[10, 20, 30, 40]"
-                    :page-size="searchForm.pageSize"
-                    :total="total"
-            ></el-pagination>
+                <el-form-item>
+                  <el-button type="primary" @click="onSubmit">保存</el-button>
+                </el-form-item>
+
+              </el-form>
+
+            </div>
           </div>
         </div>
 
       </div>
-      <!-- 创建或编辑的表单 -->
-      <el-dialog title="添加/编辑" :visible="dialogVisible" @close="dialogVisible = false" :close-on-click-modal="false">
-        <!-- 表单内容 -->
-        <el-form :model="editForm" label-width="150px">
-          <!-- ID -->
-          <el-form-item label="ID">
-            <el-input v-model="editForm.id" disabled></el-input>
-          </el-form-item>
 
-          <el-form-item label="参数名" prop="name">
-            <el-input v-model="editForm.name"></el-input>
-          </el-form-item>
-
-          <el-form-item label="描述" prop="description">
-            <el-input v-model="editForm.description"></el-input>
-          </el-form-item>
-
-          <el-form-item label="参数值" prop="value">
-            <el-input
-                    type="textarea"
-                    :rows="8"
-                    placeholder="请输入内容"
-                    v-model="editForm.value">
-            </el-input>
-          </el-form-item>
-
-        </el-form>
-        <!-- 按钮操作 -->
-        <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="clickSave">保存</el-button>
-      </span>
-
-      </el-dialog>
     </div>
   </div>
 </body>
@@ -224,10 +211,21 @@
             },
             // 表单显示
             dialogVisible: false,
+            inputVisible: false,
+            inputValue: '',
             formLabelWidth: '120px',
-            editForm:{
+            form: {
 
-            },
+              author: '',
+              aboutMeIntroduction:'',
+              aboutMeContent:'',
+              aboutMeSkills:[],
+              siteProfile:'',
+              siteLocation:'',
+              siteEmail:'',
+              siteQq:'',
+              siteWechat:''
+            }
 
           }
 
@@ -235,84 +233,44 @@
         methods:{
           //获取分页数据
           fetchPage(){
-            axiosInstance.get(`/admin/sys-configs/page`,{
-              params: this.searchForm
-            }).then(res => {
+            axiosInstance.get(`/admin/sys-configs/page`).then(res => {
               if (res.code === 20000){
-                this.list = res.data.page.list;
-                this.total = res.data.page.total;
+                this.form = res.data.sysConfig;
               }
 
             })
+          },
+          handleClose(skill) {
+            this.form.aboutMeSkills.splice(this.form.aboutMeSkills.indexOf(skill), 1);
+          },
+          showInput() {
+            this.inputVisible = true;
+            this.$nextTick(_ => {
+              this.$refs.saveTagInput.focus();
+            });
+          },
+          handleInputConfirm() {
+            let inputValue = this.inputValue;
+            if (inputValue) {
+              this.form.aboutMeSkills.push(inputValue);
+            }
+            this.inputVisible = false;
+            this.inputValue = '';
           },
           // 分页切换
           handleCurrentChange(currentPage) {
             this.searchForm.pageNum = currentPage;
             this.fetchPage();
           },
-          clickAdd(){
-            this.editForm = {}
-            this.dialogVisible = true
-          },
-          clickSave(){
-            if (this.editForm.id) {
-              // 有ID更新
-              axiosInstance.put(`/admin/sys-configs`, this.editForm)
-                      .then(resp => {
-                        if(resp.code === 20000){
-                          this.$message.success('更新成功');
-                          this.dialogVisible = false;
-                          this.fetchPage();
-                        }
-
-                      })
-                      .catch(error => {
-                        console.error(error);
-                      });
-            } else {
-              // 无ID创建
-              axiosInstance.post('/admin/sys-configs', this.editForm)
-                      .then(resp => {
-                        if(resp.code === 20000){
-                          this.$message.success('创建成功');
-                          this.dialogVisible = false;
-                          this.fetchPage();
-                        }
-                      })
-                      .catch(error => {
-                        console.error(error);
-                      });
-            }
-          },
-          // 编辑
-          clickEdit(id) {
-            axiosInstance.get(`/admin/sys-configs/${id}`)
+          onSubmit(){
+            // 有ID更新
+            axiosInstance.put(`/admin/sys-configs`, this.form)
                     .then(resp => {
-                      this.editForm = resp.data.sysConfig
-                    })
+                      if(resp.code === 20000){
+                        this.$message.success('更新成功');
+                        this.fetchPage();
+                      }
 
-            this.dialogVisible = true;
-          },
-          //点击删除
-          clickDelete(id){
-            this.$confirm('此操作将永久删除该信息, 是否继续?', '提示', {
-              cancelButtonText: '取消',
-              confirmButtonText: '确定',
-              type: 'warning'
-            }).then(() => {
-              this.delete(id)
-            }).catch(() => {
-              this.$message({
-                type: 'info',
-                message: '已取消删除'
-              });
-            })
-          },
-          // 删除
-          delete(id) {
-            axiosInstance.delete(`/admin/sys-configs/${id}`)
-                    .then(() => {
-                      this.fetchPage();
                     })
                     .catch(error => {
                       console.error(error);

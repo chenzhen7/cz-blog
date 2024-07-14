@@ -1,7 +1,6 @@
 package com.chenzhen.blog.controller;
 
 
-import com.chenzhen.blog.entity.enums.SysConfigEnum;
 import com.chenzhen.blog.entity.vo.MessageVO;
 import com.chenzhen.blog.entity.pojo.Message;
 import com.chenzhen.blog.entity.pojo.User;
@@ -43,7 +42,7 @@ public class MessageController {
 
         PageInfo<MessageVO> pageInfo = messageService.getMessageList(pageNum);
         // 获取作者
-        String author = sysConfigService.getByEnums(SysConfigEnum.AUTHOR).getValue();
+        String author = sysConfigService.list().get(0).getAuthor();
 
         model.addAttribute("page",pageInfo);
         model.addAttribute("author",author);

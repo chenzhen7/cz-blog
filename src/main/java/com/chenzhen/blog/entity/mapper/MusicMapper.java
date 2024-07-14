@@ -1,4 +1,4 @@
-package com.chenzhen.blog.mapper;
+package com.chenzhen.blog.entity.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.chenzhen.blog.entity.pojo.Music;
