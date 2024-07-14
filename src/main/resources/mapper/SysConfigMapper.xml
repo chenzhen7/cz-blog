@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chenzhen.blog.entity.mapper.SysConfigMapper">
+
+    <resultMap id="BaseResultMap" type="com.chenzhen.blog.entity.pojo.SysConfig">
+            <id property="id" column="id" jdbcType="INTEGER"/>
+            <result property="author" column="author" jdbcType="VARCHAR"/>
+            <result property="aboutMeIntroduction" column="about_me_introduction" jdbcType="VARCHAR"/>
+            <result property="aboutMeContent" column="about_me_content" jdbcType="VARCHAR"/>
+            <result property="aboutMeSkill" column="about_me_skill" jdbcType="VARCHAR"/>
+            <result property="siteProfile" column="site_profile" jdbcType="VARCHAR"/>
+            <result property="siteLocation" column="site_location" jdbcType="VARCHAR"/>
+            <result property="siteEmail" column="site_email" jdbcType="VARCHAR"/>
+            <result property="siteQq" column="site_qq" jdbcType="VARCHAR"/>
+            <result property="siteWechat" column="site_wechat" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,author,about_me_introduction,
+        about_me_content,about_me_skill,site_profile,
+        site_location,site_email,site_qq,
+        site_wechat
+    </sql>
+</mapper>
