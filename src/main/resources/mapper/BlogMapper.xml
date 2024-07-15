@@ -65,7 +65,7 @@
         <include refid="BlogVoFields"/>
         where b.published = 1 and b.recommend = 1
         order by b.update_time  desc
-        limit 4
+        limit 5
     </select>
 
     <update id="updateViews">

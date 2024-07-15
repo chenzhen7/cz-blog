@@ -4,7 +4,9 @@ body{
     no-repeat: center top;
     height: 100%;
     width: 100%;
-    margin: 0px;
+    font-family: FangZhengKaiTi!important;
+    letter-spacing: .1em;
+
 }
 .admin-body{
     background-color: #f3f3f3;
@@ -25,6 +27,13 @@ a{
     src:url(././fonts/Mao.woff2) 	format('woff2');
     font-weight:400;
 
+    font-display:swap;
+}
+
+@font-face{
+    font-family:FangZhengKaiTi;
+    src:url(././fonts/朱雀仿宋.ttf);
+    font-weight:400;
     font-display:swap;
 }
 
@@ -1224,8 +1233,9 @@ a{
     color: rgba(0, 0, 0, 0.81);
     line-height: inherit;
     white-space: nowrap;
-    font-weight: bold;
-    font-family: "Work Sans","Helvetica Neue",helvetica,arial,sans-serif;
+    font-weight: 1000;
+    font-family: 华文仿宋, serif;
+    /*font-family: "Work Sans","Helvetica Neue",helvetica,arial,sans-serif;*/
 }
 
 .cz-navbar-links {
@@ -1339,8 +1349,7 @@ a{
     font-weight: 700;
     line-height: 1.2em;
     padding-top: 15vh;
-    /*font-family : 华文楷体;*/
-    font-family: "Work Sans","Helvetica Neue",helvetica,arial,sans-serif;
+    /*font-family: "Work Sans","Helvetica Neue",helvetica,arial,sans-serif;*/
 }
 
 /* 响应式样式 - 小屏幕设备 */
@@ -1468,12 +1477,14 @@ a{
 }
 /* 默认链接样式 */
 .cz-link {
+    font-family: 华文仿宋;
     color: #000; /* 设置链接默认颜色 */
     text-decoration: none; /* 移除下划线，如果需要的话 */
 }
 
 /* 默认链接样式 */
 .cz-link2 {
+    font-family: 华文仿宋;
     color: #000; /* 设置链接默认颜色 */
     text-decoration: none; /* 移除下划线，如果需要的话 */
 }
@@ -1526,12 +1537,14 @@ a{
 .cz-blog-description{
     word-wrap:break-word;
     word-break:break-word;
+    font-size: 1.05rem;
+
 }
 
 /* 响应式样式 - 小屏幕设备 */
 @media (max-width: 768px) {
     .cz-blog-description {
-        font-size:.875em
+        font-size:.175em
     }
 }
 
@@ -2376,7 +2389,7 @@ a{
 }
 
 .cz-text-shadow-3{
-    text-shadow: 4px 4px 0 rgba(16,16,16,0.18);
+    text-shadow: 4px 4px 0 rgba(16,16,16,0.14);
 }
 
 .cz-text-shadow-4{
