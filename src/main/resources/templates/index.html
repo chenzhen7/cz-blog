@@ -133,11 +133,11 @@
                         <p class="card-text fw-light" th:text="${recommendList[0].description}" >
                             最近推荐博文描述
                         </p>
-                        <small class="d-block text-muted">ChenZhen</small>
+                        <small class="d-block text-muted fw-bold">ChenZhen</small>
 
                         <div class="d-flex justify-content-between w-100">
 
-                            <div class="text-muted d-flex align-items-center ">
+                            <div class="text-muted fw-bold d-flex align-items-center ">
                                 <small class="me-3" th:text="${#temporals.format(recommendList[0].createTime)}">2023-12-12 17:52</small>
                                 <small class="d-flex align-items-center ">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
@@ -171,11 +171,11 @@
                                 <h2 class="mb-2 h6 fw-bold">
                                     <div class="fw-bold" th:text="${blog.title}">最近推荐博文2</div>
                                 </h2>
-                                <div class="card-text text-muted small">
+                                <div class="card-text text-muted small fw-bold">
                                     ChenZhen
                                 </div>
                                 <div class="d-flex justify-content-between w-100">
-                                    <div class="text-muted d-flex align-items-center ">
+                                    <div class="text-muted fw-bold d-flex align-items-center ">
                                         <!--时间-->
                                         <small class="me-3" th:text="${#temporals.format(blog.createTime)}">2023-12-12 17:52</small>
                                         <!--浏览量-->
@@ -234,7 +234,7 @@
                             <p class="cz-blog-description" th:text="${blog.description}" >
                                 我们在学习ES客户端时，一直使用的都是`Java High Level Rest Client`，在浏览官网时，发现官方给出的警告是：`Java REST` 客户端已被弃用，取而代之的是 `Java API client` 客户端，ES `8.x` 新版本中，`Type` 概念被弃用，所以新版 `JavaAPI` 也相应做出了改变，使用更加简便。ES 官方从 `7.15` 起开始建议使用新的 `JavaAPI`
                             </p>
-                            <a class="card-text text-muted small" href="" th:href="@{/about}">
+                            <a class="card-text text-muted small " href="" th:href="@{/about}">
                                 ChenZhen
                             </a>
                             <div class="d-flex justify-content-between">

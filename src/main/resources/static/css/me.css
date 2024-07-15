@@ -1544,7 +1544,7 @@ a{
 /* 响应式样式 - 小屏幕设备 */
 @media (max-width: 768px) {
     .cz-blog-description {
-        font-size:.175em
+        font-size:0.95em
     }
 }
 
