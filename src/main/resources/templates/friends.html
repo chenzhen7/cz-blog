@@ -26,10 +26,11 @@
             <a href="friends.html"  th:href="@{/friends}" class="cz-nav-link cz-active-link">友链</a>
             <a href="about.html"    th:href="@{/about}" class="cz-nav-link">关于我</a>
         </div>
-        <div class="cz-navbar-brand"><strong>搜索</strong></div>
-
-
+        <a href="#" class="cz-navbar-brand" data-bs-toggle="modal" data-bs-target="#searchModal">
+            <strong>搜索</strong>
+        </a>
         <button class="cz-menu-toggle-btn">菜单</button>
+
     </div>
     <div class="cz-mobile-menu fw-light fs-6">
         <a href="index.html"    th:href="@{/}" class="cz-nav-link ">首页</a>
@@ -41,6 +42,32 @@
     </div>
 </div>
 
+
+<!-- 搜索框 -->
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content p-2 ">
+            <div class="modal-body ">
+                <button type="button" class="btn-close float-end" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="text-center fs-5 mb-3">搜　索</div>
+                <div class="input-group mb-4">
+                  <span class="input-group-text" id="basic-addon1">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                      </svg>
+                  </span>
+                    <input id="keywordInput" type="text" class="form-control" placeholder="输入关键词" aria-describedby="basic-addon1">
+                </div>
+
+                <div class="mb-2">搜索结果</div>
+                <!-- 搜索结果展示区域 -->
+                <div id="searchResults" class="list-group">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 <div  alt="" class="" style="height: 15vh"></div>
 
 
