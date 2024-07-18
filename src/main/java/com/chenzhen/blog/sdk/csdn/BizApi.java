@@ -16,4 +16,9 @@ public interface BizApi {
      * 文章列表接口
      */
     String LIST_URL  = "/blog/phoenix/console/v1/article/list";
+
+    /**
+     * 获取文章详情
+     */
+    String GET_ARTICLE_URL  = "/blog-console-api/v3/editor/getArticle";
 }
