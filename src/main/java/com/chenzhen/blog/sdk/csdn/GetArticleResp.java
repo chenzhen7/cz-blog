@@ -122,4 +122,9 @@ public class GetArticleResp implements Serializable {
      * 文章级别
      */
     private String level;
+
+    /**
+     * 封面
+     */
+    private List<String> cover_image;
 }

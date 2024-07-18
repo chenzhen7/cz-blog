@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * @author ChenZhen
@@ -33,12 +34,9 @@ public class AdminBlogController {
 
     @GetMapping("/edit")
     public String edit(){
-//        BlogDTO blog = blogService.getBlogDTO(id);
-//        model.addAttribute("blog",blog);
         return "admin/blog-edit";
     }
 
-    //跳转[博客列表]页面
     @ResponseBody
     @GetMapping("/page")
     public R blogs(BlogQuery query){
@@ -67,6 +65,16 @@ public class AdminBlogController {
     @DeleteMapping("/{id}")
     public R delete(@PathVariable Integer id) {
         return blogService.removeById(id) ? R.success() : R.error("删除失败");
+    }
+
+    /**
+     * csdn文章同步接口
+     */
+    @ResponseBody
+    @PostMapping("/syncCsdn")
+    public R syncCsdn(@RequestParam("ids") List<Integer> ids,@RequestParam("typeId") Long typeId) {
+        blogService.syncCsdn(ids,typeId);
+        return R.success();
     }
 
 

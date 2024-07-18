@@ -52,4 +52,6 @@ public interface BlogService extends IService<Blog> {
     List<Blog> searchBlog(String keyword);
 
     List<Blog> getSimilarBlogs(Long id);
+
+    void syncCsdn(List<Integer> ids,Long typeId);
 }
