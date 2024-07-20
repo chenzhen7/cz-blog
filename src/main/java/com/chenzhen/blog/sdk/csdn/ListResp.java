@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * @author chenjixian
@@ -20,9 +19,16 @@ public class ListResp implements Serializable {
 
     private Count count;
 
-    private java.util.List<List> list;
+    private java.util.List<Article> list;
 
-    static class Count {
+    private Integer page;
+
+    private Integer size;
+
+    private Integer total;
+
+    @Data
+    public static class Count {
         private Integer all;
         private Integer deleted;
         private Integer original;
@@ -31,7 +37,8 @@ public class ListResp implements Serializable {
         private Integer draft;
     }
 
-    static class List {
+    @Data
+    public static class Article {
         /**
          * 文章ID
          */

@@ -9,13 +9,11 @@ import com.chenzhen.blog.entity.dto.BlogDTO;
 import com.chenzhen.blog.entity.pojo.BlogTag;
 import com.chenzhen.blog.entity.pojo.Tag;
 import com.chenzhen.blog.entity.pojo.Blog;
+import com.chenzhen.blog.entity.query.BaseQuery;
 import com.chenzhen.blog.entity.query.BlogQuery;
 import com.chenzhen.blog.entity.vo.BlogVO;
 import com.chenzhen.blog.entity.mapper.TagMapper;
-import com.chenzhen.blog.sdk.CommonResult;
-import com.chenzhen.blog.sdk.csdn.BizClient;
-import com.chenzhen.blog.sdk.csdn.GetArticleRequest;
-import com.chenzhen.blog.sdk.csdn.GetArticleResp;
+import com.chenzhen.blog.sdk.csdn.*;
 import com.chenzhen.blog.service.BlogService;
 import com.chenzhen.blog.entity.mapper.BlogMapper;
 import com.chenzhen.blog.service.TypeService;
@@ -175,7 +173,8 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
         // 对相似度进行降序排序
         List<Blog> recommendedBlogs = recommendedBlogsMap.entrySet().stream()
                 .sorted(Map.Entry.<Blog, Double>comparingByValue().reversed())
-                .limit(3)  // 取前三篇
+                // 取前三篇
+                .limit(3)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
@@ -183,38 +182,57 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     }
 
     @Override
-    public void syncCsdn(List<Integer> ids,Long typeId) {
+    public void batchAyncCsdn(List<Integer> ids, Long typeId) throws Exception {
         for (Integer id : ids) {
-            syncBlog(typeId, id);
+            AyncCsdn(typeId, id);
         }
     }
 
-    private void syncBlog(Long typeId, Integer id){
-        try{
-            GetArticleRequest getArticleRequest = GetArticleRequest.builder()
-                    .id(id)
-                    .cookie("cookies")
-                    .build();
-            GetArticleResp getArticleResp = BizClient.getArticle(getArticleRequest).getResult();
+    @Override
+    public List<ListResp.Article> pageCsdnBlogs(BaseQuery query) throws Exception {
+        ListRequest listRequest = ListRequest.builder()
+                .pageSize(query.getPageSize())
+                .cookie("cookies")
+                .build();
+        ListResp listResp = BizClient.list(listRequest).getResult();
 
-            Blog blog = new Blog();
-            blog.setTitle(getArticleResp.getTitle());
-            blog.setTypeId(typeId);
-            blog.setContent(getArticleResp.getMarkdown_content());
-            blog.setDescription(getArticleResp.getDescription());
-            blog.setFirstPicture(CollUtil.isEmpty(getArticleResp.getCover_image()) ? null : getArticleResp.getCover_image().get(0));
-            blog.setCommentabled(true);
-            blog.setAppreciation(true);
-            blog.setPublished(true);
-            blog.setRecommend(true);
-            blog.setShareStatement(true);
-            blog.setCopyright(1);
-
-            save(blog);
-        }catch (Exception e){
-            log.error("同步博客失败",e);
-            e.printStackTrace();
+        if (CollUtil.isEmpty(listResp.getList())) {
+            return null;
         }
+        PageInfo<ListResp.Article> pageInfo = new PageInfo<>();
+
+        pageInfo.setList(listResp.getList());
+        pageInfo.setTotal(listResp.getTotal());
+        pageInfo.setPages(listResp.getTotal() / listResp.getSize());
+        pageInfo.setPageNum(listResp.getPage());
+        pageInfo.setPageSize(listResp.getSize());
+
+        return pageInfo.getList();
+    }
+
+    private void AyncCsdn(Long typeId, Integer id) throws Exception {
+
+        GetArticleRequest getArticleRequest = GetArticleRequest.builder()
+                .id(id)
+                .cookie("cookies")
+                .build();
+        GetArticleResp getArticleResp = BizClient.getArticle(getArticleRequest).getResult();
+
+        Blog blog = new Blog();
+        blog.setTitle(getArticleResp.getTitle());
+        blog.setTypeId(typeId);
+        blog.setContent(getArticleResp.getMarkdown_content());
+        blog.setDescription(getArticleResp.getDescription());
+        blog.setFirstPicture(CollUtil.isEmpty(getArticleResp.getCover_image()) ? null : getArticleResp.getCover_image().get(0));
+        blog.setCommentabled(true);
+        blog.setAppreciation(true);
+        blog.setPublished(true);
+        blog.setRecommend(true);
+        blog.setShareStatement(true);
+        blog.setCopyright(1);
+
+        save(blog);
+
     }
 
     public static double calculateCosineSimilarity(String text1, String text2) {

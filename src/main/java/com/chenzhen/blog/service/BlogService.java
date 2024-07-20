@@ -3,8 +3,10 @@ package com.chenzhen.blog.service;
 import com.chenzhen.blog.entity.dto.BlogDTO;
 import com.chenzhen.blog.entity.pojo.Blog;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.chenzhen.blog.entity.query.BaseQuery;
 import com.chenzhen.blog.entity.query.BlogQuery;
 import com.chenzhen.blog.entity.vo.BlogVO;
+import com.chenzhen.blog.sdk.csdn.ListResp;
 import com.chenzhen.blog.util.R;
 import com.github.pagehelper.PageInfo;
 
@@ -53,5 +55,7 @@ public interface BlogService extends IService<Blog> {
 
     List<Blog> getSimilarBlogs(Long id);
 
-    void syncCsdn(List<Integer> ids,Long typeId);
+    void batchAyncCsdn(List<Integer> ids, Long typeId) throws Exception;
+
+    List<ListResp.Article> pageCsdnBlogs(BaseQuery query) throws Exception;
 }

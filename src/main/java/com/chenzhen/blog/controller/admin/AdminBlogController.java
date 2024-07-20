@@ -1,12 +1,12 @@
 package com.chenzhen.blog.controller.admin;
 
 import com.chenzhen.blog.entity.dto.BlogDTO;
+import com.chenzhen.blog.entity.query.BaseQuery;
 import com.chenzhen.blog.entity.query.BlogQuery;
 import com.chenzhen.blog.service.BlogService;
 import com.chenzhen.blog.util.R;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -68,12 +68,20 @@ public class AdminBlogController {
     }
 
     /**
+     * csdn文章列表
+     */
+    @ResponseBody
+    @GetMapping("/csdnList")
+    public R csdnList(BaseQuery query){
+        return R.success().data("page",blogService.pageCsdnBlogs(query));
+    }
+    /**
      * csdn文章同步接口
      */
     @ResponseBody
     @PostMapping("/syncCsdn")
-    public R syncCsdn(@RequestParam("ids") List<Integer> ids,@RequestParam("typeId") Long typeId) {
-        blogService.syncCsdn(ids,typeId);
+    public R batchAyncCsdn(@RequestParam("ids") List<Integer> ids,@RequestParam("typeId") Long typeId) throws Exception {
+        blogService.batchAyncCsdn(ids,typeId);
         return R.success();
     }
 
