@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="referrer" content="no-referrer"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>博客管理</title>
+  <link href="../static/images/favicon.ico" th:href="@{/images/favicon.ico}" rel="icon" type="image/x-ico">
+  <link rel="stylesheet" href="../../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"  />
+  <link rel="stylesheet" href="../../static/css/me.css" th:href="@{/css/me.css}">
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="../../static/css/element-ui-index.css" th:href="@{/css/element-ui-index.css}">
+  <link rel="stylesheet" href="../../static/lib/editormd/css/editormd.min.css"  th:href="@{/lib/editormd/css/editormd.min.css}">
+
+
+</head>
+<body class="admin-body">
+  <div id="app" class="d-flex flex-nowrap vh-100">
+
+    <!--侧边栏-->
+    <div class="d-flex flex-column flex-shrink-0 p-3 bg-white " style="width: 280px;height: 100vh">
+      <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+        <svg class="bi pe-none me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
+        <span class="fs-4"><strong>ChenZhen</strong></span>
+      </a>
+      <hr>
+      <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+          <a href="./blogs.html" th:href="@{/admin/blogs}" class="nav-link link-dark" aria-current="page">
+            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#home"></use></svg>
+            文章管理
+          </a>
+        </li>
+        <li>
+          <a href="./types.html" th:href="@{/admin/types}" class="nav-link link-dark">
+            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#speedometer2"></use></svg>
+            分类管理
+          </a>
+        </li>
+        <li>
+          <a href="./tags.html" th:href="@{/admin/tags}" class="nav-link link-dark">
+            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#table"></use></svg>
+            标签管理
+          </a>
+        </li>
+        <li>
+          <a href="./friendlinks.html" th:href="@{/admin/friendlinks}" class="nav-link link-dark">
+            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#grid"></use></svg>
+            友链管理
+          </a>
+        </li>
+        <li>
+          <a href="./musics.html" th:href="@{/admin/musics}" class="nav-link link-dark">
+            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
+            音乐管理
+          </a>
+        </li>
+        <li>
+          <a href="./sys-configs.html" th:href="@{/admin/sys-configs}" class="nav-link link-dark">
+            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
+            系统配置管理
+          </a>
+        </li>
+        <li>
+          <a href="./users.html" th:href="@{/admin/users}" class="nav-link link-dark">
+            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
+            用户管理
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="./sync-blogs.html" th:href="@{/admin/sync-blogs}" class="nav-link active" aria-current="page">
+            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#home"></use></svg>
+            同步文章
+          </a>
+        </li>
+      </ul>
+      <hr>
+      <div class="dropdown">
+        <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+          <strong>mdo</strong>
+        </a>
+        <ul class="dropdown-menu text-small shadow">
+          <li><a class="dropdown-item" href="#">New project...</a></li>
+          <li><a class="dropdown-item" href="#">Settings</a></li>
+          <li><a class="dropdown-item" href="#">Profile</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="#">Sign out</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="w-100 overflow-y-auto">
+      <!--    顶部栏-->
+      <header class="p-2 text-bg-dark">
+        <div class="container">
+          <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-end">
+            <!--头像-->
+            <img class="me-2 img-fluid rounded-5" width="40" height="40" src="../../static/images/me.jpg" th:src="@{${session.user.avatar}}">
+            <!--名字-->
+            <span class="me-3" th:src="@{${session.user.nickname}}" >ChenZhen</span>
+            <div>
+              <a href="#" @click="logout" class="btn btn-outline-light me-2">注销</a>
+            </div>
+
+          </div>
+        </div>
+      </header>
+      <!--内容-->
+      <div v-show="!dialogVisible" class="container-fluid mt-3 mb-3">
+        <div class="card">
+          <div class="card-body">
+
+            <!-- 切换导航栏 -->
+            <el-tabs v-model="activeTab" @tab-click="handleTabClick">
+              <el-tab-pane label="CSDN" name="CSDN">
+                <el-form size="" :model="searchForm" ref="searchForm" inline>
+
+                  <el-form-item label="博客标题">
+                    <el-input v-model="searchForm.keyword"></el-input>
+                  </el-form-item>
+
+
+                  <el-form-item label="状态">
+                    <el-select v-model="searchForm.status" placeholder="请选择">
+                      <el-option label="全部" value="all"></el-option>
+                      <el-option label="全部可见" value="enable"></el-option>
+                      <el-option label="仅我可见" value="private"></el-option>
+                      <el-option label="审核" value="audit"></el-option>
+                      <el-option label="草稿箱" value="draft"></el-option>
+                      <el-option label="回收站" value="deleted"></el-option>
+                    </el-select>
+                  </el-form-item>
+
+                  <!-- Search Button -->
+                  <el-form-item>
+                    <el-button type="primary" @click="fetchPage">搜索</el-button>
+                  </el-form-item>
+                </el-form>
+                <el-form size="" :rules="rules" :model="syncForm" ref="syncForm" inline>
+
+
+                  <el-form-item label="默认同步分类" prop="typeId">
+                    <el-select v-model="syncForm.typeId"  placeholder="请选择">
+                      <el-option
+                              v-for="item in typeList"
+                              :key="item.id"
+                              :label="item.name"
+                              :value="item.id">
+                      </el-option>
+                    </el-select>
+                    <el-tooltip class="item" effect="dark" content="同步到我的博客时，默认选择的分类" placement="top">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                      </svg>
+                    </el-tooltip>
+
+                  </el-form-item>
+
+                </el-form>
+
+                <!-- 批量同步 -->
+                <el-button class="mb-3" type="success" plain  @click="clickBatchSync(multipleSelection)">批量同步</el-button>
+
+                <!-- 表格 -->
+                <el-table
+                        ref="syncTable"
+                        :data="list"
+                        stripe
+                        border
+                        style="width: 100%"
+                        @selection-change="handleSectionChange">
+                  <el-table-column
+                          type="selection"
+                          width="55">
+                  </el-table-column>
+                  <el-table-column
+                          prop="articleId"
+                          label="ID"
+                          width="150">
+                  </el-table-column>
+
+
+                  <el-table-column width="220" label="图片" prop="coverImage">
+                    <template slot-scope="scope">
+                      <img :src="scope.row.coverImage.length > 0 ? scope.row.coverImage[0] : ''" alt="" width="100%">
+                    </template>
+                  </el-table-column>
+
+                  <el-table-column
+                          prop="title"
+                          label="标题"
+                  >
+                  </el-table-column>
+
+
+                  <el-table-column width="100" label="发布状态" prop="status">
+                    <template slot-scope="scope">
+                      {{ mapStatus(scope.row.status) }}
+                    </template>
+                  </el-table-column>
+
+                  <el-table-column
+                          prop="totalExposures"
+                          label="展现量"
+                          width="100"
+                  >
+                  </el-table-column>
+
+                  <el-table-column
+                          prop="viewCount"
+                          label="文章浏览数"
+                          width="100"
+                  >
+                  </el-table-column>
+
+                  <el-table-column
+                          prop="commentCount"
+                          label="文章评论数"
+                          width="100"
+                  >
+                  </el-table-column>
+
+                  <el-table-column
+                          prop="collectCount"
+                          label="收藏数"
+                          width="100"
+                  >
+                  </el-table-column>
+
+                  <el-table-column
+                          width="150"
+                          prop="postTime"
+                          label="文章发布时间">
+                  </el-table-column>
+
+                  <el-table-column label="操作">
+                    <template slot-scope="scope">
+                      <el-button  size="mini" @click="clickView(scope.row)">查看</el-button>
+                      <el-button  size="mini" type="primary" @click="clickSync(scope.row)">同步到我的博客</el-button>
+                    </template>
+                  </el-table-column>
+
+                </el-table>
+              </el-tab-pane>
+
+            </el-tabs>
+
+            <!-- 分页 -->
+            <el-pagination
+                    class="mt-5"
+                    @current-change="handleCurrentChange"
+                    :current-page="searchForm.pageNum"
+                    :page-sizes="[10, 20, 30, 40]"
+                    :page-size="searchForm.pageSize"
+                    :total="total"
+            ></el-pagination>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</body>
+
+  <script src="../../static/lib/jquery-3.2.1/jquery-3.2.1.min.js" th:src="@{/lib/jquery-3.2.1/jquery-3.2.1.min.js}"></script>
+  <!-- import Vue before Element -->
+  <script src="../../static/lib/vue.js"                   th:src="@{/lib/vue.js}"></script>
+  <!-- import JavaScript -->
+  <script src="../../static/lib/element-ui-index.js"      th:src="@{/lib/element-ui-index.js}"></script>
+  <script src="../../static/lib/axios.min.js"             th:src="@{/lib/axios.min.js}"></script>
+  <script src="../../static/lib/axiosInstance.js"         th:src="@{/lib/axiosInstance.js}"></script>
+  <script src="../../static/lib/editormd/editormd.min.js" th:src="@{/lib/editormd/editormd.min.js}"></script>
+
+  <script >
+
+      new Vue({
+        el: '#app',
+        data: function() {
+          return {
+            list: [],
+            total: 0, // 总记录数
+            searchForm: {
+              pageNum: 1, // 当前页
+              pageSize: 10  // 每页显示条数
+            },
+            // 表单显示
+            dialogVisible: false,
+            formLabelWidth: '120px',
+            editForm:{
+              recommend: false,
+              shareStatement: false,
+              commentabled: false,
+              appreciation: false
+            },
+            syncForm:{
+              typeId: null,
+              ids:[]
+            },
+            rules: {
+              typeId: [
+                {required: true, message: '请选择默认同步分类', trigger: 'change'},
+              ],
+            },
+            tagList:[],
+            typeList:[{name:'1',id:1}],
+            activeTab: 'CSDN',
+            multipleSelection:[]
+          }
+
+        },
+        methods:{
+          mapRecommend(recommend){
+            const recommendMap = {
+              true: '是',
+              false: '否'
+            }
+            return recommendMap[recommend] || '未知';
+          },
+          mapStatus(status){
+            const statusMap = {
+              1: '发布',
+              2: '草稿'
+            }
+            return statusMap[status] || '未知';
+          },
+          mapCopyright(copyright){
+            const copyrightMap = {
+              1: '原创',
+              0: '转载'
+            }
+            return copyrightMap[copyright] || '未知';
+          } ,
+          //获取分页数据
+          fetchPage(){
+            this.list = [];
+            this.list = [
+              {
+                "articleId": "136566172",
+                "title": "数智系统的一些注意点",
+                "status": 2,
+                "editorType": 1,
+                "coverImage": [],
+                "postTime": "2024-07-18T09:37:44",
+                "totalExposures": 0,
+                "collectCount": 0,
+                "viewCount": 0,
+                "commentCount": 0,
+                "username": "ShockChen7",
+                "qualitySpecification": "https://blog.csdn.net/u010280923/article/details/131449478"
+              },
+              {
+                "articleId": "140489057",
+                "title": "使用Github-Action实现当代码推送远程仓库后自动部署Springboot项目",
+                "status": 2,
+                "editorType": 1,
+                "coverImage": [
+                  "https://img-blog.csdnimg.cn/img_convert/4a1ab8c050264b68b823fdf04301d802.png"
+                ],
+                "postTime": "2024-07-17T11:38:27",
+                "totalExposures": 0,
+                "collectCount": 0,
+                "viewCount": 0,
+                "commentCount": 0,
+                "username": "ShockChen7",
+                "qualitySpecification": "https://blog.csdn.net/u010280923/article/details/131449478"
+              }
+            ]
+            axiosInstance.get(`/admin/sync-blogs/csdnList`,{
+              params: this.searchForm
+            }).then(res => {
+              if (res.code === 20000){
+                this.list = res.data.page.list;
+                this.total = res.data.page.total;
+              }
+
+            })
+          },
+          fetchTypeList(){
+            axiosInstance.get(`/admin/types/all`).then(res => {
+              if (res.code === 20000){
+                this.typeList = res.data.typeList;
+              }
+            })
+          },
+          // 分页切换
+          handleCurrentChange(currentPage) {
+            this.searchForm.pageNum = currentPage;
+            this.fetchPage();
+          },
+          clickAdd(){
+            //跳转
+            location.href = '/admin/blogs/edit';
+          },
+          // 查看
+          clickView(row) {
+            if (row.editorType === 0){
+              Vue.prototype.$message.error("目前仅支持Markdown类型文章，暂不支持此富文本类型");
+              return;
+            }
+            //跳转新的标签页
+            window.open('https://editor.csdn.net/md/?articleId=' + row.articleId);
+          },
+          handleSectionChange(val) {
+            this.multipleSelection = val;
+            // this.syncForm.ids = val.map(item => item.articleId);
+          },
+          clickBatchSync(rows){
+            if (rows.length === 0){
+              Vue.prototype.$message.error("请选择要同步的文章");
+              return
+            }
+            this.$refs['syncForm'].validate((valid) => {
+              if (valid) {
+                var errorTypeTitles = [];
+                var draftTitles = [];
+                for (let i = 0; i < rows.length; i++) {
+                   if (rows[i].editorType === 0){
+                     errorTypeTitles.push("《" + rows[i].title + "》");
+                   }
+                   if (rows[i].status === 2){
+                     draftTitles.push("《" + rows[i].title + "》")
+                   }
+                }
+                if (errorTypeTitles.length > 0){
+                  Vue.prototype.$message.error("目前仅支持Markdown类型文章，暂不支持富文本类型，出错文章：" + errorTypeTitles.join(""));
+                  return;
+                }
+                //草稿提醒
+                if (draftTitles.length > 0){
+                  Vue.prototype.$confirm('文章' + draftTitles.join('') + '为草稿，确定同步到我的博客吗？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                  }).then(() => {
+                    this.handleSync(rows)
+                  })
+                }else{
+                  this.handleSync(rows)
+                }
+              }else {
+                Vue.prototype.$message.error("请选择默认同步分类");
+              }
+            });
+
+          },
+          clickSync(row) {
+            this.clickBatchSync([row]);
+          },
+          handleSync(rows){
+            //检查是否有相同文章
+            axiosInstance.post('/admin/sync-blogs/checkSameBlog', {
+                titles: rows.map(item => item.title)
+            }).then(res => {
+              if (res.code === 20000){
+                if (res.data.sameTitles) {
+                  Vue.prototype.$confirm('文章'+ res.data.sameTitles.join('') + '已存在，同步到我的博客会覆盖原有文章，确定同步吗？', '已存在！', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                  }).then(() => {
+                    this.syncCsdn(rows)
+                  })
+                }else{
+                  this.syncCsdn(rows)
+                }
+              }
+
+            })
+          },
+          syncCsdn(rows){
+            this.syncForm.ids = rows.map(item => item.articleId);
+            //同步到我的博客
+            axiosInstance({
+              url: '/admin/sync-blogs/syncCsdn',
+              method: 'post',
+              data: this.syncForm,
+              timeout: 300 * 1000
+            }).then(res => {
+              if (res.code === 20000){
+                Vue.prototype.$message.success('同步成功！');
+              }
+            })
+          },
+          handleTabClick(tab) {
+            this.activeTab = tab.name;
+          },
+          logout(){
+            axiosInstance.get('/admin/logout').then(res => {
+              if (res.code === 20000){
+                location.href = "/admin";
+              }
+            })
+          }
+
+        },
+        mounted(){
+          this.fetchPage()
+          this.fetchTypeList()
+        },
+        created(){
+        }
+      })
+
+
+
+
+  </script>
+
+</html>

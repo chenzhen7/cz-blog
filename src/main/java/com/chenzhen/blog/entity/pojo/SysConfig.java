@@ -65,6 +65,11 @@ public class SysConfig implements Serializable {
      */
     private String siteWechat;
 
+    /**
+     * CSDN的Session
+     */
+    private String csdnSession;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

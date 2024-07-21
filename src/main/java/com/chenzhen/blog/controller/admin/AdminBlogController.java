@@ -67,23 +67,7 @@ public class AdminBlogController {
         return blogService.removeById(id) ? R.success() : R.error("删除失败");
     }
 
-    /**
-     * csdn文章列表
-     */
-    @ResponseBody
-    @GetMapping("/csdnList")
-    public R csdnList(BaseQuery query){
-        return R.success().data("page",blogService.pageCsdnBlogs(query));
-    }
-    /**
-     * csdn文章同步接口
-     */
-    @ResponseBody
-    @PostMapping("/syncCsdn")
-    public R batchAyncCsdn(@RequestParam("ids") List<Integer> ids,@RequestParam("typeId") Long typeId) throws Exception {
-        blogService.batchAyncCsdn(ids,typeId);
-        return R.success();
-    }
+
 
 
 

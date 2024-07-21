@@ -1,4 +1,4 @@
-package com.chenzhen.blog.handler;
+package com.chenzhen.blog.exception;
 
 import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.NotRoleException;
@@ -30,6 +30,16 @@ public class ControllerExceptionHandler {
 
     //    将异常记录到日志
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @ExceptionHandler(AdminException.class)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public R AiToolsExceptionHandler(HttpServletRequest request, AdminException e){
+
+        logger.error("请求URL : {}，异常 : {}", request.getRequestURL(),e.getMsg());
+
+        return R.error(e.getMsg());
+    }
 
 
     @ExceptionHandler(Exception.class)

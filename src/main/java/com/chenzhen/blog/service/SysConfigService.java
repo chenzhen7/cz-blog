@@ -14,4 +14,6 @@ public interface SysConfigService extends IService<SysConfig> {
     SysConfigVO getSysConfig();
 
     boolean updateSysConfig(SysConfigVO sysConfig);
+
+    String getCsdnSession();
 }

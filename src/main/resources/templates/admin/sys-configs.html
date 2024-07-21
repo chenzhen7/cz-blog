@@ -119,66 +119,86 @@
         <div class="card">
           <div class="card-body" >
             <div class="container-md " style="max-width: 1000px" >
-              <el-form ref="form" :model="form" label-width="180px"  class="mt-5" >
-                <el-form-item label="站长名称">
-                  <el-input v-model="form.author" placeholder="请输入站长名称"></el-input>
-                </el-form-item>
+              <!-- 切换导航栏 -->
+              <el-tabs v-model="activeTab" @tab-click="handleTabClick">
 
-                <el-form-item label="站点概览-个人简介（可以使用HTML标签）">
-                  <el-input type="textarea" :rows="4" v-model="form.siteProfile" placeholder="请输入站点概览-个人简介"></el-input>
-                </el-form-item>
+                <el-tab-pane label="系统配置" name="SYS-CONFIG">
+                  <el-form ref="form" :model="form" label-width="180px"  class="mt-5" >
+                    <el-form-item label="站长名称">
+                      <el-input v-model="form.author" placeholder="请输入站长名称"></el-input>
+                    </el-form-item>
 
-                <el-form-item label="站点概览-位置">
-                  <el-input v-model="form.siteLocation" placeholder="请输入位置"></el-input>
-                </el-form-item>
+                    <el-form-item label="站点概览-个人简介（可以使用HTML标签）">
+                      <el-input type="textarea" :rows="4" v-model="form.siteProfile" placeholder="请输入站点概览-个人简介"></el-input>
+                    </el-form-item>
 
-                <el-form-item label="站点概览-邮箱">
-                  <el-input v-model="form.siteEmail" placeholder="请输入邮箱"></el-input>
-                </el-form-item>
+                    <el-form-item label="站点概览-位置">
+                      <el-input v-model="form.siteLocation" placeholder="请输入位置"></el-input>
+                    </el-form-item>
 
-                <el-form-item label="站点概览-QQ">
-                  <el-input v-model="form.siteQq" placeholder="请输入QQ号"></el-input>
-                </el-form-item>
+                    <el-form-item label="站点概览-邮箱">
+                      <el-input v-model="form.siteEmail" placeholder="请输入邮箱"></el-input>
+                    </el-form-item>
 
-                <el-form-item label="站点概览-微信">
-                  <el-input v-model="form.siteWechat" placeholder="请输入微信号"></el-input>
-                </el-form-item>
+                    <el-form-item label="站点概览-QQ">
+                      <el-input v-model="form.siteQq" placeholder="请输入QQ号"></el-input>
+                    </el-form-item>
 
-                <el-form-item label="关于我页面-自我介绍">
-                  <el-input type="textarea" :rows="4" v-model="form.aboutMeIntroduction" placeholder="关于我页面-自我介绍"></el-input>
-                </el-form-item>
+                    <el-form-item label="站点概览-微信">
+                      <el-input v-model="form.siteWechat" placeholder="请输入微信号"></el-input>
+                    </el-form-item>
 
-                <el-form-item label="关于我页面-内容（可以使用HTML标签）">
-                  <el-input type="textarea" :rows="4" v-model="form.aboutMeContent" placeholder="关于我页面-内容"></el-input>
-                </el-form-item>
+                    <el-form-item label="关于我页面-自我介绍">
+                      <el-input type="textarea" :rows="4" v-model="form.aboutMeIntroduction" placeholder="关于我页面-自我介绍"></el-input>
+                    </el-form-item>
 
-                <el-form-item label="关于我页面-我的技能">
-                  <el-tag
-                          :key="skill"
-                          v-for="skill in form.aboutMeSkills"
-                          closable
-                          :disable-transitions="false"
-                          @close="handleClose(skill)">
-                    {{skill}}
-                  </el-tag>
-                  <el-input
-                          class="input-new-tag"
-                          v-if="inputVisible"
-                          v-model="inputValue"
-                          ref="saveTagInput"
-                          size="small"
-                          @keyup.enter.native="handleInputConfirm"
-                          @blur="handleInputConfirm"
-                  >
-                  </el-input>
-                  <el-button v-else class="button-new-tag" size="small" @click="showInput">+ 新增技能</el-button>
-                </el-form-item>
+                    <el-form-item label="关于我页面-内容（可以使用HTML标签）">
+                      <el-input type="textarea" :rows="4" v-model="form.aboutMeContent" placeholder="关于我页面-内容"></el-input>
+                    </el-form-item>
 
-                <el-form-item>
-                  <el-button type="primary" @click="onSubmit">保存</el-button>
-                </el-form-item>
+                    <el-form-item label="关于我页面-我的技能">
+                      <el-tag
+                              :key="skill"
+                              v-for="skill in form.aboutMeSkills"
+                              closable
+                              :disable-transitions="false"
+                              @close="handleClose(skill)">
+                        {{skill}}
+                      </el-tag>
+                      <el-input
+                              class="input-new-tag"
+                              v-if="inputVisible"
+                              v-model="inputValue"
+                              ref="saveTagInput"
+                              size="small"
+                              @keyup.enter.native="handleInputConfirm"
+                              @blur="handleInputConfirm"
+                      >
+                      </el-input>
+                      <el-button v-else class="button-new-tag" size="small" @click="showInput">+ 新增技能</el-button>
+                    </el-form-item>
 
-              </el-form>
+                    <el-form-item>
+                      <el-button type="primary" @click="onSubmit">保存</el-button>
+                    </el-form-item>
+
+                  </el-form>
+                </el-tab-pane>
+
+                <el-tab-pane label="第三方服务" name="THIRD-SERVICE">
+                  <el-form ref="form" :model="form" label-width="180px"  class="mt-5" >
+                    <el-form-item label="CSDN的Session">
+                      <el-input type="textarea" :rows="4" v-model="form.csdnSession" placeholder="请输入Session"></el-input>
+                    </el-form-item>
+
+                    <el-form-item>
+                      <el-button type="primary" @click="onSubmit">保存</el-button>
+                    </el-form-item>
+
+                  </el-form>
+
+                </el-tab-pane>
+              </el-tabs>
 
             </div>
           </div>
@@ -215,7 +235,6 @@
             inputValue: '',
             formLabelWidth: '120px',
             form: {
-
               author: '',
               aboutMeIntroduction:'',
               aboutMeContent:'',
@@ -224,8 +243,10 @@
               siteLocation:'',
               siteEmail:'',
               siteQq:'',
-              siteWechat:''
-            }
+              siteWechat:'',
+              csdnSession:''
+            },
+            activeTab: 'SYS-CONFIG'
 
           }
 
@@ -275,6 +296,11 @@
                     .catch(error => {
                       console.error(error);
                     });
+          },
+          // 处理导航栏点击事件
+          handleTabClick(tab) {
+            // 切换表格数据源
+              this.activeTab = tab.name;
           },
           logout(){
             axiosInstance.get('/admin/logout').then(res => {

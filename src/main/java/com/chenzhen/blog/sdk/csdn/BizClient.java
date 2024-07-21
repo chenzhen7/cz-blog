@@ -23,11 +23,27 @@ public class BizClient {
 
 
     public static CommonResult<ListResp> list(ListRequest request) throws Exception {
+        //CSDN接口有参数加密 ，参数必须按照顺序拼接
+        StringBuilder path = new StringBuilder(BizApi.LIST_URL);
+        boolean isFirstParam = true;
+        if (request.getKeyword() != null && !request.getKeyword().isEmpty()) {
+            path.append(isFirstParam ? "?" : "&").append("keyword=").append(request.getKeyword());
+            isFirstParam = false;
+        }
+        if (request.getPage() != null) {
+            path.append(isFirstParam ? "?" : "&").append("page=").append(request.getPage());
+            isFirstParam = false;
+        }
+        if (request.getPageSize() != null) {
+            path.append(isFirstParam ? "?" : "&").append("pageSize=").append(request.getPageSize());
+            isFirstParam = false;
+        }
+        if (request.getStatus() != null && !request.getStatus().isEmpty()) {
+            path.append(isFirstParam ? "?" : "&").append("status=").append(request.getStatus());
+        }
+        String finalPath = path.toString();
 
-        final String path =  BizApi.LIST_URL
-                + "?pageSize=" + request.getPageSize();
-
-        HttpResponse response = getHttpResponse(request, path);
+        HttpResponse response = getHttpResponse(request, finalPath);
 
         //失败
         if (!response.isOk()){

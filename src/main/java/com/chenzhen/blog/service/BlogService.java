@@ -55,7 +55,5 @@ public interface BlogService extends IService<Blog> {
 
     List<Blog> getSimilarBlogs(Long id);
 
-    void batchAyncCsdn(List<Integer> ids, Long typeId) throws Exception;
 
-    List<ListResp.Article> pageCsdnBlogs(BaseQuery query) throws Exception;
 }

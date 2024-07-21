@@ -1,8 +1,10 @@
 package com.chenzhen.blog.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chenzhen.blog.entity.pojo.SysConfig;
 import com.chenzhen.blog.entity.vo.SysConfigVO;
+import com.chenzhen.blog.exception.AdminException;
 import com.chenzhen.blog.service.SysConfigService;
 import com.chenzhen.blog.entity.mapper.SysConfigMapper;
 import org.springframework.beans.BeanUtils;
@@ -33,6 +35,15 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
         BeanUtils.copyProperties(sysConfigVO,sysConfig);
         sysConfig.setAboutMeSkill(String.join(",",sysConfigVO.getAboutMeSkills()));
         return updateById(sysConfig);
+    }
+
+    @Override
+    public String getCsdnSession() {
+        String csdnSession = getSysConfig().getCsdnSession();
+        if (StrUtil.isBlank(csdnSession)){
+            throw new AdminException("你没有配置CSDN的Session，请前往系统设置配置。");
+        }
+        return csdnSession;
     }
 
 }

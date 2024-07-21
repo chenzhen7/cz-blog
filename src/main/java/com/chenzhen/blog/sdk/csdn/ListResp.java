@@ -50,6 +50,16 @@ public class ListResp implements Serializable {
         private String title;
 
         /**
+         * 状态 1.发布 2.草稿
+         */
+        private Integer status;
+
+        /**
+         * 编辑器类型 0.富文本 1.markdown
+         */
+        private Integer editorType;
+
+        /**
          * 文章封面
          */
         private java.util.List<String> coverImage;
@@ -58,6 +68,17 @@ public class ListResp implements Serializable {
          * 文章发布时间
          */
         private LocalDateTime postTime;
+
+
+        /**
+         * 展现量
+         */
+        private int totalExposures;
+
+        /**
+         * 收藏
+         */
+        private int collectCount;
 
         /**
          * 文章浏览数

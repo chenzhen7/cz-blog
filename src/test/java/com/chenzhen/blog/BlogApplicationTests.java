@@ -67,5 +67,3 @@ class BlogApplicationTests {
 
 
 }
-
-        System.out.println("response = " + response);

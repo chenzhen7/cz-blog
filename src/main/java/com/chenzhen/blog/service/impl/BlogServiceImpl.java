@@ -181,59 +181,8 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
         return recommendedBlogs;
     }
 
-    @Override
-    public void batchAyncCsdn(List<Integer> ids, Long typeId) throws Exception {
-        for (Integer id : ids) {
-            AyncCsdn(typeId, id);
-        }
-    }
 
-    @Override
-    public List<ListResp.Article> pageCsdnBlogs(BaseQuery query) throws Exception {
-        ListRequest listRequest = ListRequest.builder()
-                .pageSize(query.getPageSize())
-                .cookie("cookies")
-                .build();
-        ListResp listResp = BizClient.list(listRequest).getResult();
 
-        if (CollUtil.isEmpty(listResp.getList())) {
-            return null;
-        }
-        PageInfo<ListResp.Article> pageInfo = new PageInfo<>();
-
-        pageInfo.setList(listResp.getList());
-        pageInfo.setTotal(listResp.getTotal());
-        pageInfo.setPages(listResp.getTotal() / listResp.getSize());
-        pageInfo.setPageNum(listResp.getPage());
-        pageInfo.setPageSize(listResp.getSize());
-
-        return pageInfo.getList();
-    }
-
-    private void AyncCsdn(Long typeId, Integer id) throws Exception {
-
-        GetArticleRequest getArticleRequest = GetArticleRequest.builder()
-                .id(id)
-                .cookie("cookies")
-                .build();
-        GetArticleResp getArticleResp = BizClient.getArticle(getArticleRequest).getResult();
-
-        Blog blog = new Blog();
-        blog.setTitle(getArticleResp.getTitle());
-        blog.setTypeId(typeId);
-        blog.setContent(getArticleResp.getMarkdown_content());
-        blog.setDescription(getArticleResp.getDescription());
-        blog.setFirstPicture(CollUtil.isEmpty(getArticleResp.getCover_image()) ? null : getArticleResp.getCover_image().get(0));
-        blog.setCommentabled(true);
-        blog.setAppreciation(true);
-        blog.setPublished(true);
-        blog.setRecommend(true);
-        blog.setShareStatement(true);
-        blog.setCopyright(1);
-
-        save(blog);
-
-    }
 
     public static double calculateCosineSimilarity(String text1, String text2) {
         Map<Character, Integer> wordCount1 = getWordCount(text1);

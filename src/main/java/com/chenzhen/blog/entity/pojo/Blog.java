@@ -45,7 +45,7 @@ public class Blog extends BaseEntity implements Serializable {
      * 博文描述（不能超过200字）
      */
     @NotBlank(message = "描述不能为空")
-    @Size(max = 200, message = "描述不能超过200字")
+    @Size(max = 300, message = "描述不能超过200字")
     private String description;
 
     /**
