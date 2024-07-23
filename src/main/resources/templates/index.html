@@ -17,33 +17,7 @@
 <body >
 
 
-<!--导航-->
-<div class="cz-navbar">
-    <div class="cz-pc-menu">
-        <a href="index.html" th:href="@{/}" class="cz-navbar-brand text-decoration-none "><strong th:text="${author}">ChenZhen</strong></a>
-        <div class="cz-navbar-links fs-6 fw-light">
-            <a href="index.html"    th:href="@{/}" class="cz-nav-link cz-active-link">首页</a>
-            <a href="tags.html"     th:href="@{/tags}" class="cz-nav-link">标签</a>
-            <a href="archives.html" th:href="@{/archives}" class="cz-nav-link">归档</a>
-            <a href="message.html"  th:href="@{/message}" class="cz-nav-link">留言板</a>
-            <a href="friends.html"  th:href="@{/friends}" class="cz-nav-link">友链</a>
-            <a href="about.html"    th:href="@{/about}" class="cz-nav-link">关于我</a>
-        </div>
-        <a href="#" class="cz-navbar-brand" data-bs-toggle="modal" data-bs-target="#searchModal">
-            <strong>搜索</strong>
-        </a>
 
-        <button class="cz-menu-toggle-btn">菜单</button>
-    </div>
-    <div class="cz-mobile-menu fw-light fs-6">
-        <a href="index.html"    th:href="@{/}" class="cz-nav-link cz-active-link">首页</a>
-        <a href="tags.html"     th:href="@{/tags}" class="cz-nav-link">标签</a>
-        <a href="archives.html" th:href="@{/archives}" class="cz-nav-link">归档</a>
-        <a href="message.html"  th:href="@{/message}" class="cz-nav-link">留言板</a>
-        <a href="friends.html"  th:href="@{/friends}" class="cz-nav-link">友链</a>
-        <a href="about.html"    th:href="@{/about}" class="cz-nav-link">关于我</a>
-    </div>
-</div>
 
 <!--固定在顶部的导航-->
 <div class="cz-navbar fixed d-none" id="fixed-navbar">
@@ -106,7 +80,34 @@
      style="background-image: url('../static/images/index.jpg')"
      th:style="'background-image: url(' + @{/images/index.jpg} + ')'">
 
+
     <div class="m-bg-class_cover" align="center">
+        <!--导航-->
+        <div class="container">
+            <div class="cz-top-navbar">
+                <div class="cz-pc-menu">
+                    <a href="index.html" th:href="@{/}" class="cz-top-navbar-brand text-decoration-none"><strong th:text="${author}">ChenZhen</strong></a>
+                    <div class="cz-top-navbar-links fs-5">
+                        <a href="index.html"    th:href="@{/}" class="cz-top-nav-link ">首页</a>
+                        <a href="tags.html"     th:href="@{/tags}" class="cz-top-nav-link">标签</a>
+                        <a href="archives.html" th:href="@{/archives}" class="cz-top-nav-link">归档</a>
+                        <a href="message.html"  th:href="@{/message}" class="cz-top-nav-link">留言板</a>
+                        <a href="friends.html"  th:href="@{/friends}" class="cz-top-nav-link">友链</a>
+                        <a href="about.html"    th:href="@{/about}" class="cz-top-nav-link">关于我</a>
+                    </div>
+
+                    <a class="cz-menu-toggle-btn">菜单</a>
+                </div>
+                <div class="cz-mobile-menu fs-6">
+                    <a href="index.html"    th:href="@{/}" class="cz-top-nav-link ">首页</a>
+                    <a href="tags.html"     th:href="@{/tags}" class="cz-top-nav-link">标签</a>
+                    <a href="archives.html" th:href="@{/archives}" class="cz-top-nav-link">归档</a>
+                    <a href="message.html"  th:href="@{/message}" class="cz-top-nav-link">留言板</a>
+                    <a href="friends.html"  th:href="@{/friends}" class="cz-top-nav-link">友链</a>
+                    <a href="about.html"    th:href="@{/about}" class="cz-top-nav-link">关于我</a>
+                </div>
+            </div>
+        </div>
         <p class="cz-index-title cz-text-shadow-1">- Chen Zhen's Blog -</p>
         <p class="cz-index-title2 cz-text-shadow-1">Welcome to my website ——by 陈震 （Chen Zhen）</p>
     </div>

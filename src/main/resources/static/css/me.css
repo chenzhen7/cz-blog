@@ -467,8 +467,8 @@ a{
     width: 100%;
     height: 100%;
     background-color: rgba(17, 17, 17, 0.4);
-    left: 0px;
-    bottom: 0px;
+    left: 0;
+    bottom: 0;
 }
 
 
@@ -1206,6 +1206,17 @@ a{
     justify-content: space-between;
     align-items: center;
 }
+.cz-top-navbar {
+    width: 100%;
+    /*background-color: rgb(210, 210, 210);*/
+    color: #000000;
+    padding: 10px 20px;
+    line-height: 6vh;
+    transition: all 0.3s ease;
+    top: 0;
+    z-index: 1000;
+    font-weight: 900;
+}
 
 /* 基础样式 */
 .cz-navbar {
@@ -1238,16 +1249,41 @@ a{
     /*font-family: "Work Sans","Helvetica Neue",helvetica,arial,sans-serif;*/
 }
 
+.cz-top-navbar-brand {
+    display: inline-block;
+    margin-right: 1rem;
+    font-size: 1.45rem;
+    color: #494949;
+    line-height: inherit;
+    white-space: nowrap;
+    font-weight: 1000;
+    /*font-family: "Work Sans","Helvetica Neue",helvetica,arial,sans-serif;*/
+}
+
 .cz-navbar-links {
     display: flex;
     flex-grow: 1;
     justify-content: center; /* 居中对齐 */
 }
 
+.cz-top-navbar-links {
+    display: flex;
+    flex-grow: 1;
+    justify-content: right; /* 居中对齐 */
+}
+
 .cz-nav-link {
     margin: 0 5px;
     text-decoration: none;
     color: #000000;
+    padding: 0 15px 0 15px;
+}
+
+
+.cz-top-nav-link {
+    margin: 0 5px;
+    text-decoration: none;
+    color: #494949;
     padding: 0 15px 0 15px;
 }
 
@@ -1272,6 +1308,9 @@ a{
 /* 响应式样式 - 移动设备 */
 @media (max-width: 768px) {
     .cz-navbar-links {
+        display: none; /* 在移动设备上隐藏链接 */
+    }
+    .cz-top-navbar-links{
         display: none; /* 在移动设备上隐藏链接 */
     }
 
@@ -1319,12 +1358,13 @@ a{
 
 .cz-bg-section {
     width: 100%;
-    height: 94vh;
+    height: 100vh;
     background: rgba(0, 0, 0, .7);
     color: #fff;
     line-height: 100vh;
     text-align: center;
 }
+
 
 .cz-index-title{
     font-size: 90px;
