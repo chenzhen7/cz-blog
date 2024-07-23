@@ -29,7 +29,7 @@ public class AdminLoginController {
     @GetMapping()
     public String loginPage(){
         if(StpUtil.isLogin()){
-            return "redirect:/admin/blogs";
+            return "admin/blogs";
         }
         return "admin/login";
     }
