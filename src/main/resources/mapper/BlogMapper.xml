@@ -131,6 +131,7 @@
         <if test="typeId != null">
             AND b.type_id = #{typeId}
         </if>
+        order by b.update_time desc
     </select>
 
 
