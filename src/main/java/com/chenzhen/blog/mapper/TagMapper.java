@@ -1,4 +1,4 @@
-package com.chenzhen.blog.entity.mapper;
+package com.chenzhen.blog.mapper;
 
 import com.chenzhen.blog.entity.pojo.BlogTag;
 import com.chenzhen.blog.entity.pojo.Tag;

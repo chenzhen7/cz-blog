@@ -5,7 +5,7 @@ import com.chenzhen.blog.entity.pojo.Tag;
 import com.chenzhen.blog.entity.vo.TagVO;
 import com.chenzhen.blog.entity.query.BaseQuery;
 import com.chenzhen.blog.service.TagService;
-import com.chenzhen.blog.entity.mapper.TagMapper;
+import com.chenzhen.blog.mapper.TagMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.stereotype.Service;

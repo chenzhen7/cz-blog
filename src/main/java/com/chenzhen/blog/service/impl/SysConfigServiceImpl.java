@@ -6,7 +6,7 @@ import com.chenzhen.blog.entity.pojo.SysConfig;
 import com.chenzhen.blog.entity.vo.SysConfigVO;
 import com.chenzhen.blog.exception.AdminException;
 import com.chenzhen.blog.service.SysConfigService;
-import com.chenzhen.blog.entity.mapper.SysConfigMapper;
+import com.chenzhen.blog.mapper.SysConfigMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 

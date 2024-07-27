@@ -9,7 +9,7 @@ import com.chenzhen.blog.entity.dto.UpdateUserPwdDTO;
 import com.chenzhen.blog.entity.pojo.User;
 import com.chenzhen.blog.entity.query.BaseQuery;
 import com.chenzhen.blog.service.UserService;
-import com.chenzhen.blog.entity.mapper.UserMapper;
+import com.chenzhen.blog.mapper.UserMapper;
 import com.chenzhen.blog.util.R;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;

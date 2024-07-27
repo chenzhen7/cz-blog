@@ -1,6 +1,6 @@
 package com.chenzhen.blog.controller;
 
-import com.chenzhen.blog.entity.mapper.BlogMapper;
+import com.chenzhen.blog.mapper.BlogMapper;
 import com.chenzhen.blog.entity.vo.BlogVO;
 import com.chenzhen.blog.service.SysConfigService;
 import com.chenzhen.blog.service.ViewsService;

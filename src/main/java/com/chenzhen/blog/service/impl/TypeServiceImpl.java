@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chenzhen.blog.entity.pojo.Type;
 import com.chenzhen.blog.entity.query.BaseQuery;
 import com.chenzhen.blog.service.TypeService;
-import com.chenzhen.blog.entity.mapper.TypeMapper;
+import com.chenzhen.blog.mapper.TypeMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.stereotype.Service;

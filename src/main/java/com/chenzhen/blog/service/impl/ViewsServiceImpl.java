@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chenzhen.blog.entity.pojo.Views;
 import com.chenzhen.blog.service.ViewsService;
-import com.chenzhen.blog.entity.mapper.ViewsMapper;
+import com.chenzhen.blog.mapper.ViewsMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

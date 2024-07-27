@@ -12,7 +12,7 @@ import com.chenzhen.blog.entity.dto.FriendlinkAuditDTO;
 import com.chenzhen.blog.entity.pojo.Friend;
 import com.chenzhen.blog.entity.query.FriendlinkQuery;
 import com.chenzhen.blog.service.FriendService;
-import com.chenzhen.blog.entity.mapper.FriendMapper;
+import com.chenzhen.blog.mapper.FriendMapper;
 import com.chenzhen.blog.util.MailUtil;
 import com.chenzhen.blog.util.R;
 import com.github.pagehelper.PageHelper;

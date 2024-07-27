@@ -1,4 +1,4 @@
-package com.chenzhen.blog.entity.mapper;
+package com.chenzhen.blog.mapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

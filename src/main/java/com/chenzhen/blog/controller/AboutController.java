@@ -30,7 +30,7 @@ public class AboutController {
 
         SysConfig sysConfig = sysConfigService.list().get(0);
 
-        model.addAttribute("intro",sysConfig.getAboutMeContent());
+        model.addAttribute("intro",sysConfig.getAboutMeIntroduction());
         model.addAttribute("content",sysConfig.getAboutMeContent());
         model.addAttribute("skills",sysConfig.getAboutMeSkill().split("[,，]"));
         model.addAttribute("author",sysConfig.getAuthor());

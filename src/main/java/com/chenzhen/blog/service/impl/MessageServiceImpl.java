@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chenzhen.blog.entity.pojo.Message;
 import com.chenzhen.blog.entity.vo.MessageVO;
 import com.chenzhen.blog.service.MessageService;
-import com.chenzhen.blog.entity.mapper.MessageMapper;
+import com.chenzhen.blog.mapper.MessageMapper;
 import com.chenzhen.blog.util.MailUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
