@@ -1,6 +1,7 @@
 package com.chenzhen.blog.controller;
 
 import cn.hutool.core.collection.CollUtil;
+import com.chenzhen.blog.entity.annotation.BlogLog;
 import com.chenzhen.blog.entity.pojo.Music;
 import com.chenzhen.blog.entity.pojo.SysConfig;
 import com.chenzhen.blog.entity.pojo.Type;
@@ -48,6 +49,7 @@ public class IndexController {
 
     //跳转首页
     @GetMapping()
+    @BlogLog(value = "访问首页")
     public String index(@RequestParam(value = "pageNum",required = false,defaultValue = "1")Integer pageNum,
                         @RequestParam(value = "type",required = false)Long type,
                         Model model){
@@ -105,6 +107,7 @@ public class IndexController {
 
     //跳转博客详情页
     @GetMapping("/blog/{id}")
+    @BlogLog(value = "访问博客详情")
     public String blog(@PathVariable("id")Long id,Model model){
         //获取文章详情
         BlogVO blog = blogService.getBlogDetail(id);
@@ -129,6 +132,7 @@ public class IndexController {
     //搜索
     @ResponseBody
     @GetMapping("/search")
+    @BlogLog(value = "搜索")
     public R search(String keyword){
         //根据标题模糊搜索
         List<Blog> blogs = blogService.searchBlog(keyword.trim());

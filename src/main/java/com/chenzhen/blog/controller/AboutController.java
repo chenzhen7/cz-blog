@@ -1,5 +1,6 @@
 package com.chenzhen.blog.controller;
 
+import com.chenzhen.blog.entity.annotation.BlogLog;
 import com.chenzhen.blog.entity.pojo.SysConfig;
 import com.chenzhen.blog.service.SysConfigService;
 import com.chenzhen.blog.service.ViewsService;
@@ -26,6 +27,7 @@ public class AboutController {
     SysConfigService sysConfigService;
 
     @GetMapping("/about")
+    @BlogLog("关于我页面")
     public String about(Model model){
 
         SysConfig sysConfig = sysConfigService.list().get(0);

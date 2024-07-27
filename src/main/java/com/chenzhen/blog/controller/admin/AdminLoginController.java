@@ -1,6 +1,7 @@
 package com.chenzhen.blog.controller.admin;
 
 import cn.dev33.satoken.stp.StpUtil;
+import com.chenzhen.blog.entity.annotation.BlogLog;
 import com.chenzhen.blog.entity.dto.LoginDTO;
 import com.chenzhen.blog.service.UserService;
 import com.chenzhen.blog.util.R;
@@ -36,6 +37,7 @@ public class AdminLoginController {
 
     @ResponseBody
     @PostMapping("/login")
+    @BlogLog(value = "管理员登录")
     public R login(@RequestBody @Valid LoginDTO loginDTO,HttpSession session){
         return userService.login(loginDTO,session);
     }

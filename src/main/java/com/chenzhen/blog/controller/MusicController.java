@@ -1,5 +1,6 @@
 package com.chenzhen.blog.controller;
 
+import com.chenzhen.blog.entity.annotation.BlogLog;
 import com.chenzhen.blog.factories.CoverStrategyFactory;
 import com.chenzhen.blog.strategies.CoverStrategy;
 import org.jaudiotagger.audio.AudioFile;

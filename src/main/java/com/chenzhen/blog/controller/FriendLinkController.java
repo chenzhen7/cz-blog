@@ -1,6 +1,7 @@
 package com.chenzhen.blog.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.chenzhen.blog.entity.annotation.BlogLog;
 import com.chenzhen.blog.entity.pojo.Friend;
 import com.chenzhen.blog.service.FriendService;
 import com.chenzhen.blog.service.SysConfigService;
@@ -35,6 +36,7 @@ public class FriendLinkController {
     private SysConfigService sysConfigService;
 
     @GetMapping()
+    @BlogLog(value = "友链页面")
     public String friendLink(Model model){
         // 获取审核状态为已通过的友链
         List<Friend> list = friendService.list(new LambdaQueryWrapper<Friend>().eq(Friend::getStatus, Friend.Status.PASS));
@@ -52,6 +54,7 @@ public class FriendLinkController {
 
     @PostMapping("/apply-friendlink")
     @ResponseBody
+    @BlogLog(value = "申请友链")
     public R applyFriendlink(Friend friend) throws MessagingException {
         return friendService.applyFriendLink(friend);
     }

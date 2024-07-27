@@ -1,5 +1,6 @@
 package com.chenzhen.blog.controller;
 
+import com.chenzhen.blog.entity.annotation.BlogLog;
 import com.chenzhen.blog.mapper.BlogMapper;
 import com.chenzhen.blog.entity.vo.BlogVO;
 import com.chenzhen.blog.service.SysConfigService;
@@ -29,6 +30,7 @@ public class ArchivesController {
     private SysConfigService sysConfigService;
 
     @GetMapping("/archives")
+    @BlogLog("归档页面")
     public String archives(Model model){
 
         List<BlogVO> memoryList = blogMapper.getBlogList();

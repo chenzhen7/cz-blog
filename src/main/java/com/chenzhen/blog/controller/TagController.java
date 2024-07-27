@@ -1,6 +1,7 @@
 package com.chenzhen.blog.controller;
 
 import cn.hutool.core.util.ArrayUtil;
+import com.chenzhen.blog.entity.annotation.BlogLog;
 import com.chenzhen.blog.entity.vo.BlogVO;
 import com.chenzhen.blog.entity.vo.TagVO;
 import com.chenzhen.blog.service.BlogService;
@@ -36,6 +37,7 @@ public class TagController {
     private SysConfigService sysConfigService;
     //分类页面
     @GetMapping("/tags")
+    @BlogLog(value = "标签页面")
     public String types(@RequestParam(value = "tagIds",required = false) long[] tagIds,
                         @RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum,
                         Model model){

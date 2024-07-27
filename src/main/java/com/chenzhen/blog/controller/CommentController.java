@@ -1,5 +1,6 @@
 package com.chenzhen.blog.controller;
 
+import com.chenzhen.blog.entity.annotation.BlogLog;
 import com.chenzhen.blog.entity.pojo.Comment;
 import com.chenzhen.blog.entity.pojo.User;
 import com.chenzhen.blog.entity.vo.CommentVO;
@@ -47,6 +48,7 @@ public class CommentController {
 
     //新增评论
     @PostMapping("/comments")
+    @BlogLog("新增评论")
     public String post(Comment comment, HttpSession session,Integer pageNum) throws MessagingException {
         User user = (User) session.getAttribute("user");
         if (user != null) {
@@ -63,6 +65,7 @@ public class CommentController {
 
     //删除评论
     @GetMapping("/comments/delete/{id}")
+    @BlogLog("删除评论")
     public String delete(@PathVariable("id")Long commentId,
                          Long blogId, Integer pageNum, HttpSession session){
 

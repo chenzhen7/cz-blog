@@ -1,6 +1,7 @@
 package com.chenzhen.blog.controller;
 
 
+import com.chenzhen.blog.entity.annotation.BlogLog;
 import com.chenzhen.blog.entity.vo.MessageVO;
 import com.chenzhen.blog.entity.pojo.Message;
 import com.chenzhen.blog.entity.pojo.User;
@@ -38,6 +39,7 @@ public class MessageController {
 
     //显示留言板页面
     @GetMapping(value = "/message")
+    @BlogLog(value = "留言板页面")
     public String message(Model model, @RequestParam(defaultValue = "1") Integer pageNum) {
 
         PageInfo<MessageVO> pageInfo = messageService.getMessageList(pageNum);
@@ -54,6 +56,7 @@ public class MessageController {
     //查询评论列表
     @CrossOrigin
     @GetMapping(value = {"/messagecomment","/messagecomment/{pageNum}"})
+    @BlogLog(value = "留言板评论列表")
     public String messageComment(@PathVariable(value = "pageNum",required = false) Integer pageNum, Model model) {
         if (pageNum == null){
             pageNum = 1;
@@ -66,6 +69,7 @@ public class MessageController {
 
     //新增留言
     @PostMapping("/message")
+    @BlogLog(value = "新增留言")
     public String message(Message message, HttpSession session, Integer pageNum) throws MessagingException {
 
         User user = (User) session.getAttribute("user");
