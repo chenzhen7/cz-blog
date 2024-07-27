@@ -74,10 +74,11 @@ public class LogAspect {
         //获取操作名称
         BlogLog annotation = currentMethod.getAnnotation(BlogLog.class);
         boolean save = annotation.save();
+        String content = annotation.value();
         if (!save) {
             return;
         }
-        logService.asyncSaveSystemLog(attributes);
+        logService.asyncSaveSystemLog(content,attributes);
     }
 
 

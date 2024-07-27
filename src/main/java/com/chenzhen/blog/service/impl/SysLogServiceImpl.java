@@ -36,11 +36,12 @@ public class SysLogServiceImpl extends ServiceImpl<SysLogMapper, SysLog>
 
     @Override
     @Async("asyncThreadPoolTaskExecutor")
-    public void asyncSaveSystemLog(ServletRequestAttributes attributes) {
+    public void asyncSaveSystemLog(String content,ServletRequestAttributes attributes) {
         HttpServletRequest request = attributes.getRequest();
         String ua = request.getHeader("User-Agent");
 
         SysLog sysLog = new SysLog();
+        sysLog.setContent(content);
         sysLog.setIp(getRealIp(request));
         sysLog.setReferer(request.getHeader("Referer"));
         sysLog.setRequestUrl(request.getRequestURL().toString());

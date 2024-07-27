@@ -11,5 +11,5 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 */
 public interface SysLogService extends IService<SysLog> {
 
-    void asyncSaveSystemLog(ServletRequestAttributes attributes);
+    void asyncSaveSystemLog(String content,ServletRequestAttributes attributes);
 }
