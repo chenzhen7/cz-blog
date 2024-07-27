@@ -247,4 +247,20 @@ CREATE TABLE `t_views`  (
 -- ----------------------------
 INSERT INTO `t_views` VALUES (3, 0, 0, '2024-02-23 16:52:52', '2024-06-09 23:51:36');
 
+DROP TABLE IF EXISTS `t_sys_log`;
+CREATE TABLE `t_sys_log` (
+                             `id` int(11) NOT NULL AUTO_INCREMENT,
+                             `ip` varchar(255) DEFAULT NULL COMMENT 'IP地址',
+                             `content` varchar(255) DEFAULT NULL COMMENT '日志内容',
+                             `params` varchar(255) DEFAULT NULL COMMENT '请求参数',
+                             `os` varchar(255) DEFAULT NULL COMMENT '操作系统',
+                             `browser` varchar(255) DEFAULT NULL COMMENT '浏览器类型',
+                             `spider_type` varchar(255) DEFAULT NULL COMMENT '爬虫类型',
+                             `request_url` varchar(255) DEFAULT NULL COMMENT '请求URL',
+                             `referer` varchar(255) DEFAULT NULL COMMENT '引荐来源',
+                             `create_time` datetime DEFAULT NULL,
+                             `update_time` datetime DEFAULT NULL,
+                             PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
