@@ -2,6 +2,9 @@ package com.chenzhen.blog.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.chenzhen.blog.entity.pojo.SysLog;
+import com.chenzhen.blog.entity.query.BaseQuery;
+import com.chenzhen.blog.util.R;
+import com.github.pagehelper.PageInfo;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
@@ -12,4 +15,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public interface SysLogService extends IService<SysLog> {
 
     void asyncSaveSystemLog(String content,ServletRequestAttributes attributes);
+
+    PageInfo<SysLog> pageSysLogs(BaseQuery query);
 }

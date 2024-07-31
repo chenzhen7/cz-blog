@@ -3,6 +3,7 @@ package com.chenzhen.blog.service;
 import com.chenzhen.blog.entity.pojo.Comment;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.chenzhen.blog.entity.pojo.User;
+import com.chenzhen.blog.entity.vo.CommentBlogVO;
 import com.chenzhen.blog.entity.vo.CommentVO;
 import com.github.pagehelper.PageInfo;
 
@@ -22,5 +23,6 @@ public interface CommentService extends IService<Comment> {
 
     int saveComment(Comment comment);
 
+    List<CommentBlogVO> getRecentComment();
 
 }

@@ -2,6 +2,9 @@ package com.chenzhen.blog.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chenzhen.blog.entity.pojo.Comment;
+import com.chenzhen.blog.entity.pojo.Message;
+import com.chenzhen.blog.entity.pojo.User;
+import com.chenzhen.blog.entity.vo.CommentBlogVO;
 import com.chenzhen.blog.entity.vo.CommentVO;
 import com.chenzhen.blog.mapper.BlogMapper;
 import com.chenzhen.blog.service.CommentService;
@@ -24,6 +27,8 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment>
     implements CommentService{
     @Autowired
     private BlogMapper blogMapper;
+    @Autowired
+    private CommentMapper commentMapper;
 
     @Override
     public PageInfo<CommentVO> pageCommentList(Long blogId,Integer pageNum) {
@@ -45,7 +50,10 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment>
         return getBaseMapper().insert(comment);
     }
 
-
+    @Override
+    public List<CommentBlogVO> getRecentComment() {
+        return commentMapper.getRecentComment();
+    }
 
 
 }

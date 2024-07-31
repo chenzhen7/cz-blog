@@ -2,6 +2,7 @@ package com.chenzhen.blog.mapper;
 
 import com.chenzhen.blog.entity.pojo.Comment;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.chenzhen.blog.entity.vo.CommentBlogVO;
 import com.chenzhen.blog.entity.vo.CommentVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -20,6 +21,7 @@ public interface CommentMapper extends BaseMapper<Comment> {
 
     List<CommentVO> getRootCommentList(@Param("blogId") Long blogId);
 
+    List<CommentBlogVO> getRecentComment();
 }
 
 

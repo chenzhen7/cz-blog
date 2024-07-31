@@ -43,6 +43,11 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
         return pageInfo;
     }
 
+    @Override
+    public List<Message> getRecentMessage() {
+        return messageMapper.getRecentMessage();
+    }
+
 
 }
 

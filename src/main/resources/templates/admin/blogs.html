@@ -26,6 +26,12 @@
       <hr>
       <ul class="nav nav-pills flex-column mb-auto">
         <li class="nav-item">
+          <a href="./dashboard.html" th:href="@{/admin/dashboard}" class="nav-link link-dark" aria-current="page">
+            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#home"></use></svg>
+            仪表盘
+          </a>
+        </li>
+        <li class="nav-item">
           <a href="./blogs.html" th:href="@{/admin/blogs}" class="nav-link active" aria-current="page">
             <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#home"></use></svg>
             文章管理
@@ -152,14 +158,23 @@
 
             <!-- 添加按钮 -->
             <el-button class="mb-3" type="primary" plain  @click="clickAdd">添加文章</el-button>
+            <!-- 添加按钮 -->
+            <el-button class="mb-3" type="primary" plain  @click="clickAdd">推送文章到百度</el-button>
 
 
             <!-- 表格 -->
             <el-table
+                    ref="blogTable"
                     :data="list"
                     stripe
                     border
+                    @selection-change="handleSelectionChange"
                     style="width: 100%">
+              <el-table-column
+                      type="selection"
+                      width="55">
+              </el-table-column>
+
               <el-table-column
                       prop="id"
                       label="ID"
@@ -224,6 +239,7 @@
               <el-table-column width="150" label="操作">
                 <template slot-scope="scope">
                   <el-button  size="mini" @click="clickEdit(scope.row.id)">编辑</el-button>
+                  <el-button  size="mini" type="success" @click="clickEdit(scope.row.id)">编辑</el-button>
                   <el-button  size="mini" type="danger" @click="clickDelete(scope.row.id)">删除</el-button>
                 </template>
               </el-table-column>
@@ -280,6 +296,7 @@
             },
             tagList:[],
             typeList:[],
+            multipleSelection: [],
             contentEditor:null
           }
 
@@ -378,6 +395,9 @@
                 location.href = "/admin";
               }
             })
+          },
+          handleSelectionChange(val) {
+            this.multipleSelection = val;
           }
 
         },

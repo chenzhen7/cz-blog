@@ -55,5 +55,6 @@ public interface BlogService extends IService<Blog> {
 
     List<Blog> getSimilarBlogs(Long id);
 
+    List<Blog> getBlogViewTop10();
 
 }

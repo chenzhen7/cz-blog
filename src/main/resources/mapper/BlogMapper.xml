@@ -174,7 +174,13 @@
                  left join t_tag t on bt.tag_id = t.id
         where b.published = 1
     </select>
-
+    <select id="getBlogViewTop10" resultType="com.chenzhen.blog.entity.pojo.Blog">
+        select b.id,b.title,b.views
+        from t_blog b
+        where b.published = 1
+        order by b.views desc
+        limit 10
+    </select>
 
 
     <insert id="saveBlogTags">

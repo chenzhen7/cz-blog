@@ -56,7 +56,7 @@
                 // 保存记住我
                 axiosInstance.post('/admin/login',this.form).then(res=>{
                     if (res.code === 20000){
-                        window.location.href = '/admin/blogs';
+                        window.location.href = '/admin/dashboard';
                     }
                 })
             }

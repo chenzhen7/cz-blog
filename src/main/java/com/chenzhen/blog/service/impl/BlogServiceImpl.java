@@ -182,6 +182,11 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
 
 
 
+    @Override
+    public List<Blog> getBlogViewTop10() {
+        return blogMapper.getBlogViewTop10();
+    }
+
     public static double calculateCosineSimilarity(String text1, String text2) {
         Map<Character, Integer> wordCount1 = getWordCount(text1);
         Map<Character, Integer> wordCount2 = getWordCount(text2);

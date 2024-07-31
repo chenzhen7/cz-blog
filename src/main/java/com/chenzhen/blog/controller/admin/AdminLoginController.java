@@ -30,7 +30,7 @@ public class AdminLoginController {
     @GetMapping()
     public String loginPage(){
         if(StpUtil.isLogin()){
-            return "admin/blogs";
+            return "admin/dashboard";
         }
         return "admin/login";
     }

@@ -19,6 +19,7 @@ public interface MessageMapper extends BaseMapper<Message> {
 
     List<MessageVO> getMessageList();
 
+    List<Message> getRecentMessage();
 
 }
 

@@ -2,7 +2,10 @@ package com.chenzhen.blog.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.chenzhen.blog.entity.pojo.SysLog;
+import com.chenzhen.blog.entity.query.BaseQuery;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 /**
 * @author MIS
@@ -13,6 +16,7 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface SysLogMapper extends BaseMapper<SysLog> {
 
+    List<SysLog> pageAdminBlogs(BaseQuery query);
 }
 
 

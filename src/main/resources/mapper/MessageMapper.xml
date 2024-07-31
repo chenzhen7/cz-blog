@@ -45,6 +45,13 @@
         WHERE m.root_message_id = ${id}
         order by m.create_time asc
     </select>
+    <select id="getRecentMessage" resultType="com.chenzhen.blog.entity.pojo.Message">
+        select
+            id,nickname,email,content,avatar,address,create_time,update_time
+        from t_message
+        order by create_time desc
+        limit 10
+    </select>
 
 
 </mapper>

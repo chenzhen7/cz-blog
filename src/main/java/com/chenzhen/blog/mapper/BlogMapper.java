@@ -46,6 +46,7 @@ public interface BlogMapper extends BaseMapper<Blog> {
 
     List<Blog> getAllTitle();
 
+    List<Blog> getBlogViewTop10();
 }
 
 

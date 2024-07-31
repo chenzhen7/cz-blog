@@ -45,12 +45,15 @@
         where c.root_comment_id = ${id}
         order by c.create_time asc
     </select>
-
-
-
-
-
-
+    <select id="getRecentComment" resultType="com.chenzhen.blog.entity.vo.CommentBlogVO">
+        select
+            c.id,c.blog_id,c.parent_comment_id,c.root_comment_id,c.nickname,c.email,c.content,c.avatar,c.address,c.admin_comment,c.create_time,c.update_time,
+            b.title blog_title
+        from t_comment c
+        left join t_blog b on c.blog_id = b.id
+        order by c.create_time desc
+        limit 10
+    </select>
 
 
 </mapper>

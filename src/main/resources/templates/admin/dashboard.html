@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta name="referrer" content="no-referrer"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仪表盘</title>
+    <link href="../static/images/favicon.ico" th:href="@{/images/favicon.ico}" rel="icon" type="image/x-ico">
+    <link rel="stylesheet" href="../../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"  />
+    <link rel="stylesheet" href="../../static/css/me.css" th:href="@{/css/me.css}">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../../static/css/element-ui-index.css" th:href="@{/css/element-ui-index.css}">
+    <link rel="stylesheet" href="../../static/lib/editormd/css/editormd.min.css"  th:href="@{/lib/editormd/css/editormd.min.css}">
+
+
+</head>
+<body class="admin-body">
+<div id="app" class="d-flex flex-nowrap vh-100">
+
+    <!--侧边栏-->
+    <div class="d-flex flex-column flex-shrink-0 p-3 bg-white " style="width: 280px;height: 100vh">
+        <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+            <svg class="bi pe-none me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
+            <span class="fs-4"><strong>ChenZhen</strong></span>
+        </a>
+        <hr>
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item">
+                <a href="./dashboard.html" th:href="@{/admin/dashboard}" class="nav-link active" aria-current="page">
+                    <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#home"></use></svg>
+                    仪表盘
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="./blogs.html" th:href="@{/admin/blogs}" class="nav-link link-dark" aria-current="page">
+                    <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#home"></use></svg>
+                    文章管理
+                </a>
+            </li>
+            <li>
+                <a href="./types.html" th:href="@{/admin/types}" class="nav-link link-dark">
+                    <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#speedometer2"></use></svg>
+                    分类管理
+                </a>
+            </li>
+            <li>
+                <a href="./tags.html" th:href="@{/admin/tags}" class="nav-link link-dark">
+                    <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#table"></use></svg>
+                    标签管理
+                </a>
+            </li>
+            <li>
+                <a href="./friendlinks.html" th:href="@{/admin/friendlinks}" class="nav-link link-dark">
+                    <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#grid"></use></svg>
+                    友链管理
+                </a>
+            </li>
+            <li>
+                <a href="./musics.html" th:href="@{/admin/musics}" class="nav-link link-dark">
+                    <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
+                    音乐管理
+                </a>
+            </li>
+            <li>
+                <a href="./sys-configs.html" th:href="@{/admin/sys-configs}" class="nav-link link-dark">
+                    <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
+                    系统配置管理
+                </a>
+            </li>
+            <li>
+                <a href="./users.html" th:href="@{/admin/users}" class="nav-link link-dark">
+                    <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
+                    用户管理
+                </a>
+            </li>
+        </ul>
+        <hr>
+        <div class="dropdown">
+            <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+                <strong>mdo</strong>
+            </a>
+            <ul class="dropdown-menu text-small shadow">
+                <li><a class="dropdown-item" href="#">New project...</a></li>
+                <li><a class="dropdown-item" href="#">Settings</a></li>
+                <li><a class="dropdown-item" href="#">Profile</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#">Sign out</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="w-100 overflow-y-auto">
+        <!--    顶部栏-->
+        <header class="p-2 text-bg-dark">
+            <div class="container">
+                <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-end">
+                    <!--头像-->
+                    <img class="me-2 img-fluid rounded-5" width="40" height="40" src="../../static/images/me.jpg" th:src="@{${session.user.avatar}}">
+                    <!--名字-->
+                    <span class="me-3" th:src="@{${session.user.nickname}}" >ChenZhen</span>
+                    <div>
+                        <a href="#" @click="logout" class="btn btn-outline-light me-2">注销</a>
+                    </div>
+
+                </div>
+            </div>
+        </header>
+        <!--内容-->
+        <div  class="container-fluid mt-3 mb-3">
+            <div class="card mb-3">
+                <div class="card-body p-4">
+                    <el-row :gutter="20">
+                        <el-col :span="4">
+                            <div>
+                                <el-statistic
+                                        :precision="2"
+                                        :value="blogTotal"
+                                        title="文章数"
+                                >
+                                <template slot="prefix">
+                                    <i class="el-icon-s-flag" style="color: red"></i>
+                                </template>
+                                </el-statistic>
+                            </div>
+                        </el-col>
+                        <el-col :span="4">
+                            <div>
+                                <el-statistic
+                                        :precision="2"
+                                        :value="blogTagTotal"
+                                        title="标签数"
+                                >
+                                    <template slot="prefix">
+                                        <i class="el-icon-s-flag" style="color: red"></i>
+                                    </template>
+                                </el-statistic>
+                            </div>
+                        </el-col>
+                        <el-col :span="4">
+                            <div>
+                                <el-statistic
+                                        :precision="2"
+                                        :value="blogTypeTotal"
+                                        title="分类数"
+                                >
+                                    <template slot="prefix">
+                                        <i class="el-icon-s-flag" style="color: red"></i>
+                                    </template>
+                                </el-statistic>
+                            </div>
+                        </el-col>
+                        <el-col :span="4">
+                            <div>
+                                <el-statistic
+                                        :precision="2"
+                                        :value="blogCommentTotal"
+                                        title="评论数"
+                                >
+                                    <template slot="prefix">
+                                        <i class="el-icon-s-flag" style="color: red"></i>
+                                    </template>
+                                </el-statistic>
+                            </div>
+                        </el-col>
+                        <el-col :span="4">
+                            <div>
+                                <el-statistic
+                                        :precision="2"
+                                        :value="blogMessageTotal"
+                                        title="留言数"
+                                >
+                                    <template slot="prefix">
+                                        <i class="el-icon-s-flag" style="color: red"></i>
+                                    </template>
+                                </el-statistic>
+                            </div>
+                        </el-col>
+                        <el-col :span="4">
+                            <div>
+                                <el-statistic
+                                        :precision="2"
+                                        :value="blogViewTotal"
+                                        title="访问量"
+                                >
+                                    <template slot="prefix">
+                                        <i class="el-icon-s-flag" style="color: red"></i>
+                                    </template>
+                                </el-statistic>
+                            </div>
+                        </el-col>
+                    </el-row>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body p-4">
+                    <!-- 表格 -->
+                    <el-table
+                            ref="blogTable"
+                            :data="sysLogs"
+                            stripe
+                            border
+                            size="mini"
+                            style="width: 100%">
+
+                        <el-table-column
+                                prop="id"
+                                label="ID"
+                                width="50">
+                        </el-table-column>
+
+
+                        <el-table-column
+                                prop="content"
+                                label="日志内容"
+                        >
+                        </el-table-column>
+
+                        <el-table-column
+                                prop="params"
+                                label="请求参数"
+                        >
+                        </el-table-column>
+
+                        <el-table-column
+                                prop="os"
+                                label="操作系统"
+                        >
+                        </el-table-column>
+
+                        <el-table-column
+                                prop="browser"
+                                label="浏览器类型"
+                        >
+                        </el-table-column>
+
+                        <el-table-column
+                                prop="spiderType"
+                                label="爬虫类型"
+                        >
+                        </el-table-column>
+
+                        <el-table-column
+                                prop="requestUrl"
+                                label="请求URL"
+                        >
+                        </el-table-column>
+
+                        <el-table-column
+                                prop="referer"
+                                label="引荐来源"
+                        >
+                        </el-table-column>
+
+                        <el-table-column
+                                width="150"
+                                prop="createTime"
+                                label="创建时间">
+                        </el-table-column>
+
+                        <el-table-column
+                                width="150"
+                                prop="updateTime"
+                                label="更新时间">
+                        </el-table-column>
+
+                    </el-table>
+
+                    <!-- 分页 -->
+                    <el-pagination
+                            class="mt-5"
+                            @size-change="handleSizeChange"
+                            @current-change="handleCurrentChange"
+                            :current-page="searchForm.pageNum"
+                            :page-sizes="[10, 20, 50, 100]"
+                            :page-size="searchForm.pageSize"
+                            layout="total, sizes, prev, pager, next, jumper"
+                            :total="sysLogsTotal"
+                    ></el-pagination>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+</div>
+</body>
+
+<script src="../../static/lib/jquery-3.2.1/jquery-3.2.1.min.js" th:src="@{/lib/jquery-3.2.1/jquery-3.2.1.min.js}"></script>
+<!-- import Vue before Element -->
+<script src="../../static/lib/vue.js"                   th:src="@{/lib/vue.js}"></script>
+<!-- import JavaScript -->
+<script src="../../static/lib/element-ui-index.js"      th:src="@{/lib/element-ui-index.js}"></script>
+<script src="../../static/lib/axios.min.js"             th:src="@{/lib/axios.min.js}"></script>
+<script src="../../static/lib/axiosInstance.js"         th:src="@{/lib/axiosInstance.js}"></script>
+<script src="../../static/lib/editormd/editormd.min.js" th:src="@{/lib/editormd/editormd.min.js}"></script>
+
+<script >
+
+    new Vue({
+        el: '#app',
+        data: function() {
+            return {
+                sysLogs: [],
+                sysLogsTotal: 0, // 总记录数
+                searchForm: {
+                    pageNum: 1, // 当前页
+                    pageSize: 10  // 每页显示条数
+                },
+                // 表单显示
+                dialogVisible: false,
+                formLabelWidth: '120px',
+                blogTotal: 0, // 文章总数
+                blogTypeTotal: 0, // 分类总数
+                blogTagTotal: 0, // 标签总数
+                blogCommentTotal: 0, // 评论总数
+                blogMessageTotal: 0, // 留言总数
+                blogViewTotal: 0, // 访问量
+                blogViewYesterday: 0, // 昨日访问量
+                blogViewTop10: [], // 访问量排名前10的文章
+                recentComment:[],
+                recentMessage:[]
+
+            }
+
+        },
+        methods:{
+            mapRecommend(recommend){
+                const recommendMap = {
+                    true: '是',
+                    false: '否'
+                }
+                return recommendMap[recommend] || '未知';
+            },
+            mapPublished(published){
+                const publishedMap = {
+                    true: '是',
+                    false: '否'
+                }
+                return publishedMap[published] || '未知';
+            },
+            mapCopyright(copyright){
+                const copyrightMap = {
+                    1: '原创',
+                    0: '转载'
+                }
+                return copyrightMap[copyright] || '未知';
+            } ,
+            //获取分页数据
+            fetchSysLogsPage(){
+                this.list = [];
+                axiosInstance.get(`/admin/dashboard/pageSysLogs`,{
+                    params: this.searchForm
+                }).then(res => {
+                    if (res.code === 20000){
+                        this.sysLogs = res.data.sysLogsPage.list;
+                        this.sysLogsTotal = res.data.sysLogsPage.total;
+                    }
+
+                })
+            },
+            //获取数据
+            info(){
+                this.list = [];
+                axiosInstance.get(`/admin/dashboard/info`).then(res => {
+                    if (res.code === 20000){
+                        this.blogTotal = res.data.blogTotal;
+                        this.blogTypeTotal = res.data.blogTypeTotal;
+                        this.blogTagTotal = res.data.blogTagTotal;
+                        this.blogCommentTotal = res.data.blogCommentTotal;
+                        this.blogMessageTotal = res.data.blogMessageTotal;
+                        this.blogViewTotal = res.data.blogViewTotal;
+                        this.blogViewYesterday = res.data.blogViewYesterday;
+                        this.blogViewTop10 = res.data.blogViewTop10;
+                        this.recentComment = res.data.recentComment;
+                        this.recentMessage = res.data.recentMessage;
+                    }
+                })
+            },
+            handleSizeChange(val) {
+                this.searchForm.pageSize = val;
+                this.fetchSysLogsPage();
+            },
+            // 分页切换
+            handleCurrentChange(currentPage) {
+                this.searchForm.pageNum = currentPage;
+                this.fetchSysLogsPage();
+            },
+            clickAdd(){
+                //跳转
+                location.href = '/admin/blogs/edit';
+            },
+            // 编辑
+            clickEdit(id) {
+                //跳转
+                location.href = '/admin/blogs/edit?id=' + id;
+            },
+            //点击删除
+            clickDelete(id){
+                this.$confirm('此操作将永久删除该信息, 是否继续?', '提示', {
+                    cancelButtonText: '取消',
+                    confirmButtonText: '确定',
+                    type: 'warning'
+                }).then(() => {
+                    this.delete(id)
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                })
+            },
+            logout(){
+                axiosInstance.get('/admin/logout').then(res => {
+                    if (res.code === 20000){
+                        location.href = "/admin";
+                    }
+                })
+            }
+
+        },
+        mounted(){
+            this.info()
+            this.fetchSysLogsPage()
+        },
+        created(){
+        }
+    })
+
+
+
+
+</script>
+
+</html>

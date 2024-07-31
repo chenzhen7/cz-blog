@@ -24,4 +24,10 @@
         spider_type,request_url,referer,
         create_time,update_time
     </sql>
+    <select id="pageAdminBlogs" resultType="com.chenzhen.blog.entity.pojo.SysLog">
+        select id,ip,content,params,os,browser,spider_type,request_url,referer,
+               create_time,update_time
+        from t_sys_log
+
+    </select>
 </mapper>
