@@ -11,7 +11,7 @@
  Target Server Version : 80011
  File Encoding         : 65001
 
- Date: 21/07/2024 22:12:31
+ Date: 31/07/2024 22:11:13
 */
 
 SET NAMES utf8mb4;
@@ -168,13 +168,38 @@ CREATE TABLE `t_sys_config`  (
   `site_qq` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '站点概览-QQ',
   `site_wechat` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '站点概览-微信',
   `csdn_session` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT 'CSDN的Session',
+  `baidu_link_submit_token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '在百度搜索资源平台申请的推送用的准入密钥',
+  `baidu_link_submit_site` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '在百度搜索资源平台验证的站点',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统配置表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统配置表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_sys_config
 -- ----------------------------
-INSERT INTO `t_sys_config` VALUES (10, 'ChenZhen', '我是陈震，欢迎来到我的博客！我热爱写作、探索技术和分享知识。', '<p>做这个博客的初衷是为了找一个练手的springboot项目，而且当时看别人都有个人博客，自己也眼红了，于是便着手搭建博客。\n<p>博客就相当于自己的学习笔记一样，将自己学到的东西写成博文的方式记录下来，可以加深你对知识点的理解，记录足迹，反映成长。写博客实际上是记录一个人思考和解决问题的成长过程。很久之后，你再翻看自己以前写的文章，你会感觉得到自己的变化和进步。</p>\n<p>技术是很容易遗忘的，你学习完一门新的技术，很可能现在懂了，但是过一段时间没用很快就会遗忘，当你把你学习的内容写成博客，不仅可以加深记忆和理解，如果遗忘了还可以回头看看，也能帮助和你一样处于同一阶段的人。</p>\n', '面向GPT编程,CSS,JavaScript,撒打算', '酷爱Jpop、纯音、ACG、电子音乐，如果你也听：安田丽、泽野弘之、尾浦由纪、ClariS、桑田佳佑、YOASOBI的歌，说明我们品味很相似。\n\n最崇拜的作曲家：a_hisa、神前晓。\n\n喜欢玩lol，最拿手的是上单，一区ID：IGTheXian丶（可以随时找我开黑）。\n\n本项目开源：\n<a href=\"https://github.com/chenzhen7/cz-blog\" class=\"cz-text-green\" target=\"_blank\">https://github.com/chenzhen7/cz-blog</a> \n请多多Star支持', '揭阳', '1583296383', '158329638', 'ChenZhen_7', NULL);
+INSERT INTO `t_sys_config` VALUES (10, 'ChenZhen', '我是陈震，欢迎来到我的博客！我热爱写作、探索技术和分享知识。', '<p>做这个博客的初衷是为了找一个练手的springboot项目，而且当时看别人都有个人博客，自己也眼红了，于是便着手搭建博客。\n<p>博客就相当于自己的学习笔记一样，将自己学到的东西写成博文的方式记录下来，可以加深你对知识点的理解，记录足迹，反映成长。写博客实际上是记录一个人思考和解决问题的成长过程。很久之后，你再翻看自己以前写的文章，你会感觉得到自己的变化和进步。</p>\n<p>技术是很容易遗忘的，你学习完一门新的技术，很可能现在懂了，但是过一段时间没用很快就会遗忘，当你把你学习的内容写成博客，不仅可以加深记忆和理解，如果遗忘了还可以回头看看，也能帮助和你一样处于同一阶段的人。</p>\n', '面向GPT编程,CSS,JavaScript,撒打算', '酷爱Jpop、纯音、ACG、电子音乐，如果你也听：安田丽、泽野弘之、尾浦由纪、ClariS、桑田佳佑、YOASOBI的歌，说明我们品味很相似。\n\n最崇拜的作曲家：a_hisa、神前晓。\n\n喜欢玩lol，最拿手的是上单，一区ID：IGTheXian丶（可以随时找我开黑）。\n\n本项目开源：\n<a href=\"https://github.com/chenzhen7/cz-blog\" class=\"cz-text-green\" target=\"_blank\">https://github.com/chenzhen7/cz-blog</a> \n请多多Star支持', '揭阳', '1583296383', '158329638', 'ChenZhen_7', NULL, NULL, NULL);
+
+-- ----------------------------
+-- Table structure for t_sys_log
+-- ----------------------------
+DROP TABLE IF EXISTS `t_sys_log`;
+CREATE TABLE `t_sys_log`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'IP地址',
+  `content` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '日志内容',
+  `params` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '请求参数',
+  `os` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '操作系统',
+  `browser` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '浏览器类型',
+  `spider_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '爬虫类型',
+  `request_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '请求URL',
+  `referer` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '引荐来源',
+  `create_time` datetime NULL DEFAULT NULL,
+  `update_time` datetime NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of t_sys_log
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for t_tag
@@ -246,21 +271,5 @@ CREATE TABLE `t_views`  (
 -- Records of t_views
 -- ----------------------------
 INSERT INTO `t_views` VALUES (3, 0, 0, '2024-02-23 16:52:52', '2024-06-09 23:51:36');
-
-DROP TABLE IF EXISTS `t_sys_log`;
-CREATE TABLE `t_sys_log` (
-                             `id` int(11) NOT NULL AUTO_INCREMENT,
-                             `ip` varchar(255) DEFAULT NULL COMMENT 'IP地址',
-                             `content` varchar(255) DEFAULT NULL COMMENT '日志内容',
-                             `params` varchar(255) DEFAULT NULL COMMENT '请求参数',
-                             `os` varchar(255) DEFAULT NULL COMMENT '操作系统',
-                             `browser` varchar(255) DEFAULT NULL COMMENT '浏览器类型',
-                             `spider_type` varchar(255) DEFAULT NULL COMMENT '爬虫类型',
-                             `request_url` varchar(255) DEFAULT NULL COMMENT '请求URL',
-                             `referer` varchar(255) DEFAULT NULL COMMENT '引荐来源',
-                             `create_time` datetime DEFAULT NULL,
-                             `update_time` datetime DEFAULT NULL,
-                             PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
