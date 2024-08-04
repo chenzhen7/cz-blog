@@ -31,19 +31,9 @@ public class ControllerExceptionHandler {
     //    将异常记录到日志
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @ExceptionHandler(AdminException.class)
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public R AiToolsExceptionHandler(HttpServletRequest request, AdminException e){
-
-        logger.error("请求URL : {}，异常 : {}", request.getRequestURL(),e.getMsg());
-
-        return R.error(e.getMsg());
-    }
-
 
     @ExceptionHandler(Exception.class)
-    public ModelAndView exceptionHander(HttpServletRequest request, Exception e) throws Exception {
+    public ModelAndView exceptionHandler(HttpServletRequest request, Exception e) throws Exception {
 
         //记录异常信息：请求的URL，异常信息
         logger.error("Requst URL : {}，Exception : {}", request.getRequestURL(),e);
@@ -59,6 +49,30 @@ public class ControllerExceptionHandler {
         mv.addObject("message", e.getMessage());
         mv.setViewName("error/error");
         return mv;
+    }
+
+    @ExceptionHandler(BlogException.class)
+    public ModelAndView blogExceptionHandler(HttpServletRequest request, BlogException e) throws Exception {
+
+        //记录异常信息：请求的URL，异常信息
+        logger.error("Requst URL : {}，Exception : {}", request.getRequestURL(),e.getMsg());
+
+        //将记录的异常信息返回到error页面
+        ModelAndView mv = new ModelAndView();
+        mv.addObject("url",request.getRequestURL());
+        mv.addObject("message", e.getMsg());
+        mv.setViewName("error/error");
+        return mv;
+    }
+
+    @ExceptionHandler(AdminException.class)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public R AdminExceptionHandler(HttpServletRequest request, AdminException e){
+
+        logger.error("请求URL : {}，异常 : {}", request.getRequestURL(),e.getMsg());
+
+        return R.error(e.getMsg());
     }
 
     @ExceptionHandler(NotLoginException.class)

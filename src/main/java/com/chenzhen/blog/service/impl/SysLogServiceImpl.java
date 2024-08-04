@@ -36,7 +36,6 @@ import java.util.regex.Pattern;
 public class SysLogServiceImpl extends ServiceImpl<SysLogMapper, SysLog>
     implements SysLogService{
 
-    private static final String IPV4_IPV6_PATTERN = "([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})|(((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3}))|:)))(%.+)?)";
     @Autowired
     private Map<String, String> spiderMap;
     @Autowired
@@ -45,13 +44,12 @@ public class SysLogServiceImpl extends ServiceImpl<SysLogMapper, SysLog>
 
     @Override
     @Async("asyncThreadPoolTaskExecutor")
-    public void asyncSaveSystemLog(String content,ServletRequestAttributes attributes) {
-        HttpServletRequest request = attributes.getRequest();
+    public void asyncSaveSystemLog(String content,HttpServletRequest request,String realIp) {
         String ua = request.getHeader("User-Agent");
 
         SysLog sysLog = new SysLog();
         sysLog.setContent(content);
-        sysLog.setIp(getRealIp(request));
+        sysLog.setIp(realIp);
         sysLog.setReferer(request.getHeader("Referer"));
         sysLog.setRequestUrl(request.getRequestURL().toString());
         sysLog.setSpiderType(parseUa(ua));
@@ -77,73 +75,8 @@ public class SysLogServiceImpl extends ServiceImpl<SysLogMapper, SysLog>
     }
 
 
-    /**
-     * 获取当前请求者的ip
-     *
-     * @return {String}
-     */
-    public String getRealIp(HttpServletRequest request) {
-        if (null == request) {
-            return "";
-        }
-        String[] headers = {"X-Forwarded-For", "X-Real-IP", "Proxy-Client-IP", "WL-Proxy-Client-IP", "HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR"};
-        String ip;
-        for (String header : headers) {
-            ip = request.getHeader(header);
-            if (isValidIp(ip)) {
-                return getMultistageReverseProxyIp(ip);
-            }
-        }
-        ip = request.getRemoteAddr();
-        return getMultistageReverseProxyIp(ip);
-    }
 
-    /**
-     * 从多级反向代理中获得第一个非unknown IP地址
-     *
-     * @param ip 获得的IP地址
-     * @return 第一个非unknown IP地址
-     */
-    private String getMultistageReverseProxyIp(String ip) {
-        // 多级反向代理检测
-        if (ip != null && ip.indexOf(",") > 0) {
-            final String[] ips = ip.trim().split(",");
-            for (String subIp : ips) {
-                if (isValidIp(subIp)) {
-                    ip = subIp;
-                    break;
-                }
-            }
-        }
-        return ReUtil.getGroup0(IPV4_IPV6_PATTERN, ip);
-    }
 
-    /**
-     * 校验IP
-     *
-     * @param ip 获得的IP地址
-     * @return 是否为未知的ip
-     */
-    private boolean isValidIp(String ip) {
-        return !StringUtils.isEmpty(ip) && !"unknown".equalsIgnoreCase(ip) && isIp(ip);
-    }
-
-    private boolean isIp(String ip) {
-        if (StringUtils.isEmpty(ip)) {
-            return false;
-        }
-        String regex = "^\\s*(((([0-9A-Fa-f]{1,4}:){7}(([0-9A-Fa-f]{1,4})|:))|(([0-9A-Fa-f]{1,4}:){6}(:|((25[0-5]|2[0-4]\\d|[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})|(:[0-9A-Fa-f]{1,4})))|(([0-9A-Fa-f]{1,4}:){5}((:((25[0-5]|2[0-4]\\d|[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:){4}(:[0-9A-Fa-f]{1,4}){0,1}((:((25[0-5]|2[0-4]\\d|[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:){3}(:[0-9A-Fa-f]{1,4}){0,2}((:((25[0-5]|2[0-4]\\d|[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:){2}(:[0-9A-Fa-f]{1,4}){0,3}((:((25[0-5]|2[0-4]\\d|[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:)(:[0-9A-Fa-f]{1,4}){0,4}((:((25[0-5]|2[0-4]\\d|[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(:(:[0-9A-Fa-f]{1,4}){0,5}((:((25[0-5]|2[0-4]\\d|[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(((25[0-5]|2[0-4]\\d|[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})))\\;?\\s*)*$";
-        return checkByRegex(ip, regex);
-    }
-
-    private boolean checkByRegex(String str, String regex) {
-        if (null == str) {
-            return false;
-        }
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(str);
-        return matcher.find();
-    }
 
     private String parseUa(String ua) {
         if (StringUtils.isEmpty(ua)) {

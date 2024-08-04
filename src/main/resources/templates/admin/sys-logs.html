@@ -212,7 +212,7 @@
               <!-- 表格 -->
               <el-table
                       ref="blogTable"
-                      :data="list"
+                      :data="whiteList"
                       stripe
                       border
                       size="mini"
@@ -290,7 +290,7 @@
                       :page-sizes="[10, 20, 50, 100]"
                       :page-size="searchForm.pageSize"
                       layout="total, sizes, prev, pager, next, jumper"
-                      :total="total"
+                      :total="whiteListTotal"
               ></el-pagination>
             </el-tab-pane>
 
@@ -323,6 +323,8 @@
       return {
         list: [],
         total: 0, // 总记录数
+        whiteList: [], // 黑名单列表
+        whiteListTotal: 0, // 黑名单总记录数
         searchForm: {
           pageNum: 1, // 当前页
           pageSize: 10  // 每页显示条数
@@ -345,6 +347,18 @@
       //获取分页数据
       fetchPage(){
         axiosInstance.get(`/admin/sysLogs/page`,{
+          params: this.searchForm
+        }).then(res => {
+          if (res.code === 20000){
+            this.list = res.data.page.list;
+            this.total = res.data.page.total;
+          }
+
+        })
+      },
+      //获取分页数据
+      fetchWhiteListPage(){
+        axiosInstance.get(`/admin/whiteList/page`,{
           params: this.searchForm
         }).then(res => {
           if (res.code === 20000){

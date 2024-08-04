@@ -7,6 +7,8 @@ import com.chenzhen.blog.util.R;
 import com.github.pagehelper.PageInfo;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
 * @author MIS
 * @description 针对表【t_sys_log】的数据库操作Service
@@ -14,7 +16,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 */
 public interface SysLogService extends IService<SysLog> {
 
-    void asyncSaveSystemLog(String content,ServletRequestAttributes attributes);
+    void asyncSaveSystemLog(String content, HttpServletRequest request,String realIp);
 
     PageInfo<SysLog> pageSysLogs(BaseQuery query);
 }
