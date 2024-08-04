@@ -192,93 +192,6 @@
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-body p-4">
-                    <!-- 表格 -->
-                    <el-table
-                            ref="blogTable"
-                            :data="sysLogs"
-                            stripe
-                            border
-                            size="mini"
-                            style="width: 100%">
-
-                        <el-table-column
-                                prop="id"
-                                label="ID"
-                                width="50">
-                        </el-table-column>
-
-
-                        <el-table-column
-                                prop="content"
-                                label="日志内容"
-                        >
-                        </el-table-column>
-
-                        <el-table-column
-                                prop="params"
-                                label="请求参数"
-                        >
-                        </el-table-column>
-
-                        <el-table-column
-                                prop="os"
-                                label="操作系统"
-                        >
-                        </el-table-column>
-
-                        <el-table-column
-                                prop="browser"
-                                label="浏览器类型"
-                        >
-                        </el-table-column>
-
-                        <el-table-column
-                                prop="spiderType"
-                                label="爬虫类型"
-                        >
-                        </el-table-column>
-
-                        <el-table-column
-                                prop="requestUrl"
-                                label="请求URL"
-                        >
-                        </el-table-column>
-
-                        <el-table-column
-                                prop="referer"
-                                label="引荐来源"
-                        >
-                        </el-table-column>
-
-                        <el-table-column
-                                width="150"
-                                prop="createTime"
-                                label="创建时间">
-                        </el-table-column>
-
-                        <el-table-column
-                                width="150"
-                                prop="updateTime"
-                                label="更新时间">
-                        </el-table-column>
-
-                    </el-table>
-
-                    <!-- 分页 -->
-                    <el-pagination
-                            class="mt-5"
-                            @size-change="handleSizeChange"
-                            @current-change="handleCurrentChange"
-                            :current-page="searchForm.pageNum"
-                            :page-sizes="[10, 20, 50, 100]"
-                            :page-size="searchForm.pageSize"
-                            layout="total, sizes, prev, pager, next, jumper"
-                            :total="sysLogsTotal"
-                    ></el-pagination>
-                </div>
-            </div>
         </div>
 
 
@@ -302,8 +215,6 @@
         el: '#app',
         data: function() {
             return {
-                sysLogs: [],
-                sysLogsTotal: 0, // 总记录数
                 searchForm: {
                     pageNum: 1, // 当前页
                     pageSize: 10  // 每页显示条数
@@ -347,19 +258,6 @@
                 }
                 return copyrightMap[copyright] || '未知';
             } ,
-            //获取分页数据
-            fetchSysLogsPage(){
-                this.list = [];
-                axiosInstance.get(`/admin/dashboard/pageSysLogs`,{
-                    params: this.searchForm
-                }).then(res => {
-                    if (res.code === 20000){
-                        this.sysLogs = res.data.sysLogsPage.list;
-                        this.sysLogsTotal = res.data.sysLogsPage.total;
-                    }
-
-                })
-            },
             //获取数据
             info(){
                 this.list = [];
@@ -377,16 +275,7 @@
                         this.recentMessage = res.data.recentMessage;
                     }
                 })
-            },
-            handleSizeChange(val) {
-                this.searchForm.pageSize = val;
-                this.fetchSysLogsPage();
-            },
-            // 分页切换
-            handleCurrentChange(currentPage) {
-                this.searchForm.pageNum = currentPage;
-                this.fetchSysLogsPage();
-            },
+            }, // 分页切换
             clickAdd(){
                 //跳转
                 location.href = '/admin/blogs/edit';

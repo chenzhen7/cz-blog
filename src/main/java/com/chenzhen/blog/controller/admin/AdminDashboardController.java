@@ -88,12 +88,6 @@ public class AdminDashboardController {
 
     }
 
-    @GetMapping("/pageSysLogs")
-    @ResponseBody
-    public R pageSysLogs(BaseQuery query) {
-        return R.success().data("sysLogsPage",sysLogService.pageSysLogs(query));
-    }
-
 
 
 }
