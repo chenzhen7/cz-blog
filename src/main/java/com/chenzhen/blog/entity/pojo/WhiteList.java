@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
-import java.util.Date;
 
 import com.chenzhen.blog.entity.BaseEntity;
 import lombok.Data;
@@ -14,9 +13,9 @@ import lombok.Data;
  * 
  * @TableName t_while_list
  */
-@TableName(value ="t_while_list")
+@TableName(value ="t_white_list")
 @Data
-public class WhileList extends BaseEntity implements Serializable {
+public class WhiteList extends BaseEntity implements Serializable {
     /**
      * 
      */

@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.chenzhen.blog.mapper.WhileListMapper">
+<mapper namespace="com.chenzhen.blog.mapper.WhiteListMapper">
 
-    <resultMap id="BaseResultMap" type="com.chenzhen.blog.entity.pojo.WhileList">
+    <resultMap id="BaseResultMap" type="com.chenzhen.blog.entity.pojo.WhiteList">
             <id property="id" column="id" jdbcType="INTEGER"/>
             <result property="ip" column="ip" jdbcType="VARCHAR"/>
             <result property="status" column="status" jdbcType="INTEGER"/>
@@ -16,9 +16,9 @@
         id,ip,status,
         create_time,update_time
     </sql>
-    <select id="pageWhiteList" resultType="com.chenzhen.blog.entity.pojo.WhileList">
+    <select id="pageWhiteList" resultType="com.chenzhen.blog.entity.pojo.WhiteList">
         select id,ip,status,create_time,update_time
-        from while_list
+        from t_white_list
         <where>
             <if test="ip != null and ip!= ''">
                 and ip like concat('%',#{ip},'%')

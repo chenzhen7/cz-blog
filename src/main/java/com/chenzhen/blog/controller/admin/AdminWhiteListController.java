@@ -1,15 +1,12 @@
 package com.chenzhen.blog.controller.admin;
 
-import com.chenzhen.blog.entity.query.BaseQuery;
+import com.chenzhen.blog.entity.pojo.WhiteList;
 import com.chenzhen.blog.entity.query.WhiteListQuery;
-import com.chenzhen.blog.service.WhileListService;
+import com.chenzhen.blog.service.WhiteListService;
 import com.chenzhen.blog.util.R;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author ChenZhen
@@ -20,15 +17,38 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @CrossOrigin
-@RequestMapping("/admin/whitelist")
+@RequestMapping("/admin/whiteList")
 public class AdminWhiteListController {
 
     @Autowired
-    private WhileListService whileListService;
+    private WhiteListService whiteListService;
 
     @GetMapping("/page")
     @ResponseBody
     public R pageSysLogs(WhiteListQuery query) {
-        return R.success().data("page",whileListService.pageWhiteList(query));
+        return R.success().data("page", whiteListService.pageWhiteList(query));
     }
+
+    @ResponseBody
+    @DeleteMapping("/{id}")
+    public R delete(@PathVariable Integer id) {
+        return whiteListService.removeById(id) ? R.success() : R.error("删除失败");
+    }
+
+    @ResponseBody
+    @GetMapping("/{id}")
+    public R getById(@PathVariable Integer id) {
+        return R.success().data("whiteList",whiteListService.getById(id));
+    }
+
+
+    @ResponseBody
+    @PutMapping()
+    public R update(@RequestBody WhiteList whiteList) {
+        return whiteListService.updateById(whiteList) ? R.success() : R.error("更新失败");
+    }
+
+
+
+
 }

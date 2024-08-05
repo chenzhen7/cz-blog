@@ -67,15 +67,15 @@
         </a>
       </li>
       <li>
-        <a href="./users.html" th:href="@{/admin/users}" class="nav-link link-dark">
+        <a href="./sys-logs.html" th:href="@{/admin/sysLogs}" class="nav-link active">
           <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
-          用户管理
+          系统日志管理
         </a>
       </li>
       <li>
-        <a href="./sys-logs.html" th:href="@{/admin/sys-logs}" class="nav-link active">
+        <a href="./users.html" th:href="@{/admin/users}" class="nav-link link-dark">
           <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
-          系统日志管理
+          用户管理
         </a>
       </li>
       <li class="nav-item">
@@ -208,7 +208,7 @@
                       :total="total"
               ></el-pagination>
             </el-tab-pane>
-            <el-tab-pane label="黑名单IP" name="blacklist">
+            <el-tab-pane label="黑名单IP" name="whiteList">
               <!-- 表格 -->
               <el-table
                       ref="blogTable"
@@ -226,46 +226,21 @@
 
 
                 <el-table-column
-                        prop="content"
-                        label="日志内容"
+                        prop="ip"
+                        label="ip地址"
                 >
                 </el-table-column>
 
                 <el-table-column
-                        prop="params"
-                        label="请求参数"
+                        prop="status"
+                        label="状态"
                 >
+                  <template slot-scope="scope">
+                    <el-tag type="success" v-if="scope.row.status === 1">白名单</el-tag>
+                    <el-tag type="danger" v-if="scope.row.status === -1">黑名单</el-tag>
+                  </template>
                 </el-table-column>
 
-                <el-table-column
-                        prop="os"
-                        label="操作系统"
-                >
-                </el-table-column>
-
-                <el-table-column
-                        prop="browser"
-                        label="浏览器类型"
-                >
-                </el-table-column>
-
-                <el-table-column
-                        prop="spiderType"
-                        label="爬虫类型"
-                >
-                </el-table-column>
-
-                <el-table-column
-                        prop="requestUrl"
-                        label="请求URL"
-                >
-                </el-table-column>
-
-                <el-table-column
-                        prop="referer"
-                        label="引荐来源"
-                >
-                </el-table-column>
 
                 <el-table-column
                         width="150"
@@ -277,6 +252,13 @@
                         width="150"
                         prop="updateTime"
                         label="更新时间">
+                </el-table-column>
+
+                <el-table-column width="150" label="操作" >
+                  <template slot-scope="scope">
+                    <el-button  size="mini" @click="clickEditWhiteList(scope.row.id)">编辑</el-button>
+                    <el-button  size="mini" type="danger" @click="clickDeleteWhiteList(scope.row.id)">删除</el-button>
+                  </template>
                 </el-table-column>
 
               </el-table>
@@ -293,6 +275,36 @@
                       :total="whiteListTotal"
               ></el-pagination>
             </el-tab-pane>
+
+            <!-- 创建或编辑的表单 -->
+            <el-dialog title="添加/编辑标签" :visible="dialogVisibleWhiteList" @close="dialogVisibleWhiteList = false" :close-on-click-modal="false">
+              <!-- 表单内容 -->
+              <el-form :model="editFormWhiteList" label-width="150px">
+                <!-- ID -->
+                <el-form-item label="ID">
+                  <el-input v-model="editFormWhiteList.id" disabled></el-input>
+                </el-form-item>
+
+                <el-form-item label="IP" prop="ip">
+                  <el-input v-model="editFormWhiteList.ip"></el-input>
+                </el-form-item>
+
+                <el-form-item label="状态" prop="status">
+                  <el-select v-model="editFormWhiteList.status">
+                    <el-option label="白名单" value="1"></el-option>
+                    <el-option label="黑名单" value="-1"></el-option>
+                  </el-select>
+                </el-form-item>
+
+
+              </el-form>
+              <!-- 按钮操作 -->
+              <span slot="footer" class="dialog-footer">
+                <el-button @click="dialogVisibleWhiteList = false">取消</el-button>
+                <el-button type="primary" @click="clickSaveWhiteList">保存</el-button>
+              </span>
+
+            </el-dialog>
 
           </el-tabs>
         </div>
@@ -330,9 +342,9 @@
           pageSize: 10  // 每页显示条数
         },
         // 表单显示
-        dialogVisible: false,
+        dialogVisibleWhiteList: false,
         formLabelWidth: '120px',
-        editForm:{
+        editFormWhiteList:{
 
         },
         activeTab: 'list',
@@ -343,6 +355,12 @@
     methods:{
       handleTabClick(tab) {
         this.activeTab = tab.name;
+        if (tab.name === 'list'){
+          this.fetchPage()
+        }
+        else if (tab.name === 'whiteList') {
+          this.fetchWhiteListPage()
+        }
       },
       //获取分页数据
       fetchPage(){
@@ -362,8 +380,8 @@
           params: this.searchForm
         }).then(res => {
           if (res.code === 20000){
-            this.list = res.data.page.list;
-            this.total = res.data.page.total;
+            this.whiteList = res.data.page.list;
+            this.whiteListTotal = res.data.page.total;
           }
 
         })
@@ -379,32 +397,19 @@
       },
       clickAdd(){
         this.editForm = {}
-        this.dialogVisible = true
+        this.dialogVisibleWhiteList = true
       },
-      clickSave(){
+      clickSaveWhiteList(){
         if (this.editForm.id) {
           // 有ID更新
-          axiosInstance.put(`/admin/tags`, this.editForm)
+          axiosInstance.put(`/admin/whiteList`, this.editForm)
                   .then(resp => {
                     if(resp.code === 20000){
                       this.$message.success('更新成功');
-                      this.dialogVisible = false;
+                      this.dialogVisibleWhiteList = false;
                       this.fetchPage();
                     }
 
-                  })
-                  .catch(error => {
-                    console.error(error);
-                  });
-        } else {
-          // 无ID创建
-          axiosInstance.post('/admin/tags', this.editForm)
-                  .then(resp => {
-                    if(resp.code === 20000){
-                      this.$message.success('创建成功');
-                      this.dialogVisible = false;
-                      this.fetchPage();
-                    }
                   })
                   .catch(error => {
                     console.error(error);
@@ -412,22 +417,22 @@
         }
       },
       // 编辑
-      clickEdit(id) {
-        axiosInstance.get(`/admin/tags/${id}`)
+      clickEditWhiteList(id) {
+        axiosInstance.get(`/admin/whiteList/${id}`)
                 .then(resp => {
-                  this.editForm = resp.data.tag
+                  this.editFormWhiteList = resp.data.whiteList
                 })
 
-        this.dialogVisible = true;
+        this.dialogVisibleWhiteList = true;
       },
       //点击删除
-      clickDelete(id){
+      clickDeleteWhiteList(id){
         this.$confirm('此操作将永久删除该信息, 是否继续?', '提示', {
           cancelButtonText: '取消',
           confirmButtonText: '确定',
           type: 'warning'
         }).then(() => {
-          this.delete(id)
+          this.deleteWhiteList(id)
         }).catch(() => {
           this.$message({
             type: 'info',
@@ -436,10 +441,10 @@
         })
       },
       // 删除
-      delete(id) {
-        axiosInstance.delete(`/admin/tags/${id}`)
+      deleteWhiteList(id) {
+        axiosInstance.delete(`/admin/whiteList/${id}`)
                 .then(() => {
-                  this.fetchPage();
+                  this.fetchWhiteListPage();
                 })
                 .catch(error => {
                   console.error(error);

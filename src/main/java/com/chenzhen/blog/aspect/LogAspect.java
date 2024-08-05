@@ -6,10 +6,10 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.chenzhen.blog.entity.annotation.BlogLog;
-import com.chenzhen.blog.entity.pojo.WhileList;
+import com.chenzhen.blog.entity.pojo.WhiteList;
 import com.chenzhen.blog.exception.BlogException;
 import com.chenzhen.blog.service.SysLogService;
-import com.chenzhen.blog.service.WhileListService;
+import com.chenzhen.blog.service.WhiteListService;
 import com.chenzhen.blog.util.MemoryDBUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -45,7 +45,7 @@ public class LogAspect {
     @Autowired
     private SysLogService logService;
     @Autowired
-    private WhileListService whileListService;
+    private WhiteListService whiteListService;
     @Autowired
     private MemoryDBUtil<Long> memoryDBUtil;
     //时间段（单位：秒）
@@ -94,10 +94,10 @@ public class LogAspect {
             //超过最大访问次数
             if (currentCount > maxCount) {
                 log.info("{}访问次数超过{}次，加入黑名单",realIp,maxCount);
-                List<WhileList> whileLists = whileListService.list(new LambdaQueryWrapper<WhileList>().eq(WhileList::getIp, realIp));
+                List<WhiteList> whiteLists = whiteListService.list(new LambdaQueryWrapper<WhiteList>().eq(WhiteList::getIp, realIp));
                 //如果数据库中没有该ip，则添加到数据库中黑名单
-                if (CollUtil.isEmpty(whileLists)){
-                    whileListService.saveBlackList(realIp);
+                if (CollUtil.isEmpty(whiteLists)){
+                    whiteListService.saveBlackList(realIp);
                 }
                 //随后加入内存黑名单
                 blackList.add(realIp);
