@@ -136,7 +136,13 @@
                 <el-table-column
                         prop="id"
                         label="ID"
-                        width="50">
+                        width="150">
+                </el-table-column>
+
+                <el-table-column
+                        prop="ip"
+                        label="ip地址"
+                >
                 </el-table-column>
 
 
@@ -146,11 +152,7 @@
                 >
                 </el-table-column>
 
-                <el-table-column
-                        prop="params"
-                        label="请求参数"
-                >
-                </el-table-column>
+
 
                 <el-table-column
                         prop="os"
@@ -164,11 +166,6 @@
                 >
                 </el-table-column>
 
-                <el-table-column
-                        prop="spiderType"
-                        label="爬虫类型"
-                >
-                </el-table-column>
 
                 <el-table-column
                         prop="requestUrl"
@@ -177,8 +174,20 @@
                 </el-table-column>
 
                 <el-table-column
+                        prop="params"
+                        label="请求参数"
+                >
+                </el-table-column>
+
+                <el-table-column
                         prop="referer"
                         label="引荐来源"
+                >
+                </el-table-column>
+
+                <el-table-column
+                        prop="spiderType"
+                        label="爬虫类型"
                 >
                 </el-table-column>
 
