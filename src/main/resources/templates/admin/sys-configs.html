@@ -203,7 +203,7 @@
                   </el-form>
                 </el-tab-pane>
 
-                <el-tab-pane label="第三方服务" name="THIRD-SERVICE">
+                <el-tab-pane label="CSDN配置" name="CSDN">
                   <el-form ref="form" :model="form" label-width="180px"  class="mt-5" >
                     <el-form-item label="CSDN的Session">
                       <el-input type="textarea" :rows="4" v-model="form.csdnSession" placeholder="请输入Session"></el-input>
@@ -216,6 +216,25 @@
                   </el-form>
 
                 </el-tab-pane>
+
+                <el-tab-pane label="百度推送配置" name="BAIDU">
+                  <el-form ref="form" :model="form" label-width="180px"  class="mt-5" >
+                    <el-form-item label="在百度搜索资源平台申请的推送用的准入密钥(token)">
+                      <el-input type="textarea" :rows="2" v-model="form.baiduLinkSubmitToken" placeholder="请输入在百度搜索资源平台申请的推送用的准入密钥"></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="在百度搜索资源平台验证的站点(site)">
+                      <el-input type="textarea" :rows="2" v-model="form.baiduLinkSubmitSite" placeholder="在百度搜索资源平台验证的站点"></el-input>
+                    </el-form-item>
+
+                    <el-form-item>
+                      <el-button type="primary" @click="onSubmit">保存</el-button>
+                    </el-form-item>
+
+                  </el-form>
+
+                </el-tab-pane>
+
               </el-tabs>
 
             </div>

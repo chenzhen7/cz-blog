@@ -165,7 +165,7 @@
             <!-- 添加按钮 -->
             <el-button class="mb-3" type="primary" plain  @click="clickAdd">添加文章</el-button>
             <!-- 添加按钮 -->
-            <el-button class="mb-3" type="primary" plain  @click="clickAdd">推送文章到百度</el-button>
+            <el-button class="mb-3" type="primary" plain  @click="clickBatchLinkSubmit(multipleSelection)">批量推送文章到百度</el-button>
 
 
             <!-- 表格 -->
@@ -242,10 +242,10 @@
                       label="更新时间">
               </el-table-column>
 
-              <el-table-column width="150" label="操作">
+              <el-table-column  width="250"  label="操作">
                 <template slot-scope="scope">
                   <el-button  size="mini" @click="clickEdit(scope.row.id)">编辑</el-button>
-                  <el-button  size="mini" type="success" @click="clickEdit(scope.row.id)">编辑</el-button>
+                  <el-button  size="mini" type="success" @click="clickLinkSubmit(scope.row.id)">推送百度</el-button>
                   <el-button  size="mini" type="danger" @click="clickDelete(scope.row.id)">删除</el-button>
                 </template>
               </el-table-column>
@@ -394,6 +394,61 @@
                     .catch(error => {
                       console.error(error);
                     });
+          },
+          clickLinkSubmit(id){
+            this.$confirm('确定要推送到百度吗？', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }).then(() => {
+              this.batchLinkSubmit([id])
+            }).catch(() => {
+              this.$message({
+                type: 'info',
+                message: '已取消操作'
+              });
+            })
+          },
+          clickBatchLinkSubmit(rows){
+            if (rows.length === 0){
+              Vue.prototype.$message.error("请选择要推送的文章");
+              return
+            }else {
+               this.$confirm('确定要推送到百度吗？', '提示', {
+                 confirmButtonText: '确定',
+                 cancelButtonText: '取消',
+                 type: 'warning'
+               }).then(() => {
+                 this.batchLinkSubmit(rows.map(row => row.id))
+               }).catch(() => {
+                 this.$message({
+                   type: 'info',
+                   message: '已取消操作'
+                 });
+               })
+            }
+          },
+          batchLinkSubmit(ids){
+            axiosInstance({
+              url: `/admin/baidu/batchLinkSubmit`,
+              method: 'post',
+              data: {
+                ids: ids
+              }
+            }).then(res => {
+              if (res.code === 20000){
+                var submitResp = res.data.submitResp
+                this.$message({
+                  type: 'success',
+                  dangerouslyUseHTMLString: true,
+                  message:`
+                  <p><strong>成功推送的url条数</strong>：${submitResp.success}</p>
+                  <p><strong>当天剩余的可推送url条数</strong>：${submitResp.remain}</p>
+                  <p><strong>由于不是本站url而未处理的url列表</strong>：${submitResp.not_same_site}</p>
+                  <p><strong>不合法的url列表</strong>：${submitResp.not_valid}</p> `
+                });
+              }
+            })
           },
           logout(){
             axiosInstance.get('/admin/logout').then(res => {

@@ -70,6 +70,16 @@ public class SysConfig implements Serializable {
      */
     private String csdnSession;
 
+    /**
+     * 在百度搜索资源平台验证的站点
+     */
+    private String baiduLinkSubmitSite;
+
+    /**
+     * 在百度搜索资源平台申请的推送用的准入密钥
+     */
+    private String baiduLinkSubmitToken;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }
