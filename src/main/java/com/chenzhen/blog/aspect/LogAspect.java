@@ -48,9 +48,6 @@ public class LogAspect {
     private WhiteListService whiteListService;
     @Autowired
     private MemoryDBUtil<Long> memoryDBUtil;
-    //黑名单
-    @Autowired
-    private Set<String> blackList;
     //时间段（单位：秒）
     private static final long time = 60;
     //时间段内最大访问次数
@@ -85,6 +82,7 @@ public class LogAspect {
     }
 
     private void before(String realIp) {
+        Set<String> blackList = whiteListService.getBlackList();
         //先判断是否在内存的黑名单中，如果在，则直接抛出异常，不再访问数据库
         if (blackList.contains(realIp)){
             log.info("{}在黑名单中，访问被拒绝!",realIp);

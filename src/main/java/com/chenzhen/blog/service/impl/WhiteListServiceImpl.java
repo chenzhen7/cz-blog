@@ -8,9 +8,13 @@ import com.chenzhen.blog.mapper.WhiteListMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
 * @author MIS
@@ -23,6 +27,8 @@ public class WhiteListServiceImpl extends ServiceImpl<WhiteListMapper, WhiteList
 
     @Autowired
     private WhiteListMapper whileListMapper;
+
+    private Set<String> blackList;
 
     @Override
     public void saveBlackList(String realIp) {
@@ -38,6 +44,16 @@ public class WhiteListServiceImpl extends ServiceImpl<WhiteListMapper, WhiteList
         PageHelper.orderBy("create_time desc");
         List<WhiteList> sysLogList = whileListMapper.pageWhiteList(query);
         return new PageInfo<>(sysLogList);
+    }
+
+    @PostConstruct
+    public void initBlackList() {
+        Set<String> blackList = list().stream().map(WhiteList::getIp).collect(Collectors.toSet());
+        this.blackList = blackList;
+    }
+
+    public Set<String> getBlackList() {
+        return blackList;
     }
 }
 

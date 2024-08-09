@@ -19,8 +19,6 @@ import java.util.stream.Collectors;
 @Configuration
 public class SysLogsConfig {
 
-    @Autowired
-    private WhiteListService whiteListService;
 
     @Bean("spiderMap")
     public Map<String, String> spiderMap() {
@@ -112,11 +110,5 @@ public class SysLogsConfig {
         return spider;
     }
 
-    @Bean("blackList")
-    public Set<String> blackList() {
 
-        List<WhiteList> list = whiteListService.list();
-
-        return list.stream().map(WhiteList::getIp).collect(Collectors.toSet());
-    }
 }
