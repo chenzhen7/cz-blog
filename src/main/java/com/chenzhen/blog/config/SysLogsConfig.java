@@ -1,10 +1,13 @@
 package com.chenzhen.blog.config;
 
+import com.chenzhen.blog.entity.pojo.WhiteList;
+import com.chenzhen.blog.service.WhiteListService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author ChenZhen
@@ -14,7 +17,10 @@ import java.util.Map;
  * @WeXin(WeChat) ShockChen7
  */
 @Configuration
-public class SpiderMapConfig {
+public class SysLogsConfig {
+
+    @Autowired
+    private WhiteListService whiteListService;
 
     @Bean("spiderMap")
     public Map<String, String> spiderMap() {
@@ -104,5 +110,13 @@ public class SpiderMapConfig {
         spider.put("Pandalytics", "Pandalytics");
 
         return spider;
+    }
+
+    @Bean("blackList")
+    public Set<String> blackList() {
+
+        List<WhiteList> list = whiteListService.list();
+
+        return list.stream().map(WhiteList::getIp).collect(Collectors.toSet());
     }
 }
