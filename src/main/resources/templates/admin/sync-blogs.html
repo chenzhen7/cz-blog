@@ -341,38 +341,6 @@
           //获取分页数据
           fetchPage(){
             this.list = [];
-            this.list = [
-              {
-                "articleId": "136566172",
-                "title": "数智系统的一些注意点",
-                "status": 2,
-                "editorType": 1,
-                "coverImage": [],
-                "postTime": "2024-07-18T09:37:44",
-                "totalExposures": 0,
-                "collectCount": 0,
-                "viewCount": 0,
-                "commentCount": 0,
-                "username": "ShockChen7",
-                "qualitySpecification": "https://blog.csdn.net/u010280923/article/details/131449478"
-              },
-              {
-                "articleId": "140489057",
-                "title": "使用Github-Action实现当代码推送远程仓库后自动部署Springboot项目",
-                "status": 2,
-                "editorType": 1,
-                "coverImage": [
-                  "https://img-blog.csdnimg.cn/img_convert/4a1ab8c050264b68b823fdf04301d802.png"
-                ],
-                "postTime": "2024-07-17T11:38:27",
-                "totalExposures": 0,
-                "collectCount": 0,
-                "viewCount": 0,
-                "commentCount": 0,
-                "username": "ShockChen7",
-                "qualitySpecification": "https://blog.csdn.net/u010280923/article/details/131449478"
-              }
-            ]
             axiosInstance.get(`/admin/sync-blogs/csdnList`,{
               params: this.searchForm
             }).then(res => {

@@ -11,7 +11,7 @@
  Target Server Version : 80011
  File Encoding         : 65001
 
- Date: 31/07/2024 22:11:13
+ Date: 27/08/2024 20:56:37
 */
 
 SET NAMES utf8mb4;
@@ -271,5 +271,22 @@ CREATE TABLE `t_views`  (
 -- Records of t_views
 -- ----------------------------
 INSERT INTO `t_views` VALUES (3, 0, 0, '2024-02-23 16:52:52', '2024-06-09 23:51:36');
+
+-- ----------------------------
+-- Table structure for t_white_list
+-- ----------------------------
+DROP TABLE IF EXISTS `t_white_list`;
+CREATE TABLE `t_white_list`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'IP地址',
+  `status` int(4) NULL DEFAULT NULL COMMENT '状态【-1.禁止访问  1.允许访问】',
+  `create_time` datetime NULL DEFAULT NULL,
+  `update_time` datetime NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of t_white_list
+-- ----------------------------
 
 SET FOREIGN_KEY_CHECKS = 1;
