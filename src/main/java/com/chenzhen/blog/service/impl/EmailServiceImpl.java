@@ -95,13 +95,13 @@ public class EmailServiceImpl implements EmailService {
         if (user != null && comment.getParentCommentId() != null){
             //获取父评论
             Comment parentComment = commentMapper.selectById(comment.getParentCommentId() );
-            //如果父评论是管理员，不发邮件
+            //如果父评论是管理员自己，不发邮件
             if (parentComment.isAdminComment()){
                 return;
             }
-            //如果不是根评论，则给[我回复的对象]发一封提醒邮件
+            //给[我回复的对象]发一封提醒邮件
 
-            Mail mail = new Mail(null, parentComment.getEmail(), parentComment.getNickname(), parentComment.getContent(),
+            Mail mail = new Mail(myEmail, parentComment.getEmail(), parentComment.getNickname(), parentComment.getContent(),
                     comment.getNickname(), comment.getContent(),
                     "/blog/" + comment.getBlogId(), "您在ChenZhen的博客《" + title + "》中的评论有了新的回复！");
             mailUtil.sendCommentReminderEmail(mail);
@@ -111,7 +111,7 @@ public class EmailServiceImpl implements EmailService {
             if (comment.getParentCommentId() == null){
                 //如果是根评论
                 //发给我自己，提醒有人在留言板留言了
-                Mail mail = new Mail(null, myEmail, "ChenZhen", null,
+                Mail mail = new Mail(myEmail, myEmail, "ChenZhen", null,
                         comment.getNickname(), comment.getContent(),
                         "/blog/" + comment.getBlogId(),"您在ChenZhen的博客《" + title + "》中有了新的评论！");
                 mailUtil.sendCommentReminderEmail(mail);
@@ -120,7 +120,7 @@ public class EmailServiceImpl implements EmailService {
                 //如果不是根评论
                 //给回复者[回复的对象]发一份提醒邮件
                 Comment parentComment = commentMapper.selectById(comment.getParentCommentId());
-                Mail mail = new Mail(null,parentComment.getEmail(),parentComment.getNickname(),
+                Mail mail = new Mail(myEmail,parentComment.getEmail(),parentComment.getNickname(),
                         parentComment.getContent(),comment.getNickname(),comment.getContent(),
                         "/blog/" + comment.getBlogId(),"您在ChenZhen的博客《" + title + "》中的评论有了新的回复！");
                 mailUtil.sendCommentReminderEmail(mail);
