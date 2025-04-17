@@ -55,7 +55,7 @@
             音乐管理
           </a>
         </li>
-        <li>
+        <li th:if="${session.user != null && session.user.username == 'admin'}">
           <a href="./sys-configs.html" th:href="@{/admin/sys-configs}" class="nav-link link-dark">
             <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
             系统配置管理
@@ -67,7 +67,7 @@
             系统日志管理
           </a>
         </li>
-        <li>
+        <li th:if="${session.user != null && session.user.username == 'admin'}">
           <a href="./users.html" th:href="@{/admin/users}" class="nav-link link-dark">
             <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
             用户管理
