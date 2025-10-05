@@ -153,6 +153,7 @@
 
                   <el-form-item label="默认同步分类" prop="typeId">
                     <el-select v-model="syncForm.typeId"  placeholder="请选择">
+                      <el-option label="不指定分类" value="-1"></el-option>
                       <el-option
                               v-for="item in typeList"
                               :key="item.id"

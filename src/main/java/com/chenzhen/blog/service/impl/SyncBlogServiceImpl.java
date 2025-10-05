@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -145,7 +146,7 @@ public class SyncBlogServiceImpl implements SyncBlogService {
     private void syncNewBlog(Long typeId, GetArticleResp getArticleResp) {
         Blog blog = new Blog();
         blog.setTitle(getArticleResp.getTitle());
-        blog.setTypeId(typeId);
+        blog.setTypeId(Objects.equals(typeId, -1L) ? null : typeId);
         blog.setContent(getArticleResp.getMarkdown_content());
         blog.setDescription(getArticleResp.getDescription());
         blog.setFirstPicture(CollUtil.isEmpty(getArticleResp.getCover_image()) ? null : getArticleResp.getCover_image().get(0));
