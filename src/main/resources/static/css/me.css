@@ -2030,6 +2030,13 @@ a{
     padding: 45px;
 }
 
+.markdown-body  {
+   img{
+       border-radius: 8px;
+       border: 1px solid #ddd;
+   }
+}
+
 @media (max-width: 767px) {
     .markdown-body {
         padding: 15px;
