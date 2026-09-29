@@ -48,3 +48,8 @@ pagehelper:
 
 #默认封面路径
 default-cover-path: /images/default_cover.jpg
+
+#站点对外访问地址（结尾不带斜杠）。RSS 与 sitemap 里的链接必须是绝对地址，
+#不能从请求头推：生产环境跑在反向代理后面，Host 可能是内网地址，写进订阅源的链接就是坏的。
+blog:
+  site-url: https://www.chenzhen.space

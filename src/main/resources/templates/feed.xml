@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--/*
+  RSS 2.0 订阅源模板，由 FeedServiceImpl 渲染。
+
+  说明文字必须写成这种解析器级注释，不能用普通 XML 注释：普通注释会被原样写进响应体，
+  订阅者拉到的就是一堆中文说明；解析器级注释在渲染前就被整段去掉了。
+
+  注释体自己有两条约束，都是踩过的坑：
+  1. 不能再出现注释的结束标记。一旦出现，注释会提前结束，后面的字被当成标签解析，
+     报「element 某某 is never closed」这种指向完全无关位置的错。
+  2. 不要写尖括号包起来的示例标签，同样会被当成真标签解析。
+
+  本文件必须保持良构：XML 模式下 Thymeleaf 用的是真的 XML 解析器，
+  标签没闭合、属性没加引号都是直接报错，不会像 HTML 模式那样容忍。
+  在 HTML 里算空元素的那个 link 标签，在 XML 里必须带闭合标签或写成自闭合。
+
+  变量由 FeedServiceImpl 提供：title / description / link / feedUrl / items / lastBuildDate。
+*/-->
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:th="http://www.thymeleaf.org">
+    <channel>
+        <title th:text="${title}">ChenZhen的客栈</title>
+        <link th:text="${link}">https://www.chenzhen.space/</link>
+        <description th:text="${description}">个人博客</description>
+        <language>zh-CN</language>
+        <!--/* 告诉阅读器这个订阅源自己的地址，方便它做「重新订阅」一类的操作 */-->
+        <atom:link th:href="${feedUrl}" rel="self" type="application/rss+xml"/>
+        <!--/* 没有文章时不输出：lastBuildDate 是可选元素，编一个时间出来反而会让阅读器以为有更新 */-->
+        <lastBuildDate th:if="${lastBuildDate}" th:text="${lastBuildDate}">Mon, 29 Sep 2026 10:00:00 +0800</lastBuildDate>
+
+        <item th:each="item : ${items}">
+            <title th:text="${item.title}">文章标题</title>
+            <link th:text="${item.link}">https://www.chenzhen.space/blog/1</link>
+            <!--/* description 直接取 t_blog.description。里面可能带 markdown 记号（# 与换行转义等），
+                   这是源数据本来的样子，没有在这里做转换 */-->
+            <description th:text="${item.description}">文章摘要</description>
+            <!--/* guid 用文章地址：isPermaLink 声明它就是可访问的链接本身。
+                   标题改了 guid 也不变，阅读器不会把它当成一篇新文章重复推送 */-->
+            <guid isPermaLink="true" th:text="${item.link}">https://www.chenzhen.space/blog/1</guid>
+            <pubDate th:text="${item.pubDate}">Mon, 29 Sep 2026 10:00:00 +0800</pubDate>
+        </item>
+    </channel>
+</rss>

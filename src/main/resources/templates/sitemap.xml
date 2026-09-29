@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--/*
+  sitemap.xml 模板，由 SitemapServiceImpl 渲染。
+
+  变量 entries：SitemapEntryVO 列表，静态页在前、文章在后。
+  loc 必有；lastmod 只有文章才有，静态页为 null 时整个元素不输出（该元素本就是可选的）。
+
+  与 feed.xml 一样，本文件必须保持良构（XML 模式用真 XML 解析器），
+  说明文字一律写在解析器级注释里，否则会被写进响应体。
+*/-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:th="http://www.thymeleaf.org">
+    <url th:each="entry : ${entries}">
+        <loc th:text="${entry.loc}">https://www.chenzhen.space/</loc>
+        <lastmod th:if="${entry.lastmod != null}" th:text="${entry.lastmod}">2026-09-30T10:20:00+08:00</lastmod>
+    </url>
+</urlset>

@@ -15,3 +15,7 @@ upload:
   directory:
     file: D:\cz-blog-upload\file\
     music: D:\cz-blog-upload\
+
+#本地开发用本机地址，否则 RSS / sitemap 里会生成指向线上域名的链接，本地点开是别人的站点
+blog:
+  site-url: http://localhost:8188

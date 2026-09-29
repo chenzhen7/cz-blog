@@ -1,0 +1,4 @@
+# sitemap 的地址必须是绝对地址，爬虫不认相对路径。
+# 这里的域名与 application.yml 的 blog.site-url 是同一个，换域名时两处都要改
+# （robots.txt 是静态文件，没法跟着配置走）。
+Sitemap: https://www.chenzhen.space/sitemap.xml
