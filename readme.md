@@ -11,7 +11,7 @@
 
 
 # 项目简介
-该博客是之前博客（[https://www.chenzhen.space/blog/34](https://www.chenzhen.space/blog/34 )）的一个2.0改造版本，对前端进行了全面的翻新！改用了`bootstrap`作为前端`css`框架，更加简约、美观，并且对项目的后台使用`vue` + `axios`进行了重构，框架进行重新选型，仍然基于SpringBoot并且使用`sa-token`进行鉴权，博客的模板引擎还是使用`thymeleaf`（SEO优化友好）。
+该博客是之前博客（[https://www.chenzhen.space/blog/34](https://www.chenzhen.space/blog/34 )）的一个2.0改造版本，对前端进行了全面的翻新！前台改为手写的工业编辑风设计系统（`static/css/site.css`），**不再依赖任何 CSS 框架，并移除了 jQuery**，视觉更简约；并且对项目的后台使用`vue` + `axios`进行了重构，框架进行重新选型，仍然基于SpringBoot并且使用`sa-token`进行鉴权，博客的模板引擎还是使用`thymeleaf`（SEO优化友好）。
 
 博客更新了很多实用的功能，并且后续会以能够开源的标准进行开发，代码全部开源，并且这次会作为稳定的版本持续的维护下去。
 
@@ -24,7 +24,9 @@
 项目制作不易，如果对你有帮助，请给一个小小的star⭐支持一下
 
 # 运行
-下载源码，创建数据库`cz-blog`,在该数据库上执行sql文件创建数据表，然后修改application-dev.yml文件中连接数据库的用户名、密码。运行项目即可。数据库版本Mysql8以上。
+下载源码，创建数据库`blog`（库名以 `application-dev.yml` 里 jdbc url 的为准），在该数据库上执行 `sql/init.sql` 创建数据表，然后修改application-dev.yml文件中连接数据库的用户名、密码。运行项目即可。数据库版本Mysql8以上。
+
+> 如果你是从旧版本升级而不是全新部署，**不要**跑 `init.sql`（它会 DROP 掉所有表），改跑 `sql/migration/` 下按日期排列的迁移脚本。
 
 前端访问地址：http://localhost:8188
 
@@ -37,15 +39,28 @@ yaml中的邮箱地址和授权码，具体怎么配置可以看我博客文章 
 项目无需安装除数据库外的任何中间件，直接运行即可。后台采用前后端分离的开发模式，前端使用Vue + Bootstrap5，后端使用SpringBoot + Mybatis进行开发， 博客页面使用Thymeleaf作为模板引擎，利好SEO优化，数据库使用mysql8。 
 
 ## 前端
+
+### 博客前台
+设计系统： 手写 `static/css/site.css`（工业编辑风），**无 CSS 框架依赖**，Bootstrap 与 jQuery 已完全移除
+
+动效与 3D： GSAP + ScrollTrigger、Three.js（首页首屏等高线地形）
+
+字体： 全部自托管（拉丁可变字体 + Noto Sans SC 子集），无外部字体请求
+
+三方库： 一律放在 `static/lib/` 下自托管，**不走 CDN**，全站零外部请求
+
+代码高亮： prism
+
+目录生成： Tocbot
+
+### 管理后台
 JS框架： Vue
 
 CSS框架：Bootstrap5
 
 Markdown编辑器：editormd
 
-代码高亮： prism
-
-目录生成：Tocbot
+> 后台样式沿用旧的 `me.css`，与前台设计系统相互独立、互不影响。
 
 ## 后端
 整体使用springboot + Thymeleaf + Mybatis进行开发

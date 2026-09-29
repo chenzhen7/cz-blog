@@ -341,10 +341,12 @@ body { font-size: 17px; line-height: 1.75; }
 
 ## 8. Thymeleaf 落地约定
 
-- **一份 `me.css` 承载全部令牌与组件**，替换掉 Bootstrap 依赖。GSAP / Three.js 走 CDN（`cdnjs.cloudflare.com`）。
+- **本规范落在 `static/css/site.css` 一个文件里**，前台不再依赖任何 CSS 框架（Bootstrap 与 jQuery 已从前台完全移除）。
+  **绝不要写进 `me.css`**：那份样式后台 12 个模板还在用，本规范的全局规则（`* { border-radius: 0 !important }`、`body` 字号与背景、`--font-*` 覆盖）一进去就会直接打到后台。`me.css` 现已冻结，后台用 Element UI 重做时整个文件删除，只需把 `.admin-body` 一条规则搬走。
+- **三方库一律自托管在 `static/lib/`，不走 CDN**：GSAP、ScrollTrigger、Three.js、Prism、Tocbot 都是本地文件。字体同理，全站零外部请求。
 - **现有资源路径与 Thymeleaf 语法不动**：`th:href="@{/}"`、`th:text="${author}"`、`th:style="'background-image: url(' + @{/images/index.jpg} + ')'"` 原样保留。改版只动结构与 class，不动后端契约。
 - **SEO 不回归**：`<title>`、`meta description/keywords`、页面 slug、导航文案保持稳定。改版最大的风险是 SEO 迁移，不是视觉。
-- **导航文案**（首页 / 标签 / 归档 / 留言板 / 友链 / 关于我）是既有信息架构，不因视觉改版而改。
+- **导航文案与顺序**（首页 / 标签 / 归档 / 留言板 / 友链 / 🚇开往 / 关于我，共 7 项）是既有信息架构，不因视觉改版而改。注意「开往」不是站内路由，它指向外部 webring `https://www.travellings.cn/go.html`，因此不参与 `aria-current` 高亮，也是唯一没有 `active` 参数的导航项。
 - 前端动效脚本放在页面底部，**在 DOM 就绪后初始化**；用 `IntersectionObserver` 判断 hero 是否在视口内以开关渲染。
 - 首屏 LCP 元素（大标题）不要依赖外部字体加载完成才可见，配 `font-display: swap`。
 
