@@ -1,8 +1,8 @@
 package com.chenzhen.blog.controller;
 
 import com.chenzhen.blog.entity.annotation.BlogLog;
-import com.chenzhen.blog.mapper.BlogMapper;
 import com.chenzhen.blog.entity.vo.BlogVO;
+import com.chenzhen.blog.service.BlogService;
 import com.chenzhen.blog.service.SysConfigService;
 import com.chenzhen.blog.service.ViewsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ import java.util.List;
 public class ArchivesController {
 
     @Autowired
-    private BlogMapper blogMapper;
+    private BlogService blogService;
     @Autowired
     private ViewsService viewsService;
     @Autowired
@@ -33,13 +33,8 @@ public class ArchivesController {
     @BlogLog("归档页面")
     public String archives(Model model){
 
-        List<BlogVO> memoryList = blogMapper.getBlogList();
-        for (BlogVO blogVO : memoryList) {
-            //如果描述太长 截取前100个字
-            if (blogVO.getDescription().length() > 100){
-                blogVO.setDescription(blogVO.getDescription().substring(0,100) + "...");
-            }
-        }
+        // 获取归档文章列表。描述截断属于业务规则，由 service 负责，Controller 只做响应封装
+        List<BlogVO> memoryList = blogService.getArchiveList();
         // 获取作者
         String author = sysConfigService.list().get(0).getAuthor();
 

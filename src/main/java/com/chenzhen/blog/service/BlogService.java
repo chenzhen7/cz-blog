@@ -57,4 +57,14 @@ public interface BlogService extends IService<Blog> {
 
     List<Blog> getBlogViewTop10();
 
+    /**
+     * 获取归档页的文章列表（全部已发布，按创建时间倒序）
+     * <p>
+     * 与直接调 mapper 的区别：这里会把过长的 description 截断，归档页只展示摘要。
+     * 截断属于业务规则，不放在 Controller 里。
+     *
+     * @return 描述已截断的文章列表
+     */
+    List<BlogVO> getArchiveList();
+
 }

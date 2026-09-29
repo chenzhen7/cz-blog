@@ -37,6 +37,9 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     implements BlogService{
 
 
+    /** 归档页展示的文章摘要最大字数，超出部分截断并追加省略号 */
+    private static final int ARCHIVE_DESCRIPTION_MAX_LENGTH = 100;
+
     @Autowired
     private BlogMapper blogMapper;
     @Autowired
@@ -310,8 +313,21 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
         return countViews;
     }
 
+    @Override
+    public List<BlogVO> getArchiveList() {
+        List<BlogVO> blogList = getBaseMapper().getBlogList();
 
+        for (BlogVO blog : blogList) {
+            String description = blog.getDescription();
+            // t_blog.description 允许为 NULL，直接调 length() 会抛 NPE 让整个归档页 500。
+            // 这里只跳过空值，不编造默认文案：描述为空就让它空着，前端不渲染即可。
+            if (StrUtil.isNotEmpty(description) && description.length() > ARCHIVE_DESCRIPTION_MAX_LENGTH) {
+                blog.setDescription(description.substring(0, ARCHIVE_DESCRIPTION_MAX_LENGTH) + "...");
+            }
+        }
 
+        return blogList;
+    }
 
 }
 
