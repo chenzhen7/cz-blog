@@ -341,20 +341,27 @@
                     </div>
 
                     <!--分页-->
+                    <!--
+                        必须留在 commentList 片段之外、整页渲染的位置。
+                        这里用 ${blog.id} 拼分页地址，而 blog 只有 IndexController.blog()
+                        会放进 model；CommentController.comments() 走 AJAX 单渲染片段时
+                        只给 commentPageInfo。一旦把这块挪进片段，AJAX 场景下 ${blog.id}
+                        就会取不到值。真要挪，得先让 CommentController 也提供 blogId。
+                    -->
                     <nav th:if="${not #lists.isEmpty(commentPageInfo.list)}">
                         <ul class="pagination justify-content-center">
                             <li class="page-item" th:classappend="${commentPageInfo.hasPreviousPage} ? 'page-item' : 'page-item disabled' ">
-                                <a class="page-link text-black" href="#" th:href="@{ '/message?pageNum=' + ${commentPageInfo.prePage}}">上一页</a>
+                                <a class="page-link text-black" href="#" th:href="@{ '/comments/' + ${blog.id} + '?pageNum=' +${commentPageInfo.prePage}}">上一页</a>
                             </li>
 
                             <li class="page-item"
                                 th:each="num : ${commentPageInfo.navigatepageNums}"
                                 th:classappend="${commentPageInfo.pageNum == num} ? 'page-item active' : 'page-item'">
-                                <a class="page-link text-black fw-bold" href="#" th:href="@{ '/message?pageNum=' + ${num}}" th:text="${num}">1</a>
+                                <a class="page-link text-black fw-bold" href="#" th:href="@{ '/comments/' + ${blog.id} + '?pageNum=' +${num}}" th:text="${num}">1</a>
                             </li>
 
                             <li class="page-item" th:classappend="${commentPageInfo.hasNextPage} ? 'page-item' : 'page-item disabled' ">
-                                <a class="page-link text-black" href="#" th:href="@{ '/message?pageNum=' + ${commentPageInfo.nextPage}}" >下一页</a>
+                                <a class="page-link text-black" href="#" th:href="@{ '/comments/' + ${blog.id} + '?pageNum=' +${commentPageInfo.nextPage}}" >下一页</a>
                             </li>
                         </ul>
                     </nav>
