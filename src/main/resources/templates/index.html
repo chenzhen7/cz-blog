@@ -343,9 +343,7 @@
                 <nav>
                     <ul class="pagination justify-content-center">
                         <li class="page-item" th:classappend="${page.hasPreviousPage} ? 'page-item' : 'page-item disabled' ">
-                            <a class="page-link text-black" href="#">
-                                <span aria-hidden="true" th:href="@{'/?pageNum=' + ${page.prePage}}">上一页</span>
-                            </a>
+                            <a class="page-link text-black" href="#" th:href="@{'/?pageNum=' + ${page.prePage}}">上一页</a>
                         </li>
 
                         <li class="page-item"
@@ -355,9 +353,7 @@
                         </li>
 
                         <li class="page-item" th:classappend="${page.hasNextPage} ? 'page-item' : 'page-item disabled' ">
-                            <a class="page-link text-black" href="#">
-                                <span aria-hidden="true" th:href="@{'/?pageNum=' + ${page.nextPage}}">下一页</span>
-                            </a>
+                            <a class="page-link text-black" href="#" th:href="@{'/?pageNum=' + ${page.nextPage}}">下一页</a>
                         </li>
                     </ul>
                 </nav>
