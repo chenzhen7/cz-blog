@@ -15,8 +15,6 @@ import java.util.List;
  */
 @Data
 public class BlogVO extends Blog {
-    //分类名
-    private String typeName;
     //标签名
     private List<Tag> tagList;
 

@@ -15,6 +15,4 @@ import java.util.List;
 public class SyncCsdnDTO {
 
     private List<Integer> ids;
-
-    private Long typeId;
 }

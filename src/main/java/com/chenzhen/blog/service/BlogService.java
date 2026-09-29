@@ -24,13 +24,11 @@ public interface BlogService extends IService<Blog> {
 
     /**
      * 获取首页博客列表分页信息
-     * @param typeId 分类ID
      * @param pageNum 页码
      * @param pageSize 每页条数
      * @return
      */
-
-    PageInfo<BlogVO> pageIndex(Long typeId, Integer pageNum, Integer pageSize);
+    PageInfo<BlogVO> pageIndex(Integer pageNum, Integer pageSize);
 
     Boolean updateBlogTags(Long blogId, List<Long> tagIds);
 

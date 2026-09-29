@@ -38,7 +38,7 @@ public interface BlogMapper extends BaseMapper<Blog> {
 
     Boolean deleteAllBlogTags(@Param("blogId")Long blogId);
 
-    List<BlogVO> pageBlogs(@Param("typeId") Long typeId);
+    List<BlogVO> pageBlogs();
 
     List<BlogVO> getBlogListByBlogIds(@Param("blogIds") List<Long> blogIds);
 

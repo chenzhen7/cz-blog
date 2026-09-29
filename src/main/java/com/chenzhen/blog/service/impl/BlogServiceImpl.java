@@ -14,7 +14,6 @@ import com.chenzhen.blog.entity.vo.BlogVO;
 import com.chenzhen.blog.mapper.TagMapper;
 import com.chenzhen.blog.service.BlogService;
 import com.chenzhen.blog.mapper.BlogMapper;
-import com.chenzhen.blog.service.TypeService;
 import com.chenzhen.blog.util.MarkdownUtil;
 import com.chenzhen.blog.util.R;
 import com.github.pagehelper.PageHelper;
@@ -42,8 +41,6 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
 
     @Autowired
     private BlogMapper blogMapper;
-    @Autowired
-    private TypeService typeService;
     @Autowired
     private TagMapper tagMapper;
 
@@ -246,12 +243,12 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     }
 
     @Override
-    public PageInfo<BlogVO> pageIndex(Long typeId, Integer pageNum, Integer pageSize) {
+    public PageInfo<BlogVO> pageIndex(Integer pageNum, Integer pageSize) {
         //开启分页
         PageHelper.startPage(pageNum, pageSize);
         PageHelper.orderBy("create_time desc");
-        //1 获取该分类下的所有博文列表 typeId为空则获取所有
-        List<BlogVO> blogList = blogMapper.pageBlogs(typeId);
+        //1 获取所有已发布的博文列表
+        List<BlogVO> blogList = blogMapper.pageBlogs();
         if (blogList.isEmpty()) {
             return new PageInfo<>(blogList, 5);
         }

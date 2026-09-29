@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -104,11 +103,11 @@ public class SyncBlogServiceImpl implements SyncBlogService {
     @Override
     public void batchAyncCsdn(SyncCsdnDTO dto) throws Exception {
         for (Integer id : dto.getIds()) {
-            AyncCsdn(dto.getTypeId(), id);
+            AyncCsdn(id);
         }
     }
 
-    private void AyncCsdn(Long typeId, Integer id) throws Exception {
+    private void AyncCsdn(Integer id) throws Exception {
 
         GetArticleRequest getArticleRequest = GetArticleRequest.builder()
                 .id(id)
@@ -125,7 +124,7 @@ public class SyncBlogServiceImpl implements SyncBlogService {
                 .eq(Blog::getTitle, getArticleResp.getTitle().trim()));
         //如果没有相同的文章，则新增
         if (CollUtil.isEmpty(blogs)){
-            syncNewBlog(typeId, getArticleResp);
+            syncNewBlog(getArticleResp);
         }
         //如果有相同的文章，则覆盖原文章内容
         else if (blogs.size() == 1){
@@ -143,10 +142,15 @@ public class SyncBlogServiceImpl implements SyncBlogService {
         blogService.updateById(blog);
     }
 
-    private void syncNewBlog(Long typeId, GetArticleResp getArticleResp) {
+    /**
+     * 同步新文章。
+     * <p>
+     * t_blog.type_id 列按约定保留，但不写入：分类功能已移除，该列允许 NULL，
+     * MyBatis-Plus 默认跳过 null 字段，落库即为 NULL。
+     */
+    private void syncNewBlog(GetArticleResp getArticleResp) {
         Blog blog = new Blog();
         blog.setTitle(getArticleResp.getTitle());
-        blog.setTypeId(Objects.equals(typeId, -1L) ? null : typeId);
         blog.setContent(getArticleResp.getMarkdown_content());
         blog.setDescription(getArticleResp.getDescription());
         blog.setFirstPicture(CollUtil.isEmpty(getArticleResp.getCover_image()) ? null : getArticleResp.getCover_image().get(0));

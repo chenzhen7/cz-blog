@@ -39,12 +39,6 @@
           </a>
         </li>
         <li>
-          <a href="./types.html" th:href="@{/admin/types}" class="nav-link link-dark">
-            <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#speedometer2"></use></svg>
-            分类管理
-          </a>
-        </li>
-        <li>
           <a href="./tags.html" th:href="@{/admin/tags}" class="nav-link link-dark">
             <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#table"></use></svg>
             标签管理
@@ -129,10 +123,6 @@
                 <el-input v-model="searchForm.title"></el-input>
               </el-form-item>
 
-              <el-form-item label="分类">
-                <el-input v-model="searchForm.typeName"></el-input>
-              </el-form-item>
-
               <el-form-item label="标签">
                 <el-input v-model="searchForm.tagName"></el-input>
               </el-form-item>
@@ -198,12 +188,6 @@
               <el-table-column
                       prop="title"
                       label="标题"
-              >
-              </el-table-column>
-
-              <el-table-column
-                      prop="typeName"
-                      label="分类"
               >
               </el-table-column>
 
@@ -303,7 +287,6 @@
               appreciation: false
             },
             tagList:[],
-            typeList:[],
             multipleSelection: [],
             contentEditor:null
           }
@@ -348,13 +331,6 @@
             axiosInstance.get(`/admin/tags/all`).then(res => {
               if (res.code === 20000){
                 this.tagList = res.data.tagList;
-              }
-            })
-          },
-          fetchTypeList(){
-            axiosInstance.get(`/admin/types/all`).then(res => {
-              if (res.code === 20000){
-                this.typeList = res.data.typeList;
               }
             })
           },
@@ -467,7 +443,6 @@
         mounted(){
           this.fetchPage()
           this.fetchTagList()
-          this.fetchTypeList()
         },
         created(){
         }

@@ -25,7 +25,6 @@
 
     <resultMap id="BlogVoMap" type="com.chenzhen.blog.entity.vo.BlogVO">
         <id property="id" column="id" jdbcType="BIGINT"/>
-        <result property="typeName" column="type_name" jdbcType="VARCHAR"/>
         <result property="title" column="title" jdbcType="VARCHAR"/>
         <result property="content" column="content" jdbcType="VARCHAR"/>
         <result property="description" column="description" jdbcType="VARCHAR"/>
@@ -48,7 +47,7 @@
 
 
     <sql id="BlogVoFields">
-        select b.id,b.type_id,b.title,b.content,b.description,b.first_picture,b.commentabled,b.appreciation,b.published,
+        select b.id,b.title,b.content,b.description,b.first_picture,b.commentabled,b.appreciation,b.published,
                b.recommend,b.share_statement,b.copyright,b.views,b.comment_count,b.update_time,b.create_time
         from t_blog b
     </sql>
@@ -93,19 +92,14 @@
     </select>
 
     <select id="pageAdminBlogs" resultMap="BlogVoMap">
-        select distinct b.id,b.type_id,b.title,b.content,b.description,b.first_picture,b.commentabled,b.appreciation,b.published,
-               b.recommend,b.share_statement,b.copyright,b.views,b.comment_count,b.update_time,b.create_time,
-               type.name type_name
+        select distinct b.id,b.title,b.content,b.description,b.first_picture,b.commentabled,b.appreciation,b.published,
+               b.recommend,b.share_statement,b.copyright,b.views,b.comment_count,b.update_time,b.create_time
         from t_blog b
-        left join t_type type on b.type_id = type.id
         left join t_blog_tag bt on b.id = bt.blog_id
         left join t_tag tag on bt.tag_id = tag.id
         <where>
             <if test="query.title != null and query.title != ''">
                 and b.title like concat('%',#{query.title},'%')
-            </if>
-            <if test="query.typeName != null and query.typeName != ''">
-                and type.name like concat('%',#{query.typeName},'%')
             </if>
             <if test="query.tagName != null and query.tagName != ''">
                 and tag.name like concat('%',#{query.tagName},'%')
@@ -128,9 +122,6 @@
     <select id="pageBlogs" resultMap="BlogVoMap">
         <include refid="BlogVoFields"/>
         WHERE b.published = 1
-        <if test="typeId != null">
-            AND b.type_id = #{typeId}
-        </if>
         order by b.update_time desc
     </select>
 

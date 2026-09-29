@@ -1,10 +1,8 @@
 package com.chenzhen.blog.controller;
 
-import cn.hutool.core.collection.CollUtil;
 import com.chenzhen.blog.entity.annotation.BlogLog;
 import com.chenzhen.blog.entity.pojo.Music;
 import com.chenzhen.blog.entity.pojo.SysConfig;
-import com.chenzhen.blog.entity.pojo.Type;
 import com.chenzhen.blog.entity.vo.CommentVO;
 import com.chenzhen.blog.entity.pojo.Blog;
 import com.chenzhen.blog.entity.vo.BlogVO;
@@ -43,27 +41,16 @@ public class IndexController {
     private ViewsService viewsService;
     @Autowired
     private MusicService musicService;
-    @Autowired
-    private TypeService typeService;
 
 
     //跳转首页
     @GetMapping()
     @BlogLog(value = "访问首页")
     public String index(@RequestParam(value = "pageNum",required = false,defaultValue = "1")Integer pageNum,
-                        @RequestParam(value = "type",required = false)Long type,
                         Model model){
 
-        //获取所有分类
-        List<Type> typeList = typeService.getTypeList();
-        //如果没有传分类Id 默认选第一个分类中的博文列表
-        if (type == null){
-            if (CollUtil.isNotEmpty(typeList)){
-                type = typeList.get(0).getId();
-            }
-        }
         //获取首页博客列表分页信息
-        PageInfo<BlogVO> pageInfo = blogService.pageIndex(type, pageNum, 12);
+        PageInfo<BlogVO> pageInfo = blogService.pageIndex(pageNum, 12);
         //获取推荐列表
         List<BlogVO> recommendList = blogService.getRecommendList();
         //获取音乐列表
@@ -81,8 +68,6 @@ public class IndexController {
         // 获取留言总数
         Long blogMessageTotal = messageService.count();
 
-        model.addAttribute("typeList",typeList);
-        model.addAttribute("nowType",type);
         model.addAttribute("page",pageInfo);
         model.addAttribute("recommendList",recommendList);
         model.addAttribute("musicList",musicList);

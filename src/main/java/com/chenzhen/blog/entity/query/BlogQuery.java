@@ -14,8 +14,6 @@ public class BlogQuery extends BaseQuery{
 
     private String title;
 
-    private String typeName;
-
     private String tagName;
 
     private Integer published;

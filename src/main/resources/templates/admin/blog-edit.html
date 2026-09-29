@@ -58,19 +58,6 @@
                       </el-select>
                     </el-form-item>
                   </div>
-                  <div class="col-6">
-                    <!--分类-->
-                    <el-form-item label="分类">
-                      <el-select class="w-100"  v-model="editForm.typeId" placeholder="分类" >
-                        <el-option
-                                v-for="item in typeList"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                        </el-option>
-                      </el-select>
-                    </el-form-item>
-                  </div>
                 </div>
                 <div class="col-12">
                   <!--图片-->
@@ -152,7 +139,6 @@
               appreciation: false
             },
             tagList:[],
-            typeList:[],
             contentEditor:null
           }
 
@@ -183,13 +169,6 @@
             axiosInstance.get(`/admin/tags/all`).then(res => {
               if (res.code === 20000){
                 this.tagList = res.data.tagList;
-              }
-            })
-          },
-          fetchTypeList(){
-            axiosInstance.get(`/admin/types/all`).then(res => {
-              if (res.code === 20000){
-                this.typeList = res.data.typeList;
               }
             })
           },
@@ -282,7 +261,6 @@
           var idParam = urlParams.get('id');
           this.getDetail(idParam)
           this.fetchTagList()
-          this.fetchTypeList()
         },
         created(){
         }

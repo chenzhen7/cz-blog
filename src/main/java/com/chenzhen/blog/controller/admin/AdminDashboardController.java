@@ -37,8 +37,6 @@ public class AdminDashboardController {
     @Autowired
     MessageService messageService;
     @Autowired
-    TypeService typeService;
-    @Autowired
     TagService tagService;
     @Autowired
     SysLogService sysLogService;
@@ -57,8 +55,6 @@ public class AdminDashboardController {
         Long blogViewYesterday = viewsService.getYesterdayViews();
         // 获取博客总数
         Long blogTotal = blogService.count();
-        // 获取博客分类总数
-        Long blogTypeTotal = typeService.count();
         // 获取博客标签总数
         Long blogTagTotal = tagService.count();
         // 获取评论总数
@@ -76,7 +72,6 @@ public class AdminDashboardController {
 
         return R.success()
                 .data("blogTotal", blogTotal)
-                .data("blogTypeTotal", blogTypeTotal)
                 .data("blogTagTotal", blogTagTotal)
                 .data("blogCommentTotal", blogCommentTotal)
                 .data("blogMessageTotal", blogMessageTotal)
