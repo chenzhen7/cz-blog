@@ -48,6 +48,10 @@ public class ControllerExceptionHandler {
         mv.addObject("url",request.getRequestURL());
         mv.addObject("message", e.getMessage());
         mv.setViewName("error/error");
+        // 状态码必须显式设置，否则 Spring 默认 200：
+        // 那样搜索引擎会把错误页当正常页面收录、监控看不到失败、
+        // 前端 fetch 拿到的 r.ok 也会是 true，属于「异常被静默」。
+        mv.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         return mv;
     }
 
@@ -62,6 +66,9 @@ public class ControllerExceptionHandler {
         mv.addObject("url",request.getRequestURL());
         mv.addObject("message", e.getMsg());
         mv.setViewName("error/error");
+        // BlogException 目前的唯一来源是 LogAspect 的黑名单与访问频率拦截（"访问被拒绝!"），
+        // 属于访问控制失败而不是服务端故障，所以是 403 不是 500。
+        mv.setStatus(HttpStatus.FORBIDDEN);
         return mv;
     }
 
@@ -105,6 +112,9 @@ public class ControllerExceptionHandler {
         ModelAndView mv = new ModelAndView();
         mv.addObject("message", message);
         mv.setViewName("error/error");
+        // 未登录是 401。Sa-Token 拦的是 /admin/**，登录页 /admin/login 已在
+        // SaTokenConfigure 里排除，所以不会出现「401 跳登录页又 401」的循环。
+        mv.setStatus(HttpStatus.UNAUTHORIZED);
 
         return mv;
 
