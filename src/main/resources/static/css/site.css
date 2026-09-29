@@ -863,3 +863,99 @@ button { font: inherit; }
 .tag-chip.active { background: var(--signal-fill); border-color: var(--signal-edge); color: var(--ink-on-signal); }
 .tag-chip.active .hash,
 .tag-chip.active .count { color: var(--ink-on-signal); }
+
+/* ==========================================================================
+   19. 友链页
+   ========================================================================== */
+
+/* 上半：左边申请要求与格式，右边申请表单。窄屏堆叠 */
+.fr-apply { display: grid; grid-template-columns: minmax(0, 1fr); gap: 56px; }
+@media (min-width: 1024px) { .fr-apply { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 72px; } }
+
+.fr-rules h3 {
+  font-family: var(--font-cjk); font-weight: 700; font-size: 19px;
+  margin: 0 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--line);
+}
+.fr-rules p { color: var(--ink-2); margin: 0 0 10px; }
+.fr-rules + h3, .fr-rules h3 + h3 { margin-top: 40px; }
+
+/* 申请格式：一行「字段名 + 值 + 复制按钮」 */
+.fr-copy-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+.fr-copy-row .k { flex-shrink: 0; color: var(--ink-2); }
+.fr-copy-row .v {
+  min-width: 0; font-family: var(--font-mono); font-size: var(--fs-label);
+  color: var(--ink); word-break: break-all;
+}
+.fr-copy {
+  flex-shrink: 0; margin-left: auto; cursor: pointer;
+  border: 1px solid var(--line-strong); background: none;
+  padding: 4px 10px; font-size: var(--fs-label); color: var(--ink-2);
+  transition: background .3s, color .3s, border-color .3s;
+}
+.fr-copy:hover { background: var(--signal-fill); color: var(--ink-on-signal); border-color: var(--signal-edge); }
+/* 复制成功/失败的短暂反馈。用 min-width 顶住按钮宽度，否则文案一变按钮就跳一下 */
+.fr-copy { min-width: 62px; text-align: center; }
+.fr-copy.is-ok { border-color: var(--signal-edge); color: var(--signal); }
+
+/* 申请表单 */
+.fr-field { margin-bottom: 22px; }
+.fr-field label { display: flex; align-items: baseline; gap: 8px; font-weight: 700; margin-bottom: 8px; }
+.fr-field .req { color: var(--signal); }
+.fr-field .hint { color: var(--ink-2); font-weight: 400; font-size: var(--fs-label); }
+.fr-input, .fr-textarea {
+  width: 100%; padding: 12px 14px; font: inherit; font-size: 17px;
+  background: var(--bg); color: var(--ink);
+  border: 1px solid var(--line-strong); transition: border-color .3s;
+}
+.fr-input:focus, .fr-textarea:focus { border-color: var(--signal); outline: none; }
+.fr-textarea { min-height: 108px; resize: vertical; }
+
+/* 友链名片墙。
+   这里**不能**照搬首页「站点统计」那套 `gap: 1px + 容器底色画线`：
+   那套的线其实是容器底色从格缝里透出来的，一旦某一行没填满，
+   空出来的格子会把底色整片露出来（22 张卡在 5 列下最后一行只剩 2 张，
+   右下角就是一大块灰）。站点统计固定 3 格刚好填满，所以那边没暴露这个问题。
+   改成把线画在单元格上：容器只负责上边与左边，格子各自负责右边与下边，
+   没有格子就没有线，填不满也不会漏底，且相邻边不会叠成 2px。 */
+.fl-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  border-top: 1px solid var(--line); border-left: 1px solid var(--line);
+}
+.fl-card {
+  position: relative; display: flex; align-items: flex-start; gap: 14px;
+  padding: 22px 24px; background: var(--bg); transition: background .3s;
+  border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.fl-card:hover { background: var(--panel); }
+.fl-avatar {
+  flex-shrink: 0; width: 44px; height: 44px; object-fit: cover;
+  filter: grayscale(1) contrast(.96) brightness(1.15); transition: filter .3s;
+}
+.fl-card:hover .fl-avatar { filter: none; }
+.fl-body { min-width: 0; }
+.fl-name { display: block; font-weight: 700; font-size: 17px; color: var(--ink); overflow-wrap: break-word; }
+.fl-desc {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; margin-top: 4px; color: var(--ink-2); font-size: 16px;
+}
+
+/* 网络状态方块。四值枚举（0 良好 / 1 一般 / 2 超时 / 3 异常）必须三色可辨，
+   一个颜色套不了。这里不新增色相 —— 绿与红直接取正文代码块里已经用过的两个
+   token 色（Prism 的字符串绿与关键字红），黄直接用信号色边线档。 */
+.fl-status {
+  position: absolute; top: 14px; right: 14px;
+  width: 10px; height: 10px; border: 1px solid var(--line-strong);
+}
+.fl-status[data-net="0"] { background: #2f6b3a; border-color: #2f6b3a; }   /* 网络状态良好 */
+.fl-status[data-net="1"] { background: var(--signal-edge); border-color: var(--signal-edge); }  /* 状态一般 */
+.fl-status[data-net="2"] { background: #8a2b1f; border-color: #8a2b1f; }   /* 网络异常 */
+/* 3 = 网络超时，与 2 同色但留描边：同属故障、可区分于「异常」 */
+.fl-status[data-net="3"] { background: #8a2b1f; border-color: var(--ink-on-signal); }
+/* 枚举之外的值（含 null）显式画成问号方块。原模板对这些值什么都不画，
+   于是一个坏值在页面上完全看不出来 —— 那是静默回退。 */
+.fl-status[data-net="unknown"] {
+  background: none; border-color: var(--line-strong); color: var(--ink-2);
+  width: 14px; height: 14px; top: 12px; right: 12px;
+  font-size: 11px; line-height: 12px; text-align: center; font-family: var(--font-mono);
+}
+.fl-status[data-net="unknown"]::after { content: "?"; }

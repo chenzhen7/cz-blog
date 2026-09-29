@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="zh-CN" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta name="referrer" content="no-referrer"/>
     <meta charset="UTF-8">
@@ -8,232 +8,237 @@
     <meta name="description" content="ChenZhen的个人博客，友人帐页面，博客友链显示">
     <meta name="keywords" content="ChenZhen,博客,友人帐,友链">
     <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
-    <link rel="stylesheet" href="../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"  />
-    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+    <link rel="stylesheet" th:href="@{/fonts/fonts.css}">
+    <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 <body>
 
+<th:block th:replace="~{fragments/chrome :: grain}"/>
+<th:block th:replace="~{fragments/chrome :: topbar('friends')}"/>
 
-<!--导航-->
-<th:block th:replace="~{fragments/legacy :: navbar('friends')}"/>
+<main>
 
-
-<!-- 搜索框 -->
-<th:block th:replace="~{fragments/legacy :: searchModal}"/>
-<div  alt="" class="" style="height: 15vh"></div>
-
-
-
-<!--中间内容-->
-<div class="container " style="margin-top: 0em;max-width: 1200px">
-    <div class="fs-5"><strong><span class="cz-text-green ">不妨</span> , 留下你的痕迹🎞</strong></div>
-    <p class="cz-navbar-brand fw-bold cz-text-shadow-3" style="font-size:4.0rem;"><strong >让我们，交个<span class="cz-text-green">朋友</span></strong></p>
-
-    <div class="row mb-5">
-        <div class="col-5 fw-light">
-            <h4 class="mt-3 mb-3 fw-bold cz-text-shadow-3">申请友链网站要求</h4>
-            <p >🚫 无色情内容，无政治敏感内容，网站要能长期正常访问</p>
-            <p >📅 一个月内有新文章更新</p>
-            <p >🤝 原创博客、技术博客、游记博客优先</p>
-            <p class="mb-5">💖 先友后链，需要交换友链，先把本站添加到你的网站中，然后根据下面的格式，给我发email或在留言板给我留言~</p>
-
-            <h4 class="mb-3 fw-bold cz-text-shadow-3">👋申请格式</h4>
-            <p>
-                博客标题：<span id="blogTitle">ChenZhen的客栈</span>
-                <svg type="button" onclick="copyContent('blogTitle')" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" ><path fill="currentColor" fill-rule="evenodd" d="M7 5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-2v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h2zm2 2h5a3 3 0 0 1 3 3v5h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1zM5 9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z" clip-rule="evenodd"></path></svg>
-            </p>
-
-            <p>
-                博客地址：<span id="blogAddress">https://www.chenzhen.space/</span>
-                <svg type="button" onclick="copyContent('blogAddress')" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M7 5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-2v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h2zm2 2h5a3 3 0 0 1 3 3v5h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1zM5 9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z" clip-rule="evenodd"></path></svg>
-            </p>
-            <p>
-                图片地址：<span id="blogPicture">https://www.chenzhen.space/images/me.jpg</span>
-                <svg type="button" onclick="copyContent('blogPicture')" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M7 5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-2v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h2zm2 2h5a3 3 0 0 1 3 3v5h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1zM5 9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z" clip-rule="evenodd"></path></svg>
-            </p>
-
-            <p class="mb-5">
-                博客描述：<span id="blogDescription">个人博客，分享技术文章、生活文章、自建ChatGPT提示库、AI应用大全</span>
-                <svg type="button" onclick="copyContent('blogDescription')" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" ><path fill="currentColor" fill-rule="evenodd" d="M7 5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-2v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h2zm2 2h5a3 3 0 0 1 3 3v5h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1zM5 9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z" clip-rule="evenodd"></path></svg>
-            </p>
-            <h4 class="fw-bold mb-3 cz-text-shadow-3">❌无法访问或单方面取消</h4>
-            不定时排查，长期不更新文章、无法访问或单方面取消，将会移除链接，恕不告知😵
-
-
+    <!--/* model 来自 FriendLinkController：friendlinks（status=PASS 的友链）、author。 */-->
+    <header class="page-head">
+        <div class="wrap">
+            <div class="eyebrow">
+                <span class="bar"></span>
+                <span class="mono">Friends / 友人帐</span>
+            </div>
+            <h1 class="page-title">让我们，交个朋友</h1>
+            <p class="page-lead">不妨 , 留下你的痕迹🎞</p>
         </div>
-        <div class="col-7">
-            <label class="fw-bold mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-vector-pen" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M10.646.646a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1 0 .708l-1.902 1.902-.829 3.313a1.5 1.5 0 0 1-1.024 1.073L1.254 14.746 4.358 4.4A1.5 1.5 0 0 1 5.43 3.377l3.313-.828L10.646.646zm-1.8 2.908-3.173.793a.5.5 0 0 0-.358.342l-2.57 8.565 8.567-2.57a.5.5 0 0 0 .34-.357l.794-3.174-3.6-3.6z"/>
-                    <path fill-rule="evenodd" d="M2.832 13.228 8 9a1 1 0 1 0-1-1l-4.228 5.168-.026.086.086-.026z"/>
-                </svg>
-                你的博客名称<span style="color: red"> *</span>
-            </label>
-            <input name="blogName" type="text" class="cz-friendlink-input mb-4" >
+    </header>
 
-            <label class="fw-bold mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-link-45deg" viewBox="0 0 16 16">
-                    <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
-                    <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
-                </svg>
-                你的博客地址<span style="color: red"> *</span>
-            </label>
-            <input name="blogAddress" type="text" class="cz-friendlink-input mb-4" >
+    <section class="section">
+        <div class="wrap">
+            <div class="fr-apply">
 
-            <label class="fw-bold mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-square" viewBox="0 0 16 16">
-                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
-                    <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm12 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1v-1c0-1-1-4-6-4s-6 3-6 4v1a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12z"/>
-                </svg>
-                你的博客头像<span style="color: red"> *</span>
-            </label>
-            <input name="pictureAddress" type="text" class="cz-friendlink-input mb-4" >
+                <!--/* 左栏：申请要求 + 申请格式。文案与改版前逐字一致。 */-->
+                <div class="fr-rules">
+                    <h3>申请友链网站要求</h3>
+                    <p>🚫 无色情内容，无政治敏感内容，网站要能长期正常访问</p>
+                    <p>📅 一个月内有新文章更新</p>
+                    <p>🤝 原创博客、技术博客、游记博客优先</p>
+                    <p>💖 先友后链，需要交换友链，先把本站添加到你的网站中，然后根据下面的格式，给我发email或在留言板给我留言~</p>
 
-            <label class="fw-bold mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-card-text" viewBox="0 0 16 16">
-                    <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
-                    <path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8zm0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5z"/>
-                </svg>
-                你的博客描述<span style="color: red"> *</span>
-            </label>
-            <textarea name="blogDescription" type="text" class="cz-friendlink-textarea mb-4" ></textarea>
-
-            <label class="fw-bold mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope-at" viewBox="0 0 16 16">
-                    <path d="M2 2a2 2 0 0 0-2 2v8.01A2 2 0 0 0 2 14h5.5a.5.5 0 0 0 0-1H2a1 1 0 0 1-.966-.741l5.64-3.471L8 9.583l7-4.2V8.5a.5.5 0 0 0 1 0V4a2 2 0 0 0-2-2H2Zm3.708 6.208L1 11.105V5.383l4.708 2.825ZM1 4.217V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v.217l-7 4.2-7-4.2Z"/>
-                    <path d="M14.247 14.269c1.01 0 1.587-.857 1.587-2.025v-.21C15.834 10.43 14.64 9 12.52 9h-.035C10.42 9 9 10.36 9 12.432v.214C9 14.82 10.438 16 12.358 16h.044c.594 0 1.018-.074 1.237-.175v-.73c-.245.11-.673.18-1.18.18h-.044c-1.334 0-2.571-.788-2.571-2.655v-.157c0-1.657 1.058-2.724 2.64-2.724h.04c1.535 0 2.484 1.05 2.484 2.326v.118c0 .975-.324 1.39-.639 1.39-.232 0-.41-.148-.41-.42v-2.19h-.906v.569h-.03c-.084-.298-.368-.63-.954-.63-.778 0-1.259.555-1.259 1.4v.528c0 .892.49 1.434 1.26 1.434.471 0 .896-.227 1.014-.643h.043c.118.42.617.648 1.12.648Zm-2.453-1.588v-.227c0-.546.227-.791.573-.791.297 0 .572.192.572.708v.367c0 .573-.253.744-.564.744-.354 0-.581-.215-.581-.8Z"/>
-                </svg>
-                你的邮箱地址<span>（审核通过之后会提醒哦）</span>
-            </label>
-            <input name="email" type="email" class="cz-friendlink-input mb-4" >
-
-
-            <button type="submit" class="cz-friendlink-button" onclick="applyFriend()">申请友链</button>
-
-        </div>
-
-    </div>
-
-</div>
-
-<div class="container-sm">
-    <div class="row mb-4">
-
-        <div class="cz-friend-list row mt-3">
-            <div class="col-lg-3 col-md-4 col-sm-6 mb-4 " th:each="friendlink : ${friendlinks}">
-                <a href="#" target="_blank" th:href="@{${friendlink.blogAddress}}" class="cz-friend shadow">
-                    <div class="cz-friendlink-card ">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="cz-friend-avatar">
-                                <img src="../static/images/me.jpg" th:src="@{${friendlink.pictureAddress}}" alt="">
-                            </div>
-                            <strong class="fs-5 cz-text-shadow-4" th:text="${friendlink.blogName}">
-                                ChenZhen的博客
-                            </strong>
-                        </div>
-                        <div class="fw-light" th:text="${friendlink.blogDescription}">个人博客，分享技术文章、自建ChatGPT提示库、在线聊天网页</div>
-<!--                        右上角-->
-                        <div class=" position-absolute top-0 end-0 p-2">
-                            <svg th:if="${friendlink.netStatus == 0}" width="20" height="20" xmlns="http://www.w3.org/2000/svg" tabindex="0" aria-labelledby="uptime-tooltip"><rect width="20" height="20" fill="#10a37f"></rect></svg>
-                            <svg th:if="${friendlink.netStatus == 1}" width="20" height="20" xmlns="http://www.w3.org/2000/svg" tabindex="0" aria-labelledby="uptime-tooltip"><rect width="20" height="20" fill="#e0ab3c"></rect></svg>
-                            <svg th:if="${friendlink.netStatus == 2 || friendlink.netStatus == 3}" width="20" height="20" xmlns="http://www.w3.org/2000/svg" tabindex="0" aria-labelledby="uptime-tooltip"><rect width="20" height="20" fill="#ef4146"></rect></svg>
-                        </div>
+                    <h3>👋申请格式</h3>
+                    <!--/* 这四行的 id（blogTitle / blogAddress / blogPicture / blogDescription）
+                           是下面复制脚本的取值锚点，不能改名。
+                           原来复制图标是内联 onclick + SVG，这里换成带 data-copy 的 <button>，
+                           好处是不用把 JS 写进属性、键盘也能聚焦到。 */-->
+                    <div class="fr-copy-row">
+                        <span class="k">博客标题：</span>
+                        <span class="v" id="blogTitle">ChenZhen的客栈</span>
+                        <button type="button" class="fr-copy" data-copy="blogTitle">复制</button>
                     </div>
-                </a>
+                    <div class="fr-copy-row">
+                        <span class="k">博客地址：</span>
+                        <span class="v" id="blogAddress">https://www.chenzhen.space/</span>
+                        <button type="button" class="fr-copy" data-copy="blogAddress">复制</button>
+                    </div>
+                    <div class="fr-copy-row">
+                        <span class="k">图片地址：</span>
+                        <span class="v" id="blogPicture">https://www.chenzhen.space/images/me.jpg</span>
+                        <button type="button" class="fr-copy" data-copy="blogPicture">复制</button>
+                    </div>
+                    <div class="fr-copy-row">
+                        <span class="k">博客描述：</span>
+                        <span class="v" id="blogDescription">个人博客，分享技术文章、生活文章、自建ChatGPT提示库、AI应用大全</span>
+                        <button type="button" class="fr-copy" data-copy="blogDescription">复制</button>
+                    </div>
+
+                    <h3>❌无法访问或单方面取消</h3>
+                    <p>不定时排查，长期不更新文章、无法访问或单方面取消，将会移除链接，恕不告知😵</p>
+                </div>
+
+                <!--/* 右栏：申请表单。
+                       五个 name（blogName / blogAddress / pictureAddress / blogDescription / email）
+                       是后端 Friend 实体的绑定契约，一个字都不能改。
+                       注意这里不是 <form>，提交靠下面脚本发 fetch —— 与改版前一致（原来是 $.ajax）。
+                       button 上不再写 onclick，事件在脚本里绑。 */-->
+                <div class="fr-form">
+                    <div class="fr-field">
+                        <label for="f-blogName">你的博客名称<span class="req" aria-hidden="true">*</span></label>
+                        <input id="f-blogName" name="blogName" type="text" class="fr-input">
+                    </div>
+                    <div class="fr-field">
+                        <label for="f-blogAddress">你的博客地址<span class="req" aria-hidden="true">*</span></label>
+                        <input id="f-blogAddress" name="blogAddress" type="text" class="fr-input">
+                    </div>
+                    <div class="fr-field">
+                        <label for="f-pictureAddress">你的博客头像<span class="req" aria-hidden="true">*</span></label>
+                        <input id="f-pictureAddress" name="pictureAddress" type="text" class="fr-input">
+                    </div>
+                    <div class="fr-field">
+                        <label for="f-blogDescription">你的博客描述<span class="req" aria-hidden="true">*</span></label>
+                        <textarea id="f-blogDescription" name="blogDescription" class="fr-textarea"></textarea>
+                    </div>
+                    <div class="fr-field">
+                        <label for="f-email">你的邮箱地址<span class="hint">（审核通过之后会提醒哦）</span></label>
+                        <input id="f-email" name="email" type="email" class="fr-input">
+                    </div>
+
+                    <button type="button" class="btn-primary" id="applyBtn">申请友链</button>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!--/* 友链墙。netStatus 是 Friend.NetStatus 的四值枚举：
+           0 良好 / 1 一般 / 2 超时 / 3 异常。
+           原模板对 3 之内的值画了色块，对枚举之外的值（含 null）什么都不画 —— 那是静默回退，
+           一个坏值在页面上完全看不出来。这里显式给未知值一个问号方块，让问题可见。 */-->
+    <section class="section flush" th:if="${not #lists.isEmpty(friendlinks)}">
+        <div class="wrap">
+            <div class="sec-head">
+                <h2 class="sec-title">友情链接</h2>
+                <span class="mono-sm" style="color: var(--ink-2);">
+                    共 <span th:text="${#lists.size(friendlinks)}">0</span> 个
+                </span>
             </div>
 
-
+            <div class="fl-grid">
+                <a class="fl-card" th:each="friendlink : ${friendlinks}"
+                   target="_blank" rel="noopener" th:href="@{${friendlink.blogAddress}}">
+                    <img class="fl-avatar" th:src="@{${friendlink.pictureAddress}}"
+                         th:alt="${friendlink.blogName} + ' 的头像'" width="44" height="44"
+                         loading="lazy" decoding="async">
+                    <span class="fl-body">
+                        <span class="fl-name" th:text="${friendlink.blogName}">友链名称</span>
+                        <span class="fl-desc" th:text="${friendlink.blogDescription}">友链描述</span>
+                    </span>
+                    <!--/* title 是给人和读屏看的说明；原模板挂着 aria-labelledby="uptime-tooltip"，
+                           但页面上根本没有这个 id 的元素，等于没写。 */-->
+                    <span class="fl-status"
+                          th:attr="data-net=${friendlink.netStatus != null and friendlink.netStatus >= 0 and friendlink.netStatus <= 3} ? ${friendlink.netStatus} : 'unknown',
+                                   title=${friendlink.netStatus == 0} ? '网络状态良好'
+                                       : (${friendlink.netStatus == 1} ? '状态一般'
+                                       : (${friendlink.netStatus == 2} ? '网络异常'
+                                       : (${friendlink.netStatus == 3} ? '网络超时' : '状态未知')))"
+                          aria-hidden="true"></span>
+                </a>
+            </div>
         </div>
-    </div>
-</div>
+    </section>
 
-<!--底部栏-->
-<th:block th:replace="~{fragments/legacy :: footer}"/>
+</main>
 
+<th:block th:replace="~{fragments/chrome :: footer}"/>
 
+<th:block th:replace="~{fragments/chrome :: searchDialog}"/>
+<th:block th:replace="~{fragments/chrome :: scripts}"/>
 
-<script src="../static/lib/bootstrap.bundle.min.js" th:src="@{/lib/bootstrap.bundle.min.js}"></script>
-<script src="../static/lib/jquery-3.2.1/jquery-3.2.1.min.js" th:src="@{/lib/jquery-3.2.1/jquery-3.2.1.min.js}"></script>
-<script src="../static/lib/clickEffect.js" th:src="@{/lib/clickEffect.js}"></script>
-
-
-<th:block th:replace="~{fragments/legacy :: scripts}"/>
+<!--/* 页面自己的脚本：复制申请格式、提交友链申请。
+     改版前这两段依赖 jQuery（$.ajax、$("input[name=...]").val()），现在换成原生 fetch，
+     所以整个前台不再需要 jQuery。 */-->
 <script>
-
-
-
-    //复制内容
-    function copyContent(elementId) {
-        // 获取要复制的元素
-        const text = document.getElementById(elementId).textContent;
-        // 创建一个临时的文本框
-        const tempInput = document.createElement('input');
-        // 将文本内容赋值给临时文本框
-        tempInput.value = text;
-        // 将临时文本框添加到页面中
-        document.body.appendChild(tempInput);
-        // 选中临时文本框中的内容
-        tempInput.select();
-        // 执行复制操作
-        document.execCommand('copy');
-        // 删除临时文本框
-        document.body.removeChild(tempInput);
-
-
-    }
-    //申请友链
-    function applyFriend () {
-        let blogName = $("input[name='blogName']").val();
-        let blogAddress = $("input[name='blogAddress']").val();
-        let pictureAddress = $("input[name='pictureAddress']").val();
-        let blogDescription = $("textarea[name='blogDescription']").val();
-        let email = $("input[name='email']").val();
-
-
-        //校验
-        if (!blogName.trim()) {
-            alert("请输入博客名称");
-            return;
+    (function () {
+        // ---------- 复制申请格式 ----------
+        // 保留 execCommand：navigator.clipboard 只在安全上下文可用，
+        // 而本站本地调试走的是 http://localhost（安全）之外的场景不保证有。
+        function copyText(text) {
+            var input = document.createElement('textarea');
+            input.value = text;
+            // 放在视口外，避免复制瞬间页面滚动一下
+            input.style.position = 'fixed';
+            input.style.top = '-1000px';
+            document.body.appendChild(input);
+            input.select();
+            var ok = false;
+            try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+            document.body.removeChild(input);
+            return ok;
         }
-        if (!blogAddress.trim()) {
-            alert("请输入博客地址");
-            return;
-        }
-        if (!pictureAddress.trim()) {
-            alert("请输入图片地址");
-            return;
-        }
-        if (!blogDescription.trim()) {
-            alert("请输入博客描述");
-            return;
-        }
-        let requestData = {
-            blogName: blogName,
-            blogAddress: blogAddress,
-            pictureAddress: pictureAddress,
-            blogDescription: blogDescription,
-            email: email
-        };
-        // 发送 AJAX 请求
-        $.ajax({
-            type: "POST",
-            url: "/friends/apply-friendlink",  // Replace with the actual endpoint URL
-            data: requestData,
-            success: function(response) {
-                if (response.code === 20000){
-                    alert("申请成功");
-                }else{
-                    alert(response.message);
-                }
-            },
-            error: function(error) {
-                alert("申请失败");
-            }
+
+        document.querySelectorAll('[data-copy]').forEach(function (btn) {
+            // 记下原始文案，1.2 秒后还原
+            var label = btn.textContent;
+            btn.addEventListener('click', function () {
+                var target = document.getElementById(btn.getAttribute('data-copy'));
+                if (!target) return;
+                var ok = copyText(target.textContent);
+                // 失败要说出来，不能默默闪一下什么都不发生
+                btn.textContent = ok ? '已复制' : '复制失败';
+                btn.classList.toggle('is-ok', ok);
+                setTimeout(function () {
+                    btn.textContent = label;
+                    btn.classList.remove('is-ok');
+                }, 1200);
+            });
         });
-    }
 
+        // ---------- 申请友链 ----------
+        var btn = document.getElementById('applyBtn');
+        if (!btn) return;
 
+        // name 属性是后端 Friend 的绑定契约，这里只按名字取值，不改名
+        function val(name) {
+            var el = document.querySelector('[name="' + name + '"]');
+            return el ? el.value : '';
+        }
 
+        btn.addEventListener('click', function () {
+            var data = {
+                blogName: val('blogName'),
+                blogAddress: val('blogAddress'),
+                pictureAddress: val('pictureAddress'),
+                blogDescription: val('blogDescription'),
+                email: val('email')
+            };
+
+            // 校验与改版前一致（邮箱本就不做前端校验，非必填）
+            if (!data.blogName.trim()) { alert('请输入博客名称'); return; }
+            if (!data.blogAddress.trim()) { alert('请输入博客地址'); return; }
+            if (!data.pictureAddress.trim()) { alert('请输入图片地址'); return; }
+            if (!data.blogDescription.trim()) { alert('请输入博客描述'); return; }
+
+            // 表单编码。后端收的是 Friend 实体（普通表单绑定），不是 JSON，
+            // 所以不能发 application/json —— 那会 415。
+            var body = new URLSearchParams();
+            Object.keys(data).forEach(function (k) { body.append(k, data[k]); });
+
+            fetch('/friends/apply-friendlink', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                body: body.toString()
+            })
+                .then(function (r) {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.json();
+                })
+                .then(function (res) {
+                    if (res.code === 20000) { alert('申请成功'); } else { alert(res.message); }
+                })
+                .catch(function (err) {
+                    // 原来的 error 回调只会说「申请失败」，把真正的原因吞掉了。
+                    // 这里把状态码或异常信息带出来，排障时才有线索。
+                    alert('申请失败：' + err.message);
+                });
+        });
+    })();
 </script>
+
 </body>
 </html>
