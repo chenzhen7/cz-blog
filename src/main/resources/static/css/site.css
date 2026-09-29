@@ -898,17 +898,17 @@ button { font: inherit; }
 .fr-copy.is-ok { border-color: var(--signal-edge); color: var(--signal); }
 
 /* 申请表单 */
-.fr-field { margin-bottom: 22px; }
-.fr-field label { display: flex; align-items: baseline; gap: 8px; font-weight: 700; margin-bottom: 8px; }
-.fr-field .req { color: var(--signal); }
-.fr-field .hint { color: var(--ink-2); font-weight: 400; font-size: var(--fs-label); }
-.fr-input, .fr-textarea {
+.form-field { margin-bottom: 22px; }
+.form-field label { display: flex; align-items: baseline; gap: 8px; font-weight: 700; margin-bottom: 8px; }
+.form-field .req { color: var(--signal); }
+.form-field .hint { color: var(--ink-2); font-weight: 400; font-size: var(--fs-label); }
+.form-input, .form-textarea {
   width: 100%; padding: 12px 14px; font: inherit; font-size: 17px;
   background: var(--bg); color: var(--ink);
   border: 1px solid var(--line-strong); transition: border-color .3s;
 }
-.fr-input:focus, .fr-textarea:focus { border-color: var(--signal); outline: none; }
-.fr-textarea { min-height: 108px; resize: vertical; }
+.form-input:focus, .form-textarea:focus { border-color: var(--signal); outline: none; }
+.form-textarea { min-height: 108px; resize: vertical; }
 
 /* 友链名片墙。
    这里**不能**照搬首页「站点统计」那套 `gap: 1px + 容器底色画线`：
@@ -959,3 +959,90 @@ button { font: inherit; }
   font-size: 11px; line-height: 12px; text-align: center; font-family: var(--font-mono);
 }
 .fl-status[data-net="unknown"]::after { content: "?"; }
+
+/* ==========================================================================
+   20. 留言板
+   留言列表这一块是 #message-container，它同时是 Thymeleaf 片段 messageList ——
+   /messagecomment/{n} 单独渲染它并返回纯片段 HTML，页面脚本收到后替换整个容器。
+   所以这一节的样式必须在 site.css（页面已加载）里，不能写在片段里，
+   片段拿不到 <head>，单独返回时没有任何样式表可引。
+   ========================================================================== */
+
+/* 发帖区 */
+.msg-form { border: 1px solid var(--line); padding: 26px 28px; }
+.msg-form-head { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 20px; }
+.msg-avatar { flex-shrink: 0; width: 56px; height: 56px; }
+.msg-avatar img {
+  width: 56px; height: 56px; object-fit: cover;
+  filter: grayscale(1) contrast(.96) brightness(1.15);
+}
+.msg-inputs { flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+@media (min-width: 768px) { .msg-inputs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* 表情条。90 个表情一行放不下，固定高度内滚动；高度压到两行半，
+   刚好露出"还有更多"，比做成弹层的成本低得多。 */
+.emoji-bar {
+  display: flex; flex-wrap: wrap; gap: 2px;
+  max-height: 92px; overflow-y: auto;
+  padding: 10px 12px; margin: 16px 0;
+  border: 1px solid var(--line); background: var(--bg-sunken);
+}
+.emoji-bar button {
+  border: 0; background: none; cursor: pointer;
+  font-size: 20px; line-height: 1; padding: 4px 5px;
+  transition: background .2s;
+}
+.emoji-bar button:hover { background: var(--signal-fill); }
+
+/* 留言列表 */
+.cm-list { border-top: 1px solid var(--line); }
+.cm { display: flex; gap: 16px; padding: 26px 0; border-bottom: 1px solid var(--line); }
+
+.cm-avatar { position: relative; flex-shrink: 0; width: 48px; height: 48px; }
+.cm-avatar > img {
+  width: 48px; height: 48px; object-fit: cover;
+  filter: grayscale(1) contrast(.96) brightness(1.15);
+}
+/* 头像上的站点链接遮罩。原来是一直铺在头像上的半透明块，会一直压着头像；
+   改成悬停才出现，静态时头像干净。 */
+.cm-avatar .link-mask {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(17, 17, 17, .58); color: #fff;
+  opacity: 0; transition: opacity .3s;
+}
+.cm-avatar:hover .link-mask { opacity: 1; }
+
+.cm-body { flex: 1; min-width: 0; }
+.cm-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+.cm-name { font-weight: 700; color: var(--ink); }
+/* 站主标记：用实心信号块。全站「被标出的那一处」都是这个语言 */
+.cm-badge {
+  background: var(--signal-fill); color: var(--ink-on-signal);
+  border: 1px solid var(--signal-edge);
+  padding: 1px 7px; font-size: var(--fs-label);
+}
+.cm-at { color: var(--signal); font-size: var(--fs-label); }
+
+/* 留言正文。
+   pre-wrap 是这次新增的：留言框是多行输入，而原样式下换行会被 HTML 折叠成空格，
+   用户敲的三行显示出来是一行。th:text 输出的是纯文本，保留换行才对。 */
+.cm-text { color: var(--ink-2); margin: 8px 0 0; white-space: pre-wrap; overflow-wrap: break-word; }
+
+.cm-foot { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; color: var(--ink-2); font-size: var(--fs-label); }
+.cm-foot a { border-bottom: 1px solid transparent; transition: color .3s, border-color .3s; cursor: pointer; }
+.cm-foot a:hover { color: var(--signal); border-color: var(--signal-edge); }
+
+/* 回复列表：左侧一条竖线，与目录、引用块同一套语言 */
+.cm-replies { margin-top: 20px; padding-left: 18px; border-left: 1px solid var(--line); }
+.cm-replies .cm { border-bottom: 0; padding: 14px 0; }
+.cm-replies .cm:first-child { padding-top: 0; }
+.cm-replies .cm:last-child { padding-bottom: 0; }
+.cm-list .cm-empty { padding: 56px 0; color: var(--ink-2); }
+
+/* 只给读屏看的文字。Bootstrap 有这个类，前台摘掉 Bootstrap 后要自己带一份，
+   否则那些「访问站点」的说明会被当成普通文字显示出来。 */
+.visually-hidden {
+  position: absolute !important; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
