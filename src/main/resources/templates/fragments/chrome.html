@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<!--/*
+
+  前台「新 chrome」片段 —— 终末地工业编辑风。
+
+  与 fragments/legacy.html 并存：legacy 是改版前的旧样式 chrome，给还没迁移的页用。
+  Phase 3 每迁完一页就换掉它的 5 个 th:replace 目标，全迁完 legacy.html 即可删除。
+
+  这一段是 jQuery-free 的：全文用原生 querySelector / fetch / classList。
+  还没迁移的页照旧引 jQuery，互不影响。脚本必须排在 jQuery 之后、各页自己的脚本之前，
+  因为它声明的常量与页面脚本共用同一份顶层词法作用域。
+
+  依赖的 CSS 在 static/css/site.css，字体在 static/fonts/fonts.css。
+  各页自己引这两个文件（以及自己的额外样式），本文件不替页面引样式表。
+
+*/-->
+<body>
+
+<!--/* ============================================================
+     页眉（顶栏 + 移动端抽屉）
+     参数 active：当前页标识，取值 index / tags / archives / message / friends / about。
+     取其它值（如文章详情页传 blog）时七个导航项都不高亮。
+     用 aria-current="page" 而不是自定义 class 表示当前项，CSS 侧直接选这个属性。
+     ============================================================ */-->
+<th:block th:fragment="topbar(active)">
+    <header class="topbar">
+        <div class="wrap topbar-inner">
+            <a class="brand" th:href="@{/}">
+                <span class="brand-mark">CZ</span>
+                <span class="brand-code mono">/ <span th:text="${author}">ChenZhen</span></span>
+            </a>
+            <nav class="nav" aria-label="主导航">
+                <a th:href="@{/}"         th:attr="aria-current=${active == 'index'}    ? 'page' : null">首页</a>
+                <a th:href="@{/tags}"     th:attr="aria-current=${active == 'tags'}     ? 'page' : null">标签</a>
+                <a th:href="@{/archives}" th:attr="aria-current=${active == 'archives'} ? 'page' : null">归档</a>
+                <a th:href="@{/message}"  th:attr="aria-current=${active == 'message'}  ? 'page' : null">留言板</a>
+                <a th:href="@{/friends}"  th:attr="aria-current=${active == 'friends'}  ? 'page' : null">友链</a>
+                <a href="https://www.travellings.cn/go.html">🚇开往</a>
+                <a th:href="@{/about}"    th:attr="aria-current=${active == 'about'}    ? 'page' : null">关于我</a>
+            </nav>
+            <div class="topbar-right">
+                <span class="status mono"><span class="dot"></span>运行中</span>
+                <button type="button" class="btn-sq" data-search-open>搜索</button>
+                <button type="button" class="btn-sq menu-btn" id="menuBtn"
+                        aria-expanded="false" aria-controls="drawer">菜单</button>
+            </div>
+        </div>
+    </header>
+
+    <!--/* 移动端抽屉。只在 <1080px 出现，开合由 chrome 的 scripts 片段改 data-open */-->
+    <div id="drawer">
+        <nav aria-label="移动端导航">
+            <a th:href="@{/}"         th:attr="aria-current=${active == 'index'}    ? 'page' : null">首页</a>
+            <a th:href="@{/tags}"     th:attr="aria-current=${active == 'tags'}     ? 'page' : null">标签</a>
+            <a th:href="@{/archives}" th:attr="aria-current=${active == 'archives'} ? 'page' : null">归档</a>
+            <a th:href="@{/message}"  th:attr="aria-current=${active == 'message'}  ? 'page' : null">留言板</a>
+            <a th:href="@{/friends}"  th:attr="aria-current=${active == 'friends'}  ? 'page' : null">友链</a>
+            <a href="https://www.travellings.cn/go.html">🚇开往</a>
+            <a th:href="@{/about}"    th:attr="aria-current=${active == 'about'}    ? 'page' : null">关于我</a>
+        </nav>
+    </div>
+</th:block>
+
+<!--/* ============================================================
+     搜索浮层。原生 <dialog>，不用 Bootstrap Modal。
+     showModal() 自带焦点陷阱、Esc 关闭与 ::backdrop，省掉 80KB 的 bundle。
+     点 backdrop 关闭需要 JS 兜一下：监听 dialog 上的 click，命中 dialog 自身即为点到了背景。
+     ============================================================ */-->
+<dialog th:fragment="searchDialog" class="search-dlg" id="searchDlg" aria-labelledby="searchDlgTitle">
+    <div class="search-dlg-head">
+        <span class="mono" id="searchDlgTitle">Search / 搜索</span>
+        <button type="button" class="search-dlg-close" data-search-close>Esc 关闭</button>
+    </div>
+    <div class="search-dlg-body">
+        <input id="keywordInput" class="search-input" type="search" autocomplete="off"
+               placeholder="输入关键词，按标题搜索">
+        <p class="search-hint mono-sm" id="searchHint">输入后稍候，结果按标题匹配</p>
+        <!-- 搜索结果注入处。这里不放 list-group 那套 Bootstrap class -->
+        <div class="search-list" id="searchResults"></div>
+    </div>
+</dialog>
+
+<!--/* ============================================================
+     页脚。
+     只依赖 ${author}（缺失时 th:text 渲染为空），不碰任何业务 model ——
+     错误页只拿得到 timestamp/status/error/message/path，
+     这里一旦引用 ${page.list} 之类，会把 404 变成 500。
+     ============================================================ */-->
+<footer th:fragment="footer" class="footer">
+    <div class="wrap footer-inner">
+        <div class="brand">
+            <span class="brand-mark">CZ</span>
+            <span class="brand-code mono">/ <span th:text="${author}">ChenZhen</span></span>
+        </div>
+        <!--/* 用 mono-sm 而不是 mono：mono 的 .14em 字距是给短的大写标签用的，
+               压在这三条长句（备案号、运行时长）上会把整行撑出容器。 */-->
+        <div class="footer-meta mono-sm">
+            <!--/* 占位文案不能写成破折号：规范明令全站禁用 —。
+                    JS 一加载就会用真实时长覆盖它，这只是脚本没跑起来时才看得到的退路。 */-->
+            <span>本博客已营业 <span id="htmer_time">计算中</span></span>
+            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">粤ICP备2022122083号-1</a>
+            <span>文章采用 CC BY-NC-SA 4.0</span>
+        </div>
+    </div>
+</footer>
+
+<!--/* ============================================================
+     纸张纤维噪点层。固定覆盖全屏，纯装饰，pointer-events: none。
+     ============================================================ */-->
+<div th:fragment="grain" class="grain" aria-hidden="true"></div>
+
+<!--/* ============================================================
+     载入擦除。首页专用，算「开幕」。
+     keyframes 写成「先铺满再抽走」而不是「先抽走」：静止态就是被裁掉（不可见），
+     所以万一动画没跑起来也绝不会把整页盖住。这是这套动效最危险的失败模式，
+     反过来写（静止态=盖满）会让动画一旦失效整个站点变成一块黄板。
+     ============================================================ */-->
+<div th:fragment="wipe" id="wipe" aria-hidden="true">
+    <span class="wipe-code">CZ ARCHIVE / 地形加载中</span>
+</div>
+
+<!--/* ============================================================
+     公共脚本：抽屉开合、搜索浮层的打开/关闭/防抖检索、博客运行时长。
+
+     引入位置：必须排在 jQuery（若该页需要）之后、各页自己的 <script> 之前。
+     这里声明的 menuBtn / searchDlg 等是顶层 const，与页面脚本共用同一份顶层词法作用域。
+
+     依赖的 DOM：#menuBtn / #drawer / #searchDlg / #keywordInput / #searchResults / #htmer_time
+     ============================================================ */-->
+<th:block th:fragment="scripts">
+<script>
+    // ---------- 移动端抽屉开合 ----------
+    (function () {
+        var menuBtn = document.getElementById('menuBtn');
+        var drawer = document.getElementById('drawer');
+        if (!menuBtn || !drawer) return;
+        menuBtn.addEventListener('click', function () {
+            var open = drawer.hasAttribute('data-open');
+            if (open) {
+                drawer.removeAttribute('data-open');
+            } else {
+                drawer.setAttribute('data-open', '');
+            }
+            menuBtn.setAttribute('aria-expanded', String(!open));
+        });
+    })();
+
+    // ---------- 博客运行时长 ----------
+    (function () {
+        var el = document.getElementById('htmer_time');
+        if (!el) return;
+
+        function secondToDate(second) {
+            if (!second) return [0, 0, 0, 0, 0];
+            var time = [0, 0, 0, 0, 0];
+            if (second >= 365 * 24 * 3600) { time[0] = parseInt(second / (365 * 24 * 3600)); second %= 365 * 24 * 3600; }
+            if (second >= 24 * 3600) { time[1] = parseInt(second / (24 * 3600)); second %= 24 * 3600; }
+            if (second >= 3600) { time[2] = parseInt(second / 3600); second %= 3600; }
+            if (second >= 60) { time[3] = parseInt(second / 60); second %= 60; }
+            if (second > 0) { time[4] = second; }
+            return time;
+        }
+
+        // 站点创建时间，与改版前一致，不因视觉改版而改
+        var createTime = Math.round(new Date(Date.UTC(2022, 8, 21, 15, 15, 15)).getTime() / 1000);
+        function tick() {
+            var t = secondToDate(Math.round((Date.now() + 8 * 60 * 60 * 1000) / 1000) - createTime);
+            el.textContent = t[0] + '年' + t[1] + '天' + t[2] + '时' + t[3] + '分' + t[4] + '秒';
+        }
+        tick();
+        setInterval(tick, 1000);
+    })();
+
+    // ---------- 搜索浮层 ----------
+    (function () {
+        var dlg = document.getElementById('searchDlg');
+        var input = document.getElementById('keywordInput');
+        var list = document.getElementById('searchResults');
+        var hint = document.getElementById('searchHint');
+        if (!dlg || !input || !list) return;
+
+        var defaultHint = hint ? hint.textContent : '';
+        var timer = null;
+        // 中文输入法拼字期间不触发检索，否则每敲一个拼音字母都发一次请求
+        var composing = false;
+
+        function open() {
+            if (typeof dlg.showModal === 'function') { dlg.showModal(); } else { dlg.setAttribute('open', ''); }
+            input.focus();
+        }
+        function close() {
+            if (typeof dlg.close === 'function') { dlg.close(); } else { dlg.removeAttribute('open'); }
+        }
+
+        document.querySelectorAll('[data-search-open]').forEach(function (b) {
+            b.addEventListener('click', open);
+        });
+        document.querySelectorAll('[data-search-close]').forEach(function (b) {
+            b.addEventListener('click', close);
+        });
+        // 点 backdrop 关闭：dialog 自身铺满整个视口，点到它自己即为点到背景
+        dlg.addEventListener('click', function (e) { if (e.target === dlg) close(); });
+
+        function render(items) {
+            list.textContent = '';
+            if (!items || !items.length) {
+                var empty = document.createElement('div');
+                empty.className = 'search-empty';
+                empty.textContent = '没有匹配的文章';
+                list.appendChild(empty);
+                return;
+            }
+            items.forEach(function (blog) {
+                var a = document.createElement('a');
+                a.href = '/blog/' + blog.id;
+                a.textContent = blog.title;
+                list.appendChild(a);
+            });
+        }
+
+        function search() {
+            var keyword = input.value.trim();
+            if (!keyword) {
+                list.textContent = '';
+                if (hint) hint.textContent = defaultHint;
+                return;
+            }
+            fetch('/search?keyword=' + encodeURIComponent(keyword))
+                .then(function (r) {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.json();
+                })
+                .then(function (res) {
+                    if (res.code !== 20000) throw new Error('接口返回 code=' + res.code);
+                    var blogs = res.data && res.data.blogs;
+                    render(blogs);
+                    if (hint) hint.textContent = '匹配 ' + (blogs ? blogs.length : 0) + ' 篇';
+                })
+                .catch(function (err) {
+                    // 不静默兜底：搜索失败要让用户看见，而不是留一块空白
+                    list.textContent = '';
+                    var box = document.createElement('div');
+                    box.className = 'search-empty';
+                    box.textContent = '搜索失败：' + err.message;
+                    list.appendChild(box);
+                });
+        }
+
+        input.addEventListener('compositionstart', function () { composing = true; });
+        input.addEventListener('compositionend', function () { composing = false; search(); });
+        input.addEventListener('input', function () {
+            if (composing) return;
+            clearTimeout(timer);
+            timer = setTimeout(search, 300);
+        });
+        // 关掉浮层时清空，下次打开是干净状态
+        dlg.addEventListener('close', function () {
+            input.value = '';
+            list.textContent = '';
+            if (hint) hint.textContent = defaultHint;
+        });
+    })();
+</script>
+</th:block>
+
+</body>
+</html>

@@ -1,0 +1,675 @@
+/* ==========================================================================
+   cz-blog 前台设计系统 · 终末地工业编辑风
+   规范见 .claude/skills/blog-design/SKILL.md，可运行原型见 prototypes/g-endfield-terrain.html
+
+   这份文件只服务前台。后台 12 个模板共用 me.css，那边一个字都不动：
+   me.css 里有 * { border-radius: 0 } 与 body { font-size: 17px } 这类全局规则，
+   原地改写会把 Element UI 的按钮、输入框、对话框全部削平。等后台单独用 Element UI 重做时
+   再连文件一起删（届时只需把 .admin-body 一条规则搬走）。
+
+   字体不在这里 @font-face：拉丁与中文各三个 woff2，放在 fonts/fonts.css。
+   页面先引 fonts.css 再引本文件，这样才能给首屏字体加 preload。
+   ========================================================================== */
+
+/* ==========================================================================
+   1. 令牌
+   ========================================================================== */
+:root {
+  /* ---- 纸与墨 ---- */
+  --bg:            #ffffff;   /* 纯白是刻意选的：早期用暖灰纸 #e8e8e2，多数显示器上发闷 */
+  --bg-sunken:     #fafaf9;   /* 信息条 / 页脚 */
+  --panel:         #fbfbfa;   /* 抽屉 / 悬停面 */
+  --line:          #e8e8e8;   /* 细线 l1 */
+  --line-strong:   #d4d4d4;   /* 重线 l2 */
+  --ink:           #111111;   /* 正文      白底 19.1:1 */
+  --ink-2:         #4a4a4a;   /* 次要文字  白底  8.9:1 */
+  --ink-on-signal: #111111;   /* 信号色底上的墨字 */
+
+  /* ---- 信号黄：按「要不要被读到」分三档 ----
+     任何亮到能被称为「亮黄」的颜色对白底都是 1:1，这是明度决定的物理限制，
+     所以黄不能当一个颜色用，必须按落点拆角色。 */
+  --signal:        #6b5d00;   /* 文字 / 焦点环         白底 6.58:1 */
+  --signal-fill:   #ffe600;   /* 实心块，块内墨字 15.0:1 */
+  --signal-fill-h: #ffd000;   /* 实心块 hover / press */
+  --signal-edge:   #edc800;   /* 细线与描边            白底 1.63:1，只求看得见 */
+  --signal-rgb:    255, 230, 0;
+
+  /* ---- 几何与字阶 ---- */
+  --cut:      16px;   /* 斜切楔形尺寸 */
+  --fs-label: 15px;   /* 技术标签层字号：时间戳、页码、角度、侧轨编号。只做注释，不承载正文 */
+
+  --font-cjk:   "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-sans:  "Space Grotesk", var(--font-cjk);
+  --font-disp:  "Archivo", "Space Grotesk", var(--font-cjk);
+  /* JetBrains Mono 没有中文字形。栈里必须垫中文字体，否则 mono 元素里的中文会一路回退
+     到系统默认等宽（中文 Windows 上是宋体），和全站字体不是一套。字体回退按字形走：
+     拉丁与数字仍走 JetBrains Mono，只有它缺的中文才落到 Noto Sans SC。 */
+  --font-mono:  "JetBrains Mono", var(--font-cjk), ui-monospace, monospace;
+}
+
+/* ==========================================================================
+   2. 基础
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; border-radius: 0 !important; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 17px; line-height: 1.75;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;   /* 日期、耗时、百分比跳动时不产生横向抖动 */
+}
+
+/* 本来就圆的形状保留圆形。用 !important 是防止任何第三方组件带进圆角 */
+.avatar, .dot, .spinner { border-radius: 50% !important; }
+
+::selection { background: var(--signal-fill); color: var(--ink-on-signal); }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 1px; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line-strong); }
+::-webkit-scrollbar-thumb:hover { background: var(--signal); }
+
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+button { font: inherit; }
+
+.wrap { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+@media (min-width: 1024px) { .wrap { padding: 0 48px; } }
+
+/* 字号降回 15px 后字距要放回来：大写等宽字在小字号下需要更多呼吸才不糊成一团 */
+.mono    { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em; text-transform: uppercase; }
+.mono-sm { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .06em; }
+
+/* 纯中文的标签不要给 mono：没有拉丁字符需要等宽对齐时，mono 只剩多余字距和对中文无效的 uppercase */
+.u-plain { font-family: var(--font-sans); font-size: var(--fs-label); letter-spacing: normal; text-transform: none; }
+
+/* 斜切楔形。clip-path 是 grouping 属性，会拍平子元素的 3D 变换：
+   一块图既要斜切又要停在不同纵深时，把 clip-path 和 translateZ 放在同一个元素上，
+   它自身的 3D 定位仍生效，只是子元素被拍平。 */
+.cut-tr { clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%); }
+.cut-bl { clip-path: polygon(0 0, 100% 0, 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut))); }
+.cut-br { clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%); }
+
+/* 纸张纤维：一层固定的极淡噪点，压住纯白背景的空洞感 */
+.grain {
+  position: fixed; inset: 0; z-index: 70; pointer-events: none; opacity: .14;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.055 0 0 0 0 0.055 0 0 0 0 0.055 0 0 0 0.02 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23p)'/%3E%3C/svg%3E");
+}
+
+/* 载入擦除：满屏信号黄，用 clip-path 定向抽走。
+   静止态就是「已被裁掉」，动画负责先铺满再抽走 —— 顺序反过来（静止态=盖满）的话，
+   动画一旦没跑起来整站会被一块黄板盖死。这是这套动效最危险的失败模式。 */
+#wipe {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--signal-fill);
+  pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  clip-path: inset(0 0 0 100%);
+  animation: wipe-curtain 1.15s cubic-bezier(.16, 1, .3, 1) forwards;
+}
+@keyframes wipe-curtain {
+  0%   { clip-path: inset(0 0 0 0); }      /* 铺满 */
+  45%  { clip-path: inset(0 0 0 0); }      /* 停一拍，让「地形加载中」被看见 */
+  100% { clip-path: inset(0 0 0 100%); }   /* 向右抽走 */
+}
+#wipe .wipe-code { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .24em; color: var(--ink-on-signal); }
+
+/* ==========================================================================
+   3. 顶栏
+   桌面端导航必须单行。字号变大后断点从 900px 上移到 1080px，低于此收进汉堡抽屉。
+   ========================================================================== */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 60px;
+  background: rgba(255, 255, 255, .82);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid var(--line);
+}
+.topbar-inner { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+
+.brand { display: flex; align-items: baseline; gap: 10px; flex-shrink: 0; }
+.brand-mark {
+  font-family: var(--font-disp); font-weight: 900;
+  font-variation-settings: 'wdth' 110, 'wght' 900; font-size: 21px; letter-spacing: -.01em;
+}
+.brand-code { color: var(--ink-2); }
+
+.nav { display: none; align-items: center; gap: 2px; }
+@media (min-width: 1080px) { .nav { display: flex; } }
+.nav a {
+  position: relative; padding: 8px 14px;
+  font-size: 17px; color: var(--ink-2); transition: color .25s; white-space: nowrap;
+}
+/* 导航下划线用 scaleX 从左展开，不用 opacity 淡入 */
+.nav a::after {
+  content: ""; position: absolute; left: 14px; right: 14px; bottom: 4px;
+  height: 1px; background: var(--signal-edge);
+  transform: scaleX(0); transform-origin: right;
+  transition: transform .4s cubic-bezier(.16, 1, .3, 1);
+}
+.nav a:hover { color: var(--ink); }
+.nav a:hover::after, .nav a[aria-current="page"]::after { transform: scaleX(1); transform-origin: left; }
+.nav a[aria-current="page"] { color: var(--ink); }
+
+.topbar-right { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+.status { display: none; align-items: center; gap: 7px; }
+@media (min-width: 640px) { .status { display: flex; } }
+.status .dot { width: 6px; height: 6px; background: var(--signal-edge); animation: breathe 3.2s ease-in-out infinite; }
+@keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: .2; } }
+
+/* 方形按钮。字号 17px，可点击元素不降级到标签层 */
+.btn-sq {
+  font-family: var(--font-mono); font-size: 17px; letter-spacing: .06em; text-transform: uppercase;
+  padding: 11px 18px; border: 1px solid var(--line-strong);
+  background: transparent; color: var(--ink); cursor: pointer;
+  transition: background .3s, color .3s, border-color .3s;
+}
+.btn-sq:hover { background: var(--signal-fill); color: var(--ink-on-signal); border-color: var(--signal-edge); }
+
+.menu-btn { display: inline-flex; }
+@media (min-width: 1080px) { .menu-btn { display: none; } }
+
+/* 移动端抽屉 */
+#drawer {
+  position: fixed; top: 60px; left: 0; right: 0; z-index: 49;
+  background: var(--panel); border-bottom: 1px solid var(--line);
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path .5s cubic-bezier(.16, 1, .3, 1);
+}
+#drawer[data-open] { clip-path: inset(0 0 0 0); }
+#drawer nav { display: flex; flex-direction: column; padding: 8px 0; }
+#drawer a { padding: 16px 24px; font-size: 18px; color: var(--ink-2); border-bottom: 1px solid var(--line); }
+#drawer a:last-child { border-bottom: 0; }
+#drawer a:hover { color: var(--signal); background: rgba(var(--signal-rgb), .16); }
+
+/* ==========================================================================
+   4. 侧边轨
+   ========================================================================== */
+.rail {
+  position: fixed; left: 0; top: 60px; bottom: 0; width: 56px; z-index: 40;
+  border-right: 1px solid var(--line);
+  display: none; flex-direction: column; align-items: center; justify-content: space-between;
+  padding: 32px 0; background: rgba(250, 250, 249, .6);
+}
+@media (min-width: 1280px) { .rail { display: flex; } }
+.rail-idx { display: flex; flex-direction: column; gap: 18px; align-items: center; }
+.rail-idx span { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-2); transition: color .3s; }
+.rail-idx span[data-on] { color: var(--signal); font-weight: 700; }
+.rail-vtext {
+  writing-mode: vertical-rl; font-family: var(--font-mono);
+  font-size: var(--fs-label); letter-spacing: .2em; color: var(--ink-2); text-transform: uppercase;
+}
+@media (min-width: 1280px) { .layer { padding-left: 56px; } }
+
+/* ==========================================================================
+   5. HERO
+   ========================================================================== */
+.hero {
+  position: relative;
+  min-height: 100dvh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding-top: 60px;
+  overflow: hidden;
+}
+/* 3D 等高线地形画布。Phase 4 接 Three.js，此前是空画布，不影响版面 */
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; display: block; }
+.hero canvas#flat { display: none; }   /* WebGL 不可用时切到这张 2D 等高线 */
+
+/* 左侧纸色渐变，保证文字压在地形之上依然清晰 */
+.hero-scrim {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(96deg,
+    rgba(255,255,255,.97) 0%,
+    rgba(255,255,255,.88) 30%,
+    rgba(255,255,255,.34) 54%,
+    rgba(255,255,255,0) 72%);
+}
+/* Hero 底部渐隐，让地形沉入纸面 */
+.hero-fade {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 180px; z-index: 1;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), var(--bg));
+  pointer-events: none;
+}
+.hero > .wrap { position: relative; z-index: 2; }
+
+.hero-grid {
+  display: grid; grid-template-columns: 1fr; gap: 48px;
+  align-items: center; padding: 48px 0 56px;
+  perspective: 1600px;   /* perspective 必须写在父级，子元素的 translateZ 才看得出纵深 */
+}
+@media (min-width: 1024px) {
+  .hero-grid { grid-template-columns: 1.1fr .9fr; gap: 56px; padding: 24px 0 40px; }
+}
+
+.hero-label { display: flex; align-items: center; gap: 14px; color: var(--ink-2); margin-bottom: 26px; }
+.hero-label .bar { width: 40px; height: 1px; background: var(--signal-edge); flex-shrink: 0; }
+
+/* 雷霆大字。收一点字面、减一点重量：屏幕上最大的那块墨，收 20% 面积就轻很多 */
+.thunder {
+  font-family: var(--font-disp);
+  font-variation-settings: 'wdth' 105, 'wght' 800;
+  font-weight: 800;
+  font-size: clamp(2.8rem, 9.4vw, 6.6rem);
+  line-height: .96; letter-spacing: -.035em; margin: 0;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+.thunder-cjk { font-family: var(--font-cjk); font-variation-settings: normal; font-weight: 800; }
+.thunder .ch {
+  display: inline-block;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  /* 白底上只留下缘一道浅影，像墨刚压进纸里 */
+  text-shadow: 0 1px 0 rgba(17, 17, 17, .05);
+}
+
+/* 这句话就是全站字号下限，没有比它更小的文字 */
+.hero-sub { margin: 28px 0 0; max-width: 34ch; color: var(--ink-2); font-size: 17px; line-height: 1.85; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 38px; }
+
+/* 主按钮：亮黄底 + signal-edge 描边 + 墨色字。亮黄块对白底是 1:1，
+   块的边界会消失、只剩里面的黑字浮着，所以描边不是装饰是必需的 */
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: var(--signal-fill); color: var(--ink-on-signal);
+  padding: 14px 26px;
+  font-family: var(--font-mono); font-size: 17px; letter-spacing: .06em; text-transform: uppercase;
+  font-weight: 500; border: 1px solid var(--signal-edge);
+  cursor: pointer; will-change: transform;
+  transition: background .3s, border-color .3s;
+}
+.btn-primary:hover { background: var(--signal-fill-h); }
+.btn-primary:active { transform: translateY(1px); }
+
+.btn-outline {
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 14px 26px; border: 1px solid var(--line-strong); color: var(--ink);
+  font-family: var(--font-mono); font-size: 17px; letter-spacing: .06em; text-transform: uppercase;
+  will-change: transform;
+  transition: border-color .3s, color .3s;
+}
+.btn-outline:hover { border-color: var(--signal); color: var(--signal); }
+.btn-outline:active { transform: translateY(1px); }
+
+/* ---------- 3D 分层图像场 ---------- */
+.field-wrap { perspective: 1500px; }
+.field {
+  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(6, 46px); gap: 12px;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+@media (min-width: 1024px) { .field { grid-template-rows: repeat(6, 58px); gap: 14px; } }
+
+.tile { position: relative; will-change: transform; }
+/* 每块停在不同纵深：指针一动就产生真实视差分层，不是整体平移 */
+.t1 { grid-column: 1 / 2; grid-row: 1 / 4; transform: translateZ(-30px); }
+.t2 { grid-column: 2 / 3; grid-row: 2 / 6; transform: translateZ(-160px); }
+.t3 { grid-column: 1 / 2; grid-row: 4 / 7; transform: translateZ(-95px); }
+
+/* 照片变成高调平灰的印刷品，悬停才恢复彩色 */
+.tile img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: grayscale(1) contrast(.94) brightness(1.24);
+  transition: filter .7s cubic-bezier(.16, 1, .3, 1);
+}
+.tile:hover img { filter: grayscale(0) contrast(1.02) brightness(1.02); }
+/* 角标是「标签页」，不做成压在图上的贴片 */
+.tile .tag {
+  position: absolute; left: 0; bottom: 0;
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .1em;
+  background: var(--bg); color: var(--ink-2); padding: 5px 11px;
+  border-top: 1px solid var(--line); border-right: 1px solid var(--line);
+  transition: background .4s, color .4s, border-color .4s;
+}
+.tile:hover .tag { background: var(--signal-fill); color: var(--ink-on-signal); border-color: var(--signal-edge); }
+.tile::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(140deg, rgba(255,255,255,.42), rgba(17,17,17,.015));
+}
+
+.hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); margin-top: 8px; }
+.hero-stats > div { padding: 18px 0; border-right: 1px solid var(--line); }
+.hero-stats > div:last-child { border-right: 0; }
+.hero-stats .k {
+  font-family: var(--font-disp); font-variation-settings: 'wdth' 100, 'wght' 800;
+  font-size: 34px; line-height: 1;
+}
+/* 「篇文章 / 条评论 / 次访问」是纯中文，整个不给 mono 处理 */
+.hero-stats .u { color: var(--ink-2); margin-top: 6px; }
+
+/* ==========================================================================
+   6. 信息条（全站唯一走马灯）
+   ========================================================================== */
+.ticker {
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  background: var(--bg-sunken); overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+/* 走马灯是唯一允许 linear 的地方 */
+.ticker-track { display: flex; width: max-content; animation: slide 42s linear infinite; }
+.ticker:hover .ticker-track { animation-play-state: paused; }
+@keyframes slide { to { transform: translateX(-50%); } }
+.ticker-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 13px 28px; border-right: 1px solid var(--line); white-space: nowrap;
+}
+.ticker-item .flag { width: 3px; height: 13px; background: var(--signal-edge); flex-shrink: 0; }
+.ticker-item .t { font-size: 17px; color: var(--ink-2); transition: color .25s; }
+.ticker-item:hover .t { color: var(--ink); }
+
+/* ==========================================================================
+   7. 章节
+   ========================================================================== */
+.section { padding: 104px 0; position: relative; }
+@media (min-width: 1024px) { .section { padding: 136px 0; } }
+.section.flush { padding-top: 0; }
+
+.sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 44px; flex-wrap: wrap; }
+.sec-title {
+  font-family: var(--font-cjk); font-weight: 900;
+  font-size: clamp(1.9rem, 4vw, 2.9rem); line-height: 1.15; letter-spacing: -.02em; margin: 0;
+  perspective: 700px;
+}
+.sec-link {
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-2); border-bottom: 1px solid var(--line-strong); padding-bottom: 4px;
+  transition: color .3s, border-color .3s;
+}
+.sec-link:hover { color: var(--signal); border-color: var(--signal); }
+
+/* 幽灵数字是版面装置，不是眉标签，不要退化成 001 · 这种小号编号 */
+.ghost-num {
+  position: absolute; top: 40px; right: 24px;
+  font-family: var(--font-disp); font-variation-settings: 'wdth' 125, 'wght' 900;
+  font-size: clamp(9rem, 22vw, 20rem); line-height: .72;
+  color: rgba(17, 17, 17, .045);
+  pointer-events: none; user-select: none;
+}
+@media (min-width: 1024px) { .ghost-num { right: 48px; } }
+
+/* ==========================================================================
+   8. 文章索引
+   不用卡片。行式布局 + 1px 细线，悬停时信号黄从左填满整行。
+   ========================================================================== */
+.index { border-top: 1px solid var(--line); }
+.idx-row {
+  position: relative; isolation: isolate;   /* 让 z-index:-1 的填充层不跑到页面背景后面 */
+  border-bottom: 1px solid var(--line);
+  /* 用 minmax(0, 1fr) 而不是 1fr：1fr 的自动最小值是 min-content，
+     摘要里一个长英文串就能把整条轨道撑得比视口还宽（移动端实测撑到 592px / 视口 390px）。
+     显式给 0 下限，轨道才会跟着容器走，再由 -webkit-line-clamp 负责截断。 */
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px;
+  padding: 26px 20px 26px 0; cursor: pointer;
+}
+/* 三栏要 104 + 340 + 两块 32 的间距才够，768-1023px 之间放不下，
+   硬套会把标题挤成一条竖线，所以这个断点放在 1024px，之下退回单栏堆叠。 */
+@media (min-width: 1024px) {
+  .idx-row { grid-template-columns: 104px minmax(0, 1fr) 340px; gap: 32px; align-items: baseline; padding: 30px 24px 30px 0; }
+}
+.idx-row::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: var(--signal-fill);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path .5s cubic-bezier(.16, 1, .3, 1);
+}
+.idx-row:hover::before { clip-path: inset(0 0 0 0); }
+.idx-row:hover .idx-title,
+.idx-row:hover .idx-desc,
+.idx-row:hover .idx-num,
+.idx-row:hover .idx-meta,
+.idx-row:hover .idx-tags { color: var(--ink-on-signal); }
+.idx-row:hover .idx-meta .cat { border-color: var(--ink-on-signal); }
+
+.idx-num {
+  font-family: var(--font-disp); font-variation-settings: 'wdth' 100, 'wght' 800;
+  font-size: 30px; line-height: 1; color: rgba(17, 17, 17, .28); transition: color .35s;
+}
+.idx-title {
+  display: block; font-family: var(--font-cjk); font-weight: 700;
+  font-size: 22px; line-height: 1.45; color: var(--ink); margin: 0 0 8px; transition: color .35s;
+}
+@media (min-width: 1024px) { .idx-title { font-size: 24px; } }
+/* 摘要截两行。t_blog.description 里有相当一部分是 CSDN 同步过来的原始 markdown
+   （`# 标题 ## 小节`、`[在这里插入图片描述](url)` 这类），不截断的话每行高度都不一样，
+   整页索引会七长八短。这是数据侧的毛病，展示侧只负责别让它把版面撑歪。 */
+.idx-desc {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--ink-2); font-size: 17px; transition: color .35s;
+}
+.idx-tags { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; color: var(--ink-2); transition: color .35s; }
+.idx-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; color: var(--ink-2); transition: color .35s; }
+@media (min-width: 1024px) { .idx-meta { justify-content: flex-end; } }
+.idx-meta .cat { border: 1px solid var(--line-strong); padding: 3px 9px; transition: border-color .35s; }
+
+/* 空列表：三张表全空时也给一句人话，而不是一片留白 */
+.idx-empty { padding: 64px 0; color: var(--ink-2); border-bottom: 1px solid var(--line); }
+
+/* 分页：不用 Bootstrap 的 pagination 组件，一列等大方块。
+   当前页用墨底反白而不是信号黄：黄是「需要被看见的交互」，当前页是状态不是动作。 */
+.pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin-top: 48px; }
+.pager a, .pager .pg {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 46px; height: 46px; padding: 0 15px;
+  border: 1px solid var(--line-strong); color: var(--ink);
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .06em;
+  transition: background .3s, color .3s, border-color .3s;
+}
+.pager a:hover { background: var(--signal-fill); color: var(--ink-on-signal); border-color: var(--signal-edge); }
+/* 用 [aria-current] 而不是 .pg：模板里当前页就是个 <a>，没有额外的类。
+   用属性选择器还能顺带把「当前页」这个语义绑在无障碍属性上，不用两处维护。 */
+.pager [aria-current] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.pager .is-off { opacity: .35; pointer-events: none; }
+
+/* ==========================================================================
+   9. 数据格（原型的「常写的话题」）
+   ========================================================================== */
+.cats { display: grid; grid-template-columns: 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+@media (min-width: 768px) { .cats { grid-template-columns: 1.6fr 1fr 1fr; } }
+.cat-cell {
+  background: var(--bg); padding: 34px 28px;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 40px;
+  min-height: 190px; position: relative; overflow: hidden; transition: background .4s;
+}
+.cat-cell:hover { background: var(--panel); }
+.cat-cell::after {
+  content: ""; position: absolute; left: 0; bottom: 0; height: 2px; width: 100%;
+  background: var(--signal-edge); transform: scaleX(0); transform-origin: left;
+  transition: transform .55s cubic-bezier(.16, 1, .3, 1);
+}
+.cat-cell:hover::after { transform: scaleX(1); }
+.cat-cell .big { font-family: var(--font-disp); font-variation-settings: 'wdth' 105, 'wght' 800; font-size: 48px; line-height: 1; }
+.cat-cell .name { font-family: var(--font-cjk); font-weight: 700; font-size: 20px; }
+.cat-cell .hint { color: var(--ink-2); font-size: 17px; margin-top: 6px; }
+.cat-cell.lead { justify-content: flex-end; }
+.cat-cell.lead .big { color: var(--signal); }
+.cat-cell.lead .lead-title {
+  font-family: var(--font-cjk); font-weight: 900;
+  font-size: clamp(1.5rem, 3vw, 2.1rem); line-height: 1.3; letter-spacing: -.02em;
+}
+
+/* ==========================================================================
+   10. 关于
+   ========================================================================== */
+.about { display: grid; grid-template-columns: 1fr; gap: 40px; align-items: center; }
+@media (min-width: 900px) { .about { grid-template-columns: 300px 1fr; gap: 60px; } }
+.about-photo { position: relative; perspective: 1000px; }
+.about-photo img {
+  width: 100%; aspect-ratio: 3 / 4; object-fit: cover;
+  filter: grayscale(1) contrast(.96) brightness(1.2);
+  will-change: transform;
+}
+.about-photo .plate {
+  position: absolute; left: 0; bottom: 0;
+  background: var(--signal-fill); color: var(--ink-on-signal);
+  border: 1px solid var(--signal-edge);
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .1em; padding: 6px 12px;
+}
+.about-body p { color: var(--ink-2); max-width: 60ch; white-space: pre-line; }  /* 库里存的简介带换行，pre-line 让它按原样断行 */
+.about-body .lead { color: var(--ink); font-size: 20px; }
+/* 联系方式清单。键是纯中文，所以不给 mono —— 没有拉丁字符要等宽对齐时 mono 只有副作用 */
+.about-body .contact { list-style: none; margin: 26px 0 0; padding: 0; display: grid; gap: 11px; }
+.about-body .contact li { display: flex; gap: 16px; align-items: baseline; color: var(--ink-2); }
+.about-body .contact .k { flex-shrink: 0; min-width: 68px; color: var(--ink); font-size: var(--fs-label); }
+.about-body .links { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 30px; }
+.about-body .links a { color: var(--ink-2); border-bottom: 1px solid var(--line-strong); padding-bottom: 3px; transition: color .3s, border-color .3s; }
+.about-body .links a:hover { color: var(--signal); border-color: var(--signal); }
+
+/* ==========================================================================
+   11. 页脚
+   ========================================================================== */
+.footer { border-top: 1px solid var(--line); background: var(--bg-sunken); }
+/* 只写上下内边距。写 padding: 44px 0 会把 .wrap 的左右内边距一起抹掉 ——
+   两个类是同一元素、同一优先级，.footer-inner 在后面所以整条 padding 都生效，
+   页脚内容直接顶到视口右边缘（原型里也是这么写的，只是它的页脚内容短，没露出来）。*/
+.footer-inner { padding-top: 44px; padding-bottom: 44px; display: flex; flex-direction: column; gap: 22px; }
+@media (min-width: 768px) { .footer-inner { flex-direction: row; align-items: center; justify-content: space-between; } }
+/* min-width: 0 是关键：flex 子项默认 min-width: auto，不给 0 的话它宁可撑破容器也不换行 */
+.footer-meta { display: flex; flex-wrap: wrap; justify-content: flex-end; min-width: 0; gap: 10px 22px; color: var(--ink-2); }
+.footer-meta a { transition: color .3s; }
+.footer-meta a:hover { color: var(--signal); }
+
+/* ==========================================================================
+   12. 搜索浮层
+   用原生 <dialog> 替掉 Bootstrap Modal：少了 80KB 的 bundle，还自带焦点陷阱、
+   Esc 关闭和 ::backdrop。showModal() 之后点 backdrop 关闭要靠 JS 兜一下。
+   ========================================================================== */
+.search-dlg {
+  border: 1px solid var(--line-strong); background: var(--bg); color: var(--ink);
+  padding: 0; width: min(640px, calc(100vw - 32px)); margin: 12vh auto auto;
+  max-height: 70vh;
+}
+.search-dlg::backdrop { background: rgba(17, 17, 17, .32); }
+.search-dlg-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 20px 24px; border-bottom: 1px solid var(--line);
+}
+.search-dlg-close {
+  border: 1px solid var(--line-strong); background: transparent; color: var(--ink-2);
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .1em;
+  padding: 5px 10px; cursor: pointer; transition: background .3s, color .3s, border-color .3s;
+}
+.search-dlg-close:hover { background: var(--signal-fill); color: var(--ink-on-signal); border-color: var(--signal-edge); }
+.search-dlg-body { padding: 24px; }
+.search-input {
+  width: 100%; padding: 13px 16px; font: inherit; font-size: 17px;
+  background: var(--bg); color: var(--ink);
+  border: 1px solid var(--line-strong); outline: none;
+}
+.search-input:focus { border-color: var(--signal); }
+.search-input::placeholder { color: var(--ink-2); }
+.search-hint { color: var(--ink-2); margin: 20px 0 10px; }
+/* 搜索结果行：沿用索引行的悬停填充语言 */
+.search-list { border-top: 1px solid var(--line); max-height: 42vh; overflow-y: auto; }
+.search-list a {
+  display: block; padding: 13px 4px; font-size: 17px;
+  border-bottom: 1px solid var(--line); color: var(--ink);
+  transition: background .3s, color .3s, padding-left .3s;
+}
+.search-list a:hover {
+  background: var(--signal-fill); color: var(--ink-on-signal);
+  border-color: var(--signal-edge);   /* 灰线压在黄块上看不见，悬停时要换成信号色的边 */
+  padding-left: 12px;
+}
+.search-list .search-empty { padding: 16px 4px; color: var(--ink-2); }
+
+/* ==========================================================================
+   13. 动画初始态
+   整块用 .anim 门控：只有 JS 在 <html> 上加了 .anim 才生效。
+   否则一旦脚本没跑起来（被墙、出错、禁用 JS），.rise 的 opacity:0
+   会让整页内容凭空消失 —— 这是这套动效最容易踩的坑。
+   ========================================================================== */
+.anim .wipe-in  { clip-path: inset(0 100% 0 0); }
+.anim .rise     { opacity: 0; transform: translateY(22px); }
+.anim .depth-in { opacity: 0; transform: translateZ(-260px); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .ticker-track, .status .dot, #wipe { animation: none; }
+  /* 静止态本来就是躲开的，停掉动画即等于不出现，不需要额外的 display: none */
+  .anim .wipe-in { clip-path: none; }
+  .anim .rise, .anim .depth-in { opacity: 1; transform: none; }
+  *, *::before, *::after { transition-duration: .01ms !important; }
+}
+
+/* ==========================================================================
+   14. 数据库内容的钩子
+   ========================================================================== */
+
+/* t_sys_config.about_me_content 是存在库里的富文本，里面直接写了 class="cz-text-green"。
+   这个类必须继续有定义，否则那几处高亮会退化成普通正文。
+   新规范没有绿色（信号色只有一个黄），所以映射到 --signal 深金：语义仍是「被标出的那一处」，
+   对白底 6.58:1 也读得清。类名保留不改，改名要连着动库里的数据。 */
+.cz-text-green { color: var(--signal); }
+
+/* 文章正文（blog.html 的 #content，以及 about.html 的富文本）。
+   blog.html 是 Phase 3 最后一页，这一节到时候会再按其实际结构收紧。 */
+.md-body { max-width: 74ch; }
+.md-body > *:first-child { margin-top: 0; }
+.md-body h1, .md-body h2, .md-body h3, .md-body h4 {
+  font-family: var(--font-cjk); font-weight: 900; letter-spacing: -.02em;
+  line-height: 1.3; margin: 2.2em 0 .7em; scroll-margin-top: 84px;
+}
+.md-body h1 { font-size: 30px; }
+.md-body h2 { font-size: 26px; border-bottom: 1px solid var(--line); padding-bottom: .3em; }
+.md-body h3 { font-size: 22px; }
+.md-body h4 { font-size: 19px; }
+.md-body p, .md-body li { color: var(--ink-2); }
+.md-body strong { color: var(--ink); }
+.md-body a { color: var(--signal); border-bottom: 1px solid var(--signal-edge); }
+.md-body a:hover { background: var(--signal-fill); color: var(--ink-on-signal); border-color: var(--signal-edge); }
+.md-body img { margin: 1.6em 0; }
+.md-body hr { border: 0; border-top: 1px solid var(--line); margin: 2.6em 0; }
+.md-body blockquote {
+  margin: 1.6em 0; padding: 2px 0 2px 20px;
+  border-left: 3px solid var(--signal-edge); color: var(--ink-2);
+}
+.md-body ul, .md-body ol { padding-left: 1.4em; }
+.md-body li::marker { color: var(--signal); }
+/* 行内代码与代码块。代码块用 bg-sunken 底 + 细线，不用深色主题：
+   这套视觉是「纸与墨」，深色代码块会把纸戳出一个洞 */
+.md-body code {
+  font-family: var(--font-mono); font-size: var(--fs-label);
+  background: var(--bg-sunken); border: 1px solid var(--line); padding: 1px 5px;
+}
+.md-body pre {
+  background: var(--bg-sunken); border: 1px solid var(--line);
+  padding: 18px 20px; overflow-x: auto; margin: 1.6em 0;
+}
+.md-body pre code { background: none; border: 0; padding: 0; font-size: var(--fs-label); line-height: 1.7; }
+.md-body table { width: 100%; border-collapse: collapse; margin: 1.6em 0; font-size: 17px; }
+.md-body th, .md-body td { border: 1px solid var(--line); padding: 9px 13px; text-align: left; }
+.md-body th { background: var(--bg-sunken); font-weight: 700; }
+
+/* Prism：只保留 token 着色，容器样式交给上面的 pre。
+   色阶压在纸墨体系里，不引第三方主题，避免深色主题把纸面戳穿。
+   各类 token 的对比度都按正文标准核对过（≥ 4.5:1）。 */
+.md-body .token.comment, .md-body .token.prolog, .md-body .token.doctype, .md-body .token.cdata { color: #6b6b6b; }
+.md-body .token.punctuation { color: var(--ink-2); }
+.md-body .token.keyword, .md-body .token.tag, .md-body .token.rule, .md-body .token.important { color: #8a2b1f; }
+.md-body .token.string, .md-body .token.attr-value, .md-body .token.char { color: #2f6b3a; }
+.md-body .token.function, .md-body .token.class-name { color: #1f4f7a; }
+.md-body .token.number, .md-body .token.boolean, .md-body .token.constant { color: #6b5d00; }
+.md-body .token.attr-name, .md-body .token.property, .md-body .token.selector { color: #5a3a7a; }
+.md-body .token.operator, .md-body .token.entity, .md-body .token.url { color: var(--ink-2); }
+
+/* Tocbot 目录：把默认的圆点与缩进换成细线语言 */
+.js-toc { font-size: var(--fs-label); }
+.js-toc .toc-list { list-style: none; padding-left: 0; margin: 0; }
+.js-toc .toc-list-item { border-left: 1px solid var(--line); }
+.js-toc .toc-list .toc-list { padding-left: 14px; }
+.js-toc a.toc-link {
+  display: block; padding: 6px 0 6px 12px; color: var(--ink-2);
+  font-size: var(--fs-label); line-height: 1.5; transition: color .3s, border-color .3s;
+}
+.js-toc a.toc-link:hover { color: var(--ink); }
+.js-toc .is-active-link { color: var(--signal); font-weight: 700; }
+.js-toc .is-active-link::before { background-color: var(--signal-fill); }
+.js-toc .toc-link::before { display: none; }
