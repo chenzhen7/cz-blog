@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原型 G · 终末地纸墨 · 3D 地形 - 陈震的客栈</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Space+Grotesk:wght@300..700&family=JetBrains+Mono:wght@300..700&family=Noto+Sans+SC:wght@300..900&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   终末地 · 纸墨 3D 地形版
+   纸墨为主体 / 强调色只做信号 / 全直角 / 数字等宽
+   3D 空间不靠装饰堆砌, 而是还原游戏主界面那张会随重力感应的等高线地形图
+   ========================================================================== */
+:root {
+  --bg:            #ffffff;
+  --bg-sunken:     #fafaf9;
+  --panel:         #fbfbfa;
+  --line:          #e8e8e8;
+  --line-strong:   #d4d4d4;
+  /* 文字要够黑才读得舒服。上一版把正文字色也一起提亮了, 那是走错了方向:
+     该提亮的是背景, 不是字。 */
+  --ink:           #111111;   /* 白底 19.1:1 */
+  --ink-2:         #4a4a4a;   /* 白底 8.9:1, 仍是次要层级 */
+  --ink-on-signal: #111111;
+
+  /* 亮黄在白底上必然是 1.00:1 的隐形方块, 这是物理限制, 换哪个黄都一样。
+     所以按"要不要被读到"分三个角色:
+       --signal       需要被读的深金 (文字 / 焦点环)
+       --signal-fill  亮黄实心块, 形状靠 --signal-edge 描边定出来
+       --signal-edge  亮黄的边 (细线 / 描边), 只求在白底上看得见 */
+  --signal:        #6b5d00;   /* 白底 6.58:1 能读 */
+  --signal-fill:   #ffe600;   /* 块内墨字 15.0:1 */
+  --signal-fill-h: #ffd000;   /* hover / press */
+  --signal-edge:   #edc800;   /* 白底 1.63:1, 装饰带 */
+  --signal-rgb:    255, 230, 0;
+
+  --cut: 16px;
+
+  /* 字阶层: 正文下限 17px。
+     技术标签层(时间戳/页码/角标/栏目码)只做注释, 不承载正文信息, 放开到 15px。 */
+  --fs-label: 15px;
+
+  --font-cjk:   "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-sans:  "Space Grotesk", var(--font-cjk);
+  --font-disp:  "Archivo", "Space Grotesk", var(--font-cjk);
+  /* JetBrains Mono 没有中文字形。栈里必须垫上中文字体, 否则 mono 元素里的中文
+     会一路回退到系统默认等宽(中文 Windows 上通常是宋体), 和全站字体不是一套。
+     字体回退是按字形走的: 拉丁与数字仍走 JetBrains Mono, 只有它缺的中文才落到 Noto Sans SC。 */
+  --font-mono:  "JetBrains Mono", var(--font-cjk), ui-monospace, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; border-radius: 0 !important; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 17px; line-height: 1.75;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+
+.avatar, .dot { border-radius: 50% !important; }
+
+::selection { background: var(--signal-fill); color: var(--ink-on-signal); }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 1px; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line-strong); }
+::-webkit-scrollbar-thumb:hover { background: var(--signal); }
+
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+
+.wrap { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+@media (min-width: 1024px) { .wrap { padding: 0 48px; } }
+
+/* 字号变小后字距要放回来, 大写字距字在小字号下需要更多呼吸 */
+.mono { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em; text-transform: uppercase; }
+.mono-sm { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .06em; }
+
+.cut-tr { clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%); }
+.cut-bl { clip-path: polygon(0 0, 100% 0, 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut))); }
+.cut-br { clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%); }
+
+/* 纸张纤维 */
+.grain {
+  position: fixed; inset: 0; z-index: 70; pointer-events: none; opacity: .14;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.055 0 0 0 0 0.055 0 0 0 0 0.055 0 0 0 0.02 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23p)'/%3E%3C/svg%3E");
+}
+
+/* ---------- 3D 地形画布 ---------- */
+#gl, #flat {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  z-index: 0; pointer-events: none; display: block;
+}
+#flat { display: none; }
+
+.layer { position: relative; z-index: 1; }
+
+/* 载入擦除 */
+#wipe {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--signal-fill);
+  pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+}
+#wipe .wipe-code { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .24em; color: var(--ink-on-signal); }
+
+/* ---------- 顶栏 ---------- */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 60px;
+  background: rgba(255, 255, 255, .82);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid var(--line);
+}
+.topbar-inner { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+
+.brand { display: flex; align-items: baseline; gap: 10px; flex-shrink: 0; }
+.brand-mark {
+  font-family: var(--font-disp); font-weight: 900;
+  font-variation-settings: 'wdth' 110, 'wght' 900; font-size: 21px; letter-spacing: -.01em;
+}
+.brand-code { color: var(--ink-2); }
+
+.nav { display: none; align-items: center; gap: 2px; }
+/* 字号变大后导航会撑爆 900px, 断点跟着上移, 避免两行导航 */
+@media (min-width: 1080px) { .nav { display: flex; } }
+.nav a {
+  position: relative; padding: 8px 14px;
+  font-size: 17px; color: var(--ink-2); transition: color .25s; white-space: nowrap;
+}
+.nav a::after {
+  content: ""; position: absolute; left: 14px; right: 14px; bottom: 4px;
+  height: 1px; background: var(--signal-edge);
+  transform: scaleX(0); transform-origin: right;
+  transition: transform .4s cubic-bezier(.16, 1, .3, 1);
+}
+.nav a:hover { color: var(--ink); }
+.nav a:hover::after, .nav a[data-active]::after { transform: scaleX(1); transform-origin: left; }
+.nav a[data-active] { color: var(--ink); }
+
+.topbar-right { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+.status { display: none; align-items: center; gap: 7px; }
+@media (min-width: 640px) { .status { display: flex; } }
+.status .dot { width: 6px; height: 6px; background: var(--signal-edge); animation: breathe 3.2s ease-in-out infinite; }
+@keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: .2; } }
+
+.btn-sq {
+  font-family: var(--font-mono); font-size: 17px; letter-spacing: .06em; text-transform: uppercase;
+  padding: 11px 18px; border: 1px solid var(--line-strong);
+  background: transparent; color: var(--ink); cursor: pointer;
+  transition: background .3s, color .3s, border-color .3s;
+}
+.btn-sq:hover { background: var(--signal-fill); color: var(--ink-on-signal); border-color: var(--signal-edge); }
+
+.menu-btn { display: inline-flex; }
+@media (min-width: 1080px) { .menu-btn { display: none; } }
+
+#drawer {
+  position: fixed; top: 60px; left: 0; right: 0; z-index: 49;
+  background: var(--panel); border-bottom: 1px solid var(--line);
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path .5s cubic-bezier(.16, 1, .3, 1);
+}
+#drawer[data-open] { clip-path: inset(0 0 0 0); }
+#drawer nav { display: flex; flex-direction: column; padding: 8px 0; }
+#drawer a { padding: 16px 24px; font-size: 18px; color: var(--ink-2); border-bottom: 1px solid var(--line); }
+#drawer a:last-child { border-bottom: 0; }
+#drawer a:hover { color: var(--signal); background: rgba(var(--signal-rgb), .16); }
+
+/* 侧边轨 */
+.rail {
+  position: fixed; left: 0; top: 60px; bottom: 0; width: 56px; z-index: 40;
+  border-right: 1px solid var(--line);
+  display: none; flex-direction: column; align-items: center; justify-content: space-between;
+  padding: 32px 0; background: rgba(250, 250, 249, .6);
+}
+@media (min-width: 1280px) { .rail { display: flex; } }
+.rail-idx { display: flex; flex-direction: column; gap: 18px; align-items: center; }
+.rail-idx span { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-2); transition: color .3s; }
+.rail-idx span[data-on] { color: var(--signal); font-weight: 700; }
+.rail-vtext {
+  writing-mode: vertical-rl; font-family: var(--font-mono);
+  font-size: var(--fs-label); letter-spacing: .2em; color: var(--ink-2); text-transform: uppercase;
+}
+@media (min-width: 1280px) { .layer { padding-left: 56px; } }
+
+/* ==========================================================================
+   HERO — 3D 场景
+   ========================================================================== */
+.hero {
+  position: relative;
+  min-height: 100dvh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding-top: 60px;
+  overflow: hidden;
+}
+/* 左侧纸色渐变, 保证文字压在地形之上依然清晰 */
+.hero-scrim {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(96deg,
+    rgba(255,255,255,.97) 0%,
+    rgba(255,255,255,.88) 30%,
+    rgba(255,255,255,.34) 54%,
+    rgba(255,255,255,0) 72%);
+}
+.hero > .wrap { position: relative; z-index: 2; }
+
+/* Hero 底部渐隐, 让地形沉入纸面 */
+.hero-fade {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 180px; z-index: 1;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), var(--bg));
+  pointer-events: none;
+}
+
+.hero-grid {
+  display: grid; grid-template-columns: 1fr; gap: 48px;
+  align-items: center; padding: 48px 0 56px;
+  perspective: 1600px;   /* 让 .field-wrap 的 z 位移真的产生纵深 */
+}
+@media (min-width: 1024px) {
+  .hero-grid { grid-template-columns: 1.1fr .9fr; gap: 56px; padding: 24px 0 40px; }
+}
+
+.hero-label { display: flex; align-items: center; gap: 14px; color: var(--ink-2); margin-bottom: 26px; }
+.hero-label .bar { width: 40px; height: 1px; background: var(--signal-edge); flex-shrink: 0; }
+
+/* 雷霆大字: 逐字从纵深飞入 */
+.thunder {
+  font-family: var(--font-disp);
+  /* 收一点字面, 减一点重量: 屏幕上最大的那块墨, 收 20% 面积就轻很多 */
+  font-variation-settings: 'wdth' 105, 'wght' 800;
+  font-weight: 800;
+  font-size: clamp(2.8rem, 9.4vw, 6.6rem);
+  line-height: .96; letter-spacing: -.035em; margin: 0;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+.thunder-cjk { font-family: var(--font-cjk); font-variation-settings: normal; font-weight: 800; }
+.thunder .ch {
+  display: inline-block;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  /* 白底上只留下缘一道浅影, 像墨刚压进纸里 */
+  text-shadow: 0 1px 0 rgba(17, 17, 17, .05);
+}
+
+/* 这句话就是全站字号下限 (17px), 没有比它更小的文字 */
+.hero-sub { margin: 28px 0 0; max-width: 34ch; color: var(--ink-2); font-size: 17px; line-height: 1.85; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 38px; }
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: var(--signal-fill); color: var(--ink-on-signal);
+  padding: 14px 26px;
+  font-family: var(--font-mono); font-size: 17px; letter-spacing: .06em; text-transform: uppercase;
+  font-weight: 500; border: 1px solid var(--signal-edge);
+  cursor: pointer; will-change: transform;
+  transition: background .3s, border-color .3s;
+}
+.btn-primary:hover { background: var(--signal-fill-h); border-color: var(--signal-edge); }
+
+.btn-outline {
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 14px 26px; border: 1px solid var(--line-strong); color: var(--ink);
+  font-family: var(--font-mono); font-size: 17px; letter-spacing: .06em; text-transform: uppercase;
+  will-change: transform;
+  transition: border-color .3s, color .3s;
+}
+.btn-outline:hover { border-color: var(--signal); color: var(--signal); }
+
+/* ---------- 3D 分层图像场 ---------- */
+.field-wrap { perspective: 1500px; }
+.field {
+  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(6, 46px); gap: 12px;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+@media (min-width: 1024px) { .field { grid-template-rows: repeat(6, 58px); gap: 14px; } }
+
+/* clip-path 放在 tile 上: 它会把子元素拍平, 但 tile 自身的 translateZ 仍然生效,
+   所以每块依然是停在不同纵深的平面, 而 ::after 蒙层也会被同一个斜切裁掉 */
+.tile {
+  position: relative;
+  will-change: transform;
+}
+/* 每块停在不同纵深: 指针一动就产生真实视差分层 */
+.t1 { grid-column: 1 / 2; grid-row: 1 / 4; transform: translateZ(-30px); }
+.t2 { grid-column: 2 / 3; grid-row: 2 / 6; transform: translateZ(-160px); }
+.t3 { grid-column: 1 / 2; grid-row: 4 / 7; transform: translateZ(-95px); }
+
+.tile img {
+  width: 100%; height: 100%; object-fit: cover;
+  /* 高调: 压对比, 提亮度, 让照片变成浅灰而不是灰块 */
+  filter: grayscale(1) contrast(.94) brightness(1.24);
+  transition: filter .7s cubic-bezier(.16, 1, .3, 1);
+}
+.tile:hover img { filter: grayscale(0) contrast(1.02) brightness(1.02); }
+.tile .tag {
+  position: absolute; left: 0; bottom: 0;
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .1em;
+  background: var(--bg); color: var(--ink-2); padding: 5px 11px;
+  border-top: 1px solid var(--line); border-right: 1px solid var(--line);
+  transition: background .4s, color .4s, border-color .4s;
+}
+.tile:hover .tag {
+  background: var(--signal-fill); color: var(--ink-on-signal);
+  border-color: var(--signal-edge);
+}
+/* 深色蒙层随指针偏移, 制造"玻璃下的照片"纵深 */
+.tile::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(140deg, rgba(255,255,255,.42), rgba(17,17,17,.015));
+}
+
+.hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); margin-top: 8px; }
+.hero-stats > div { padding: 18px 0; border-right: 1px solid var(--line); }
+.hero-stats > div:last-child { border-right: 0; }
+.hero-stats .k {
+  font-family: var(--font-disp); font-variation-settings: 'wdth' 100, 'wght' 800;
+  font-size: 34px; line-height: 1;
+}
+/* 纯中文, 没有任何拉丁字符需要等宽对齐, 所以整个不给它 mono 处理 */
+.hero-stats .u {
+  font-family: var(--font-sans); font-size: var(--fs-label);
+  letter-spacing: normal; text-transform: none;
+  color: var(--ink-2); margin-top: 6px;
+}
+
+/* ==========================================================================
+   信息条 (全站唯一走马灯)
+   ========================================================================== */
+.ticker {
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  background: var(--bg-sunken); overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.ticker-track { display: flex; width: max-content; animation: slide 42s linear infinite; }
+.ticker:hover .ticker-track { animation-play-state: paused; }
+@keyframes slide { to { transform: translateX(-50%); } }
+.ticker-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 13px 28px; border-right: 1px solid var(--line); white-space: nowrap;
+}
+.ticker-item .flag { width: 3px; height: 13px; background: var(--signal-edge); flex-shrink: 0; }
+.ticker-item .t { font-size: 17px; color: var(--ink-2); }
+.ticker-item .t:hover { color: var(--ink); }
+
+/* ==========================================================================
+   章节
+   ========================================================================== */
+.section { padding: 104px 0; position: relative; }
+@media (min-width: 1024px) { .section { padding: 136px 0; } }
+
+.sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 44px; flex-wrap: wrap; }
+.sec-title {
+  font-family: var(--font-cjk); font-weight: 900;
+  font-size: clamp(1.9rem, 4vw, 2.9rem); line-height: 1.15; letter-spacing: -.02em; margin: 0;
+  perspective: 700px;
+}
+.sec-link {
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-2); border-bottom: 1px solid var(--line-strong); padding-bottom: 4px;
+  transition: color .3s, border-color .3s;
+}
+.sec-link:hover { color: var(--signal); border-color: var(--signal); }
+
+.ghost-num {
+  position: absolute; top: 40px; right: 24px;
+  font-family: var(--font-disp); font-variation-settings: 'wdth' 125, 'wght' 900;
+  font-size: clamp(9rem, 22vw, 20rem); line-height: .72;
+  color: rgba(17, 17, 17, .045);
+  pointer-events: none; user-select: none;
+}
+@media (min-width: 1024px) { .ghost-num { right: 48px; } }
+
+/* ---------- 文章索引 ---------- */
+.index { border-top: 1px solid var(--line); }
+.idx-row {
+  position: relative; isolation: isolate;
+  border-bottom: 1px solid var(--line);
+  display: grid; grid-template-columns: 1fr; gap: 10px;
+  padding: 26px 20px 26px 0; cursor: pointer;
+}
+@media (min-width: 768px) {
+  .idx-row { grid-template-columns: 104px 1fr 250px; gap: 32px; align-items: baseline; padding: 30px 24px 30px 0; }
+}
+.idx-row::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: var(--signal-fill);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path .5s cubic-bezier(.16, 1, .3, 1);
+}
+.idx-row:hover::before { clip-path: inset(0 0 0 0); }
+.idx-row:hover .idx-title,
+.idx-row:hover .idx-desc,
+.idx-row:hover .idx-num,
+.idx-row:hover .idx-meta { color: var(--ink-on-signal); }
+.idx-row:hover .idx-meta .cat { border-color: var(--ink-on-signal); }
+
+.idx-num {
+  font-family: var(--font-disp); font-variation-settings: 'wdth' 100, 'wght' 800;
+  font-size: 30px; line-height: 1; color: rgba(17, 17, 17, .28); transition: color .35s;
+}
+.idx-title {
+  display: block; font-family: var(--font-cjk); font-weight: 700;
+  font-size: 22px; line-height: 1.45; color: var(--ink); margin: 0 0 8px; transition: color .35s;
+}
+@media (min-width: 768px) { .idx-title { font-size: 24px; } }
+.idx-desc { display: block; color: var(--ink-2); font-size: 17px; transition: color .35s; }
+.idx-meta { display: flex; align-items: center; gap: 12px; color: var(--ink-2); transition: color .35s; }
+@media (min-width: 768px) { .idx-meta { justify-content: flex-end; } }
+.idx-meta .cat { border: 1px solid var(--line-strong); padding: 3px 9px; transition: border-color .35s; }
+
+/* ---------- 话题 ---------- */
+.cats { display: grid; grid-template-columns: 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+@media (min-width: 768px) { .cats { grid-template-columns: 1.6fr 1fr 1fr; } }
+.cat-cell {
+  background: var(--bg); padding: 34px 28px;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 40px;
+  min-height: 190px; position: relative; overflow: hidden; transition: background .4s;
+}
+.cat-cell:hover { background: var(--panel); }
+.cat-cell::after {
+  content: ""; position: absolute; left: 0; bottom: 0; height: 2px; width: 100%;
+  background: var(--signal-edge); transform: scaleX(0); transform-origin: left;
+  transition: transform .55s cubic-bezier(.16, 1, .3, 1);
+}
+.cat-cell:hover::after { transform: scaleX(1); }
+.cat-cell .big { font-family: var(--font-disp); font-variation-settings: 'wdth' 105, 'wght' 800; font-size: 48px; line-height: 1; }
+.cat-cell .name { font-family: var(--font-cjk); font-weight: 700; font-size: 20px; }
+.cat-cell .hint { color: var(--ink-2); font-size: 17px; margin-top: 6px; }
+.cat-cell.lead { justify-content: flex-end; }
+.cat-cell.lead .big { color: var(--signal); }
+.cat-cell.lead .lead-title {
+  font-family: var(--font-cjk); font-weight: 900;
+  font-size: clamp(1.5rem, 3vw, 2.1rem); line-height: 1.3; letter-spacing: -.02em;
+}
+
+/* ---------- 关于 ---------- */
+.about { display: grid; grid-template-columns: 1fr; gap: 40px; align-items: center; }
+@media (min-width: 900px) { .about { grid-template-columns: 300px 1fr; gap: 60px; } }
+.about-photo { position: relative; perspective: 1000px; }
+.about-photo img {
+  width: 100%; aspect-ratio: 3 / 4; object-fit: cover;
+  filter: grayscale(1) contrast(.96) brightness(1.2);
+  will-change: transform;
+}
+.about-photo .plate {
+  position: absolute; left: 0; bottom: 0;
+  background: var(--signal-fill); color: var(--ink-on-signal);
+  border: 1px solid var(--signal-edge);
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .1em; padding: 6px 12px;
+}
+.about-body p { color: var(--ink-2); max-width: 60ch; }
+.about-body .lead { color: var(--ink); font-size: 20px; }
+
+/* ---------- 页脚 ---------- */
+.footer { border-top: 1px solid var(--line); background: var(--bg-sunken); }
+.footer-inner { padding: 44px 0; display: flex; flex-direction: column; gap: 22px; }
+@media (min-width: 768px) { .footer-inner { flex-direction: row; align-items: center; justify-content: space-between; } }
+.footer-meta { display: flex; flex-wrap: wrap; gap: 22px; color: var(--ink-2); }
+
+/* ---------- 动画初始态 ---------- */
+.wipe-in { clip-path: inset(0 100% 0 0); }
+.rise { opacity: 0; transform: translateY(22px); }
+.depth-in { opacity: 0; transform: translateZ(-260px); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .ticker-track, .status .dot { animation: none; }
+  .wipe-in { clip-path: none; }
+  .rise, .depth-in { opacity: 1; transform: none; }
+  *, *::before, *::after { transition-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="wipe"><span class="wipe-code">CZ ARCHIVE / 地形加载中</span></div>
+<div class="grain" aria-hidden="true"></div>
+
+<div class="layer">
+
+  <aside class="rail" aria-hidden="true">
+    <div class="rail-idx">
+      <span data-on data-rail="0">01</span><span data-rail="1">02</span>
+      <span data-rail="2">03</span><span data-rail="3">04</span>
+    </div>
+    <div class="rail-vtext">Chenzhen Archive</div>
+  </aside>
+
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#">
+        <span class="brand-mark">CZ</span>
+        <span class="brand-code mono">/ 陈震的客栈</span>
+      </a>
+      <nav class="nav">
+        <a href="#" data-active>首页</a><a href="#">标签</a><a href="#">归档</a>
+        <a href="#">留言板</a><a href="#">友链</a><a href="#">关于我</a>
+      </nav>
+      <div class="topbar-right">
+        <span class="status mono"><span class="dot"></span>运行中</span>
+        <button class="btn-sq">搜索</button>
+        <button class="btn-sq menu-btn" id="menuBtn" aria-expanded="false" aria-controls="drawer">菜单</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="drawer">
+    <nav>
+      <a href="#">首页</a><a href="#">标签</a><a href="#">归档</a>
+      <a href="#">留言板</a><a href="#">友链</a><a href="#">关于我</a>
+    </nav>
+  </div>
+
+  <main>
+
+    <!-- ================= HERO ================= -->
+    <section class="hero" id="hero">
+      <canvas id="gl" aria-hidden="true"></canvas>
+      <canvas id="flat" aria-hidden="true"></canvas>
+      <div class="hero-scrim" aria-hidden="true"></div>
+      <div class="hero-fade" aria-hidden="true"></div>
+
+      <div class="wrap">
+        <div class="hero-grid">
+          <div>
+            <div class="hero-label wipe-in" data-reveal>
+              <span class="bar"></span>
+              <span class="mono">Personal Archive / 个人归档</span>
+            </div>
+
+            <h1 class="thunder">
+              <span class="thunder-cjk" id="thunderText">陈震的客栈</span>
+            </h1>
+
+            <p class="hero-sub rise" data-reveal>
+              一个 Java 开发者的学习笔记与生活记录。慢写, 认真改。
+            </p>
+
+            <div class="hero-actions rise" data-reveal>
+              <a href="#index" class="btn-primary magnet">进入归档 <span aria-hidden="true">→</span></a>
+              <a href="#about" class="btn-outline magnet">关于我</a>
+            </div>
+          </div>
+
+          <div class="field-wrap depth-in" data-reveal>
+            <div class="field" id="field">
+              <div class="tile cut-tr t1">
+                <img src="https://picsum.photos/seed/cz-workspace-desk/600/800" alt="工作台">
+                <span class="tag">01 / 工作台</span>
+              </div>
+              <div class="tile cut-bl t2">
+                <img src="https://picsum.photos/seed/cz-server-rack/600/800" alt="机房">
+                <span class="tag">02 / 机房</span>
+              </div>
+              <div class="tile cut-br t3">
+                <img src="https://picsum.photos/seed/cz-notebook-notes/600/800" alt="笔记本">
+                <span class="tag">03 / 手稿</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-stats rise" data-reveal>
+          <div><div class="k">68</div><div class="u">篇文章</div></div>
+          <div><div class="k">2024</div><div class="u">开始写作</div></div>
+          <div><div class="k">7</div><div class="u">个常写话题</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 信息条 ================= -->
+    <div class="ticker">
+      <div class="ticker-track">
+        <a class="ticker-item" href="#"><span class="flag"></span><span class="mono-sm t">2026-09-21</span><span class="t">JVM 内存模型: 从困惑到顿悟的那晚</span></a>
+        <a class="ticker-item" href="#"><span class="flag"></span><span class="mono-sm t">2026-09-12</span><span class="t">Spring 循环依赖: 三级缓存到底解决了什么</span></a>
+        <a class="ticker-item" href="#"><span class="flag"></span><span class="mono-sm t">2026-08-30</span><span class="t">把博客从 Bootstrap 里救出来: 一次重构记录</span></a>
+        <a class="ticker-item" href="#"><span class="flag"></span><span class="mono-sm t">2026-08-18</span><span class="t">一条慢 SQL 的自我修养</span></a>
+        <a class="ticker-item" href="#"><span class="flag"></span><span class="mono-sm t">2026-08-05</span><span class="t">Redis 缓存穿透, 击穿, 雪崩的一次讲清</span></a>
+        <a class="ticker-item" href="#" aria-hidden="true"><span class="flag"></span><span class="mono-sm t">2026-09-21</span><span class="t">JVM 内存模型: 从困惑到顿悟的那晚</span></a>
+        <a class="ticker-item" href="#" aria-hidden="true"><span class="flag"></span><span class="mono-sm t">2026-09-12</span><span class="t">Spring 循环依赖: 三级缓存到底解决了什么</span></a>
+        <a class="ticker-item" href="#" aria-hidden="true"><span class="flag"></span><span class="mono-sm t">2026-08-30</span><span class="t">把博客从 Bootstrap 里救出来: 一次重构记录</span></a>
+        <a class="ticker-item" href="#" aria-hidden="true"><span class="flag"></span><span class="mono-sm t">2026-08-18</span><span class="t">一条慢 SQL 的自我修养</span></a>
+        <a class="ticker-item" href="#" aria-hidden="true"><span class="flag"></span><span class="mono-sm t">2026-08-05</span><span class="t">Redis 缓存穿透, 击穿, 雪崩的一次讲清</span></a>
+      </div>
+    </div>
+
+    <!-- ================= 文章索引 ================= -->
+    <section class="section" id="index" data-rail-target="0">
+      <div class="wrap">
+        <span class="ghost-num" aria-hidden="true">01</span>
+        <div class="sec-head">
+          <h2 class="sec-title depth-in" data-reveal>文章索引</h2>
+          <a href="#" class="sec-link rise" data-reveal>全部 68 篇</a>
+        </div>
+
+        <div class="index">
+          <a href="#" class="idx-row rise" data-reveal>
+            <span class="idx-num">68</span>
+            <span>
+              <span class="idx-title">JVM 内存模型: 从困惑到顿悟的那晚</span>
+              <span class="idx-desc">堆与栈背了三年, 其实是同一个故事: 对象的一生。</span>
+            </span>
+            <span class="idx-meta mono"><span>2026-09-21</span><span class="cat">JVM</span></span>
+          </a>
+          <a href="#" class="idx-row rise" data-reveal>
+            <span class="idx-num">67</span>
+            <span>
+              <span class="idx-title">Spring 循环依赖: 三级缓存到底解决了什么</span>
+              <span class="idx-desc">面试常考, 但少有人讲清为什么偏偏是三级而不是两级。</span>
+            </span>
+            <span class="idx-meta mono"><span>2026-09-12</span><span class="cat">Spring</span></span>
+          </a>
+          <a href="#" class="idx-row rise" data-reveal>
+            <span class="idx-num">66</span>
+            <span>
+              <span class="idx-title">把博客从 Bootstrap 里救出来: 一次重构记录</span>
+              <span class="idx-desc">老项目的样式债, 总要有人还。记录完整心路。</span>
+            </span>
+            <span class="idx-meta mono"><span>2026-08-30</span><span class="cat">前端</span></span>
+          </a>
+          <a href="#" class="idx-row rise" data-reveal>
+            <span class="idx-num">65</span>
+            <span>
+              <span class="idx-title">一条慢 SQL 的自我修养</span>
+              <span class="idx-desc">从 3.2 秒到 40 毫秒, 我只改了一行。</span>
+            </span>
+            <span class="idx-meta mono"><span>2026-08-18</span><span class="cat">MySQL</span></span>
+          </a>
+          <a href="#" class="idx-row rise" data-reveal>
+            <span class="idx-num">64</span>
+            <span>
+              <span class="idx-title">Redis 缓存穿透, 击穿, 雪崩的一次讲清</span>
+              <span class="idx-desc">三个词长得像, 解法却完全不同。</span>
+            </span>
+            <span class="idx-meta mono"><span>2026-08-05</span><span class="cat">Redis</span></span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 话题 ================= -->
+    <section class="section" style="padding-top: 0;" data-rail-target="1">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2 class="sec-title depth-in" data-reveal>常写的话题</h2>
+        </div>
+        <div class="cats rise" data-reveal>
+          <a href="#" class="cat-cell lead">
+            <div>
+              <div class="mono" style="color: var(--ink-2); margin-bottom: 14px;">最常写 / Most Written</div>
+              <div class="lead-title">Java 与后端工程</div>
+            </div>
+            <div class="big">24</div>
+          </a>
+          <a href="#" class="cat-cell">
+            <div class="big">18</div>
+            <div><div class="name">Spring Boot</div><div class="hint">框架与踩坑</div></div>
+          </a>
+          <a href="#" class="cat-cell">
+            <div class="big">11</div>
+            <div><div class="name">MySQL</div><div class="hint">索引与慢查询</div></div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 关于 ================= -->
+    <section class="section" id="about" style="padding-top: 0;" data-rail-target="2">
+      <div class="wrap">
+        <span class="ghost-num" aria-hidden="true">02</span>
+        <div class="about">
+          <div class="about-photo depth-in" data-reveal>
+            <img class="cut-tr" id="aboutImg" src="https://picsum.photos/seed/chenzhen-portrait-desk/600/800" alt="陈震的照片">
+            <span class="plate">CZ / 陈震</span>
+          </div>
+          <div class="about-body">
+            <div class="mono rise" data-reveal style="color: var(--ink-2); margin-bottom: 18px;">关于写字的人 / About</div>
+            <p class="lead rise" data-reveal style="font-family: var(--font-cjk); font-weight: 700; margin-bottom: 18px;">
+              后端工程师。相信代码要经得起 review, 文章要经得起重读。
+            </p>
+            <p class="rise" data-reveal style="margin-bottom: 28px;">
+              这个博客始于 2024 年, 从一张模板开始, 慢慢长成现在的样子。这里不追热点, 只留沉淀: JVM 的深夜、Spring 的坑、偶尔一行诗。
+            </p>
+            <a href="#" class="btn-outline magnet rise" data-reveal>读完整的自我介绍</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer" data-rail-target="3">
+    <div class="wrap footer-inner">
+      <div class="brand">
+        <span class="brand-mark">CZ</span>
+        <span class="brand-code mono">/ 陈震的客栈</span>
+      </div>
+      <div class="footer-meta mono">
+        <span>文章采用 CC BY-NC-SA 4.0</span>
+        <span>Spring Boot 驱动</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fine   = window.matchMedia('(pointer: fine)').matches;
+  var hero   = document.getElementById('hero');
+
+  /* 全局指针状态: 只记录目标值, 真正的插值在唯一的 rAF 循环里做 */
+  var ptr = { x: 0, y: 0, tx: 0, ty: 0 };
+  if (fine) {
+    window.addEventListener('mousemove', function (e) {
+      ptr.tx = (e.clientX / window.innerWidth  - .5) * 2;   // -1 .. 1
+      ptr.ty = (e.clientY / window.innerHeight - .5) * 2;
+    }, { passive: true });
+  }
+
+  /* ======================================================================
+     1. 3D 等高线地形
+     顶点着色器按噪声抬升网格, 片元着色器用同一噪声画等高线。
+     等高线在片元里按世界坐标独立计算, 所以密度与网格无关, 永远锐利。
+     ====================================================================== */
+  var NOISE = [
+    'float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }',
+    'float vnoise(vec2 p) {',
+    '  vec2 i = floor(p), f = fract(p);',
+    '  vec2 u = f * f * (3.0 - 2.0 * f);',
+    '  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),',
+    '             mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);',
+    '}',
+    'float fbm(vec2 p) {',
+    '  float s = 0.0, a = 0.5;',
+    '  for (int i = 0; i < 5; i++) { s += a * vnoise(p); p *= 2.03; a *= 0.5; }',
+    '  return s;',
+    '}',
+    'float terrainH(vec2 p, float t) {',
+    '  vec2 q = p * 0.00085;',
+    '  float n = fbm(q + vec2(t * 0.012, t * 0.008));',
+    '  return (n - 0.5) * 2.6;',   // 拉开动态范围, 等高线才有足够密度
+    '}'
+  ].join('\n');
+
+  var VERT = NOISE + '\n' + [
+    'uniform float uTime;',
+    'varying vec2  vXY;',
+    'varying float vDepth;',
+    'void main() {',
+    '  vec3 p = position;',
+    '  vXY = p.xy;',
+    '  float h = terrainH(p.xy, uTime);',
+    '  p.z += h * 92.0;',
+    '  vec4 mv = modelViewMatrix * vec4(p, 1.0);',
+    '  vDepth = -mv.z;',
+    '  gl_Position = projectionMatrix * mv;',
+    '}'
+  ].join('\n');
+
+  var FRAG = NOISE + '\n' + [
+    'uniform float uTime;',
+    'uniform vec3  uInk;',
+    'uniform float uOpacity;',
+    'varying vec2  vXY;',
+    'varying float vDepth;',
+    // 抗锯齿等高线: 取到最近等值线的距离, 用 fwidth 归一化
+    'float contour(float h, float freq, float w) {',
+    '  float v = h * freq;',
+    '  float f = fract(v);',
+    '  float d = min(f, 1.0 - f);',
+    '  float aaw = fwidth(v) * w;',
+    '  return 1.0 - smoothstep(0.0, aaw, d);',
+    '}',
+    'void main() {',
+    '  float h = terrainH(vXY, uTime);',
+    '  float main1 = contour(h, 26.0, 1.5);',   // 主等高线
+    '  float minor = contour(h, 82.0, 1.0) * 0.30;',   // 次级等高线, 更密更淡
+    '  float line = max(main1, minor);',
+    '  if (line <= 0.002) discard;',
+    // 反转边界的 smoothstep 在 GLSL 里属未定义行为, 写成 1.0 - smoothstep 更稳
+    '  float fog = 1.0 - smoothstep(620.0, 2400.0, vDepth);',   // 远处沉入纸面
+    '  float rad = 1.0 - smoothstep(520.0, 1650.0, length(vXY));',   // 边缘淡出
+    '  gl_FragColor = vec4(uInk, line * fog * rad * uOpacity);',
+    '}'
+  ].join('\n');
+
+  var glCanvas = document.getElementById('gl');
+  var flatCanvas = document.getElementById('flat');
+  var terrain = null, renderer = null, scene = null, camera = null;
+  var glOK = false;
+
+  /* 地形墨线浓度。白底比纸底更显墨 (#111 对白 19.1:1, 对纸只有 15.5:1),
+     所以浓度要压下来, 否则整页会重新变暗。调这一个数即可。 */
+  var TERRAIN_OPACITY = 0.22;
+
+  function initGL() {
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas: glCanvas, alpha: true, antialias: false, powerPreference: 'high-performance'
+      });
+      renderer.setClearColor(0x000000, 0);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(40, 1, 1, 6000);
+      camera.position.set(0, 0, 640);
+
+      var geo = new THREE.PlaneGeometry(2800, 2800, 176, 176);
+      var mat = new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        extensions: { derivatives: true },   // WebGL1 下启用 fwidth
+        uniforms: {
+          uTime:    { value: 0 },
+          uInk:     { value: new THREE.Color('#111111') },
+          uOpacity: { value: 0 }
+        },
+        vertexShader: VERT,
+        fragmentShader: FRAG
+      });
+
+      terrain = new THREE.Mesh(geo, mat);
+      // 向后倾倒, 形成俯视地形的视角
+      terrain.rotation.x = -1.16;
+      terrain.position.set(0, -150, -300);
+      scene.add(terrain);
+
+      resizeGL();
+      renderer.render(scene, camera);   // 先渲染一帧拿到尺寸
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function resizeGL() {
+    if (!renderer) return;
+    var w = hero.clientWidth, h = hero.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+
+  /* ---- 2D 兜底: 无 WebGL 或无 Three 时退回平面等高线 ---- */
+  function drawFlat() {
+    flatCanvas.style.display = 'block';
+    var ctx = flatCanvas.getContext('2d');
+    var w = hero.clientWidth, h = hero.clientHeight;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    flatCanvas.width = Math.floor(w * dpr);
+    flatCanvas.height = Math.floor(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    function hash(x, y) { var n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123; return n - Math.floor(n); }
+    function sm(t) { return t * t * (3 - 2 * t); }
+    function vn(x, y) {
+      var xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+      var u = sm(xf), v = sm(yf);
+      var a = hash(xi, yi), b = hash(xi + 1, yi), c = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
+      return a * (1 - u) * (1 - v) + b * u * (1 - v) + c * (1 - u) * v + d * u * v;
+    }
+    function fbm(x, y) {
+      var s = 0, amp = .5, f = 1, i;
+      for (i = 0; i < 4; i++) { s += amp * vn(x * f, y * f); f *= 2.03; amp *= .5; }
+      return s;
+    }
+
+    var step = 13, cols = Math.ceil(w / step) + 1, rows = Math.ceil(h / step) + 1;
+    var field = new Float32Array(cols * rows);
+    var i, j, x, y;
+    for (j = 0; j < rows; j++) for (i = 0; i < cols; i++) field[j * cols + i] = fbm(i * step * .0026, j * step * .0026);
+
+    ctx.strokeStyle = 'rgba(17,17,17,0.035)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (var L = 0; L < 9; L++) {
+      var iso = .26 + L * .052;
+      for (j = 0; j < rows - 1; j++) for (i = 0; i < cols - 1; i++) {
+        var tl = field[j * cols + i], tr = field[j * cols + i + 1];
+        var bl = field[(j + 1) * cols + i], br = field[(j + 1) * cols + i + 1];
+        var idx = 0;
+        if (tl > iso) idx |= 8; if (tr > iso) idx |= 4;
+        if (br > iso) idx |= 2; if (bl > iso) idx |= 1;
+        if (idx === 0 || idx === 15) continue;
+        x = i * step; y = j * step;
+        var top = [x + step * ((iso - tl) / (tr - tl)), y];
+        var right = [x + step, y + step * ((iso - tr) / (br - tr))];
+        var bottom = [x + step * ((iso - bl) / (br - bl)), y + step];
+        var left = [x, y + step * ((iso - tl) / (bl - tl))];
+        var seg = function (p, q) { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+        switch (idx) {
+          case 1: case 14: seg(left, bottom); break;
+          case 2: case 13: seg(bottom, right); break;
+          case 3: case 12: seg(left, right); break;
+          case 4: case 11: seg(top, right); break;
+          case 5: seg(left, top); seg(bottom, right); break;
+          case 6: case 9: seg(top, bottom); break;
+          case 7: case 8: seg(left, top); break;
+          case 10: seg(top, right); seg(left, bottom); break;
+        }
+      }
+    }
+    ctx.stroke();
+  }
+
+  var hasGL = false;
+  if (window.THREE && !reduce) {
+    hasGL = initGL();
+    if (hasGL) glCanvas.style.display = 'block';
+  }
+  if (!hasGL) {
+    glCanvas.style.display = 'none';
+    drawFlat();
+  }
+
+  /* ======================================================================
+     2. 唯一的 rAF 循环: 地形 + 图像场纵深 + 磁性按钮
+     全部走插值, 不碰 DOM 属性读写以外的东西, 不触发重排
+     ====================================================================== */
+  var field = document.getElementById('field');
+  var magnets = Array.prototype.slice.call(document.querySelectorAll('.magnet'));
+  var magState = magnets.map(function () { return { tx: 0, ty: 0, x: 0, y: 0 }; });
+  var fieldRot = { x: 0, y: 0 };
+  var clock = 0;
+  var running = false;
+  var rafId = null;
+
+  magnets.forEach(function (el, i) {
+    el.addEventListener('mousemove', function (e) {
+      var r = el.getBoundingClientRect();
+      magState[i].tx = (e.clientX - r.left - r.width  / 2) * 0.28;
+      magState[i].ty = (e.clientY - r.top  - r.height / 2) * 0.42;
+    });
+    el.addEventListener('mouseleave', function () { magState[i].tx = 0; magState[i].ty = 0; });
+  });
+
+  function tick() {
+    if (!running) return;
+    rafId = requestAnimationFrame(tick);
+
+    ptr.x += (ptr.tx - ptr.x) * 0.055;
+    ptr.y += (ptr.ty - ptr.y) * 0.055;
+    clock += 0.016;
+
+    // --- 3D 地形: 重力感应 + 缓慢自转 ---
+    if (terrain) {
+      var tx = -1.16 + ptr.y * 0.085 + Math.sin(clock * 0.22) * 0.012;
+      var tz = ptr.x * 0.05 + Math.sin(clock * 0.13) * 0.018;
+      terrain.rotation.x += (tx - terrain.rotation.x) * 0.045;
+      terrain.rotation.z += (tz - terrain.rotation.z) * 0.045;
+      terrain.position.y += ((-150 - ptr.y * 26) - terrain.position.y) * 0.045;
+      terrain.material.uniforms.uTime.value = clock;
+      // uOpacity 不在这里插值: 入场淡入与滚动淡出分别由 GSAP 与 ScrollTrigger 接管,
+      // 两边同时写会产生争夺
+      renderer.render(scene, camera);
+    }
+
+    // --- 图像场: 3D 倾斜, 每块因 translateZ 不同而分层错开 ---
+    if (field && fine) {
+      fieldRot.x += (-ptr.y * 5.5 - fieldRot.x) * 0.06;
+      fieldRot.y += ( ptr.x * 7.5 - fieldRot.y) * 0.06;
+      field.style.transform = 'rotateX(' + fieldRot.x.toFixed(2) + 'deg) rotateY(' + fieldRot.y.toFixed(2) + 'deg)';
+    }
+
+    // --- 磁性按钮 ---
+    magnets.forEach(function (el, i) {
+      var s = magState[i];
+      s.x += (s.tx - s.x) * 0.14;
+      s.y += (s.ty - s.y) * 0.14;
+      el.style.transform = 'translate3d(' + s.x.toFixed(2) + 'px,' + s.y.toFixed(2) + 'px,0)';
+    });
+  }
+
+  function start() {
+    if (running || reduce) return;
+    running = true;
+    rafId = requestAnimationFrame(tick);
+  }
+  function stop() {
+    running = false;
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  }
+
+  // 只在 hero 可见时渲染, 滚过去就停, 省电
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) start(); else stop(); });
+    }, { threshold: 0 }).observe(hero);
+  } else {
+    start();
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stop(); else start();
+  });
+  if (reduce) {
+    // 降级: 静态渲染一帧
+    if (terrain) { terrain.material.uniforms.uOpacity.value = TERRAIN_OPACITY; renderer.render(scene, camera); }
+    if (field) field.style.transform = 'none';
+  }
+
+  var rw;
+  window.addEventListener('resize', function () {
+    clearTimeout(rw);
+    rw = setTimeout(function () {
+      if (hasGL) { resizeGL(); if (reduce) renderer.render(scene, camera); }
+      else { flatCanvas.style.display = 'none'; drawFlat(); }
+    }, 200);
+  });
+
+  /* ======================================================================
+     3. 移动抽屉
+     ====================================================================== */
+  var menuBtn = document.getElementById('menuBtn');
+  var drawer = document.getElementById('drawer');
+  menuBtn.addEventListener('click', function () {
+    if (drawer.hasAttribute('data-open')) {
+      drawer.removeAttribute('data-open'); menuBtn.setAttribute('aria-expanded', 'false');
+    } else {
+      drawer.setAttribute('data-open', ''); menuBtn.setAttribute('aria-expanded', 'true');
+    }
+  });
+  drawer.addEventListener('click', function (e) {
+    if (e.target.tagName === 'A') {
+      drawer.removeAttribute('data-open'); menuBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  /* ======================================================================
+     4. 雷霆大字逐字 3D 入场
+     ====================================================================== */
+  var thunderEl = document.getElementById('thunderText');
+  var chars = [];
+  (function splitChars() {
+    var text = thunderEl.textContent;
+    thunderEl.textContent = '';
+    text.split('').forEach(function (c) {
+      var s = document.createElement('span');
+      s.className = 'ch';
+      s.textContent = c;
+      thunderEl.appendChild(s);
+      chars.push(s);
+    });
+  })();
+
+  /* ======================================================================
+     5. 页面动效编排
+     ====================================================================== */
+  function showAll() {
+    document.querySelectorAll('.wipe-in').forEach(function (el) { el.style.clipPath = 'none'; });
+    document.querySelectorAll('.rise').forEach(function (el) { el.style.opacity = 1; el.style.transform = 'none'; });
+    document.querySelectorAll('.depth-in').forEach(function (el) { el.style.opacity = 1; el.style.transform = 'none'; });
+    document.getElementById('wipe').style.display = 'none';
+  }
+
+  if (!window.gsap) { showAll(); return; }
+  gsap.registerPlugin(ScrollTrigger);
+
+  if (reduce) {
+    showAll();
+    chars.forEach(function (c) { c.style.opacity = 1; c.style.transform = 'none'; });
+    ScrollTrigger.refresh();
+    return;
+  }
+
+  // 地形在黄块抽走之后缓缓浮现, 之后交给 ScrollTrigger 控制浓淡
+  if (terrain) {
+    gsap.to(terrain.material.uniforms.uOpacity, {
+      value: TERRAIN_OPACITY, duration: 1.8, delay: 0.45, ease: 'power2.out'
+    });
+  }
+
+  gsap.timeline({ defaults: { ease: 'power3.out' } })
+    // 黄色块抽走, 露出地形
+    .to('#wipe', { duration: .3, delay: .2 })
+    .to('#wipe', { clipPath: 'inset(0 0 0 100%)', duration: .8, ease: 'power4.inOut' })
+    .set('#wipe', { display: 'none' }, '-=0.05')
+
+    // 雷霆大字: 逐字从纵深飞入并回正
+    .from(chars, {
+      z: -820, rotationX: -78, opacity: 0,
+      duration: 1.25, stagger: 0.075, ease: 'power4.out'
+    }, '-=0.62')
+
+    // 标签条定向裁切
+    .to('.hero-label.wipe-in', { clipPath: 'inset(0 0% 0 0)', duration: .7 }, '-=0.95')
+    .to('.hero-sub', { opacity: 1, y: 0, duration: .7 }, '-=0.5')
+    .to('.hero-actions', { opacity: 1, y: 0, duration: .7 }, '-=0.55')
+    .to('.field-wrap', { opacity: 1, z: 0, duration: 1.1, ease: 'power3.out' }, '-=0.85')
+    .to('.hero-stats', { opacity: 1, y: 0, duration: .7 }, '-=0.6');
+
+  // 地形随滚动退向纵深: 像从地表沉入档案层
+  if (terrain) {
+    ScrollTrigger.create({
+      trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true,
+      onUpdate: function (self) {
+        var p = self.progress;
+        terrain.position.z = -300 - p * 620;
+        terrain.material.uniforms.uOpacity.value = TERRAIN_OPACITY * (1 - p * 0.85);
+      }
+    });
+  }
+
+  // Hero 文字同步退场
+  gsap.to('.hero-grid', {
+    y: -50, opacity: .25, ease: 'none',
+    scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
+  });
+
+  // 章节元素揭示
+  gsap.utils.toArray('.section .rise, .footer .rise').forEach(function (el, i) {
+    gsap.to(el, {
+      opacity: 1, y: 0, duration: .85, ease: 'power3.out', delay: (i % 4) * 0.06,
+      scrollTrigger: { trigger: el, start: 'top 88%' }
+    });
+  });
+
+  // 章节标题 / 图片: 从纵深浮出
+  gsap.utils.toArray('.depth-in').forEach(function (el) {
+    gsap.to(el, {
+      opacity: 1, z: 0, duration: 1, ease: 'power3.out',
+      scrollTrigger: { trigger: el, start: 'top 86%' }
+    });
+  });
+
+  gsap.utils.toArray('.wipe-in:not(.hero-label)').forEach(function (el) {
+    gsap.to(el, {
+      clipPath: 'inset(0 0% 0 0)', duration: .8, ease: 'power3.out',
+      scrollTrigger: { trigger: el, start: 'top 88%' }
+    });
+  });
+
+  gsap.utils.toArray('.ghost-num').forEach(function (el) {
+    gsap.fromTo(el, { y: 60 }, {
+      y: -60, ease: 'none',
+      scrollTrigger: { trigger: el.parentElement, start: 'top bottom', end: 'bottom top', scrub: true }
+    });
+  });
+
+  // 关于页照片: 3D 倾斜
+  gsap.fromTo('#aboutImg', { rotateY: -14 }, {
+    rotateY: 8, ease: 'none',
+    scrollTrigger: { trigger: '.about', start: 'top bottom', end: 'bottom top', scrub: true }
+  });
+
+  // 侧边轨页码
+  gsap.utils.toArray('[data-rail-target]').forEach(function (sec) {
+    ScrollTrigger.create({
+      trigger: sec, start: 'top 50%', end: 'bottom 50%',
+      onToggle: function (self) {
+        if (!self.isActive) return;
+        var key = sec.getAttribute('data-rail-target');
+        document.querySelectorAll('[data-rail]').forEach(function (s) {
+          if (s.getAttribute('data-rail') === key) s.setAttribute('data-on', '');
+          else s.removeAttribute('data-on');
+        });
+      }
+    });
+  });
+
+  window.addEventListener('load', function () {
+    if (hasGL) resizeGL();
+    ScrollTrigger.refresh();
+  });
+})();
+</script>
+</body>
+</html>
