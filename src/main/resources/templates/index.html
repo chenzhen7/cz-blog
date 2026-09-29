@@ -142,7 +142,7 @@
                 </div>
 
                 <div class="index">
-                    <a class="idx-row rise" data-reveal th:each="b : ${page.list}"
+                    <a class="idx-row row-fill rise" data-reveal th:each="b : ${page.list}"
                        th:href="@{/blog/{id}(id=${b.id})}">
                         <span class="idx-num" th:text="${b.id}">1</span>
                         <span>

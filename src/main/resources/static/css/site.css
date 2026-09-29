@@ -423,13 +423,18 @@ button { font: inherit; }
 @media (min-width: 1024px) {
   .idx-row { grid-template-columns: 104px minmax(0, 1fr) 340px; gap: 32px; align-items: baseline; padding: 30px 24px 30px 0; }
 }
-.idx-row::before {
+/* 列表行共用的悬停填充：一整块信号黄从左侧展开盖住整行。
+   首页文章索引、归档、标签页都用这一套动作。分成三份写的话，
+   改缓动或改时长就要改三处，而且很容易只改到一处。
+   行内文字的翻色留在各自的行类型里 —— 每种子元素构成不一样，这里管不着。 */
+.row-fill { position: relative; isolation: isolate; }
+.row-fill::before {
   content: ""; position: absolute; inset: 0; z-index: -1;
   background: var(--signal-fill);
   clip-path: inset(0 100% 0 0);
   transition: clip-path .5s cubic-bezier(.16, 1, .3, 1);
 }
-.idx-row:hover::before { clip-path: inset(0 0 0 0); }
+.row-fill:hover::before { clip-path: inset(0 0 0 0); }
 .idx-row:hover .idx-title,
 .idx-row:hover .idx-desc,
 .idx-row:hover .idx-num,
@@ -776,3 +781,53 @@ button { font: inherit; }
   transition: background .3s, color .3s, border-color .3s;
 }
 .skills li:hover { background: var(--signal-fill); color: var(--ink-on-signal); border-color: var(--signal-edge); }
+
+/* ==========================================================================
+   17. 归档（流年记）
+   ========================================================================== */
+.arc { border-top: 1px solid var(--line); }
+
+/* 年份分组头。吸在顶栏下方：46 条滚到一半时，不吸顶就不知道自己在哪一年。
+   顶栏是 fixed 的 60px 且 z-index 50，这里给 2，滚上去会从顶栏底下穿过。
+   必须给不透明底色，否则行会从字缝里透出来。 */
+.arc-year {
+  position: sticky; top: 60px; z-index: 2;
+  margin: 0; padding: 18px 0 12px;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+  font-family: var(--font-disp); font-variation-settings: 'wdth' 105, 'wght' 800;
+  font-size: 32px; line-height: 1; letter-spacing: -.03em;
+  display: flex; align-items: baseline; gap: 14px;
+}
+
+/* 行。移动端单栏堆叠，≥1024px 才排成 日期 / 标题描述 / 封面 三栏 ——
+   断点与 .idx-row 一致，两页的节奏感才是同一个。 */
+.arc-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 22px 20px 22px 0; border-bottom: 1px solid var(--line); }
+/* baseline 而不是 center：行高随摘要行数变（一到两行），居中会让日期在行与行之间
+   上下浮动，看着像没对齐。baseline 让日期始终咬住标题那一行。
+   封面反过来要居中，否则会跟着标题基线掉下来。 */
+@media (min-width: 1024px) {
+  .arc-row { grid-template-columns: 96px minmax(0, 1fr) 148px; gap: 32px; align-items: baseline; padding: 24px 20px 24px 0; }
+  .arc-thumb { align-self: center; }
+}
+
+.arc-date { color: var(--ink-2); transition: color .35s; }
+.arc-title { display: block; font-family: var(--font-cjk); font-weight: 700; font-size: 21px; line-height: 1.45; color: var(--ink); margin: 0 0 6px; overflow-wrap: break-word; transition: color .35s; }
+.arc-desc {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  color: var(--ink-2); font-size: 17px; transition: color .35s;
+}
+
+/* 封面。库里存的是 CSDN 的外链，33 条里 33 条都在别人域名上，
+   所以必须 loading="lazy"：不留神就是进页面并发 33 个跨域请求。
+   与 .tile img 用同一套印刷滤镜，保证站内所有图片是一张脸。 */
+.arc-thumb { display: none; }
+@media (min-width: 1024px) {
+  .arc-thumb {
+    display: block; width: 148px; height: 84px; object-fit: cover;
+    filter: grayscale(1) contrast(.96) brightness(1.2);
+  }
+}
+
+.arc-row:hover .arc-date,
+.arc-row:hover .arc-title,
+.arc-row:hover .arc-desc { color: var(--ink-on-signal); }

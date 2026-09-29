@@ -1,97 +1,89 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="zh-CN" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-  <meta name="referrer" content="no-referrer"/>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>流年记-CZ的java学习日记</title>
-  <meta name="description" content="ChenZhen的个人博客，流年记页面，用于记录生活点滴过往">
-  <meta name="keywords" content="ChenZhen的流年记,博客">
-  <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
-  <link rel="stylesheet" href="../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" />
-  <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+    <meta name="referrer" content="no-referrer"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>流年记-CZ的java学习日记</title>
+    <meta name="description" content="ChenZhen的个人博客，流年记页面，用于记录生活点滴过往">
+    <meta name="keywords" content="ChenZhen的流年记,博客">
+    <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
+    <link rel="stylesheet" th:href="@{/fonts/fonts.css}">
+    <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 <body>
 
-  <!--导航-->
-<th:block th:replace="~{fragments/legacy :: navbar('archives')}"/>
+<th:block th:replace="~{fragments/chrome :: grain}"/>
+<th:block th:replace="~{fragments/chrome :: topbar('archives')}"/>
 
-<!-- 搜索框 -->
-<th:block th:replace="~{fragments/legacy :: searchModal}"/>
+<main>
 
-
-<!--顶部背景图片-->
-<div  alt="" class="cz-bg-section cz-bg-img"
-     style="height: 45vh;background-image:url('../static/images/archives.jpg')"
-     th:style="'height: 45vh;background-image: url(' + @{/images/archives.jpg} + ')'">
-
-  <div class="m-bg-class_cover" align="center">
-    <p class="cz-page-title">- 💾归档 -</p>
-    <p class="cz-page-title2 fw-normal">Welcome to my website ——by 陈震 （Chen Zhen）</p>
-  </div>
-
-</div>
-
-<!--时间轴-->
-<div class="container mt-5" style="max-width: 1170px;">
-
-  <div class="cz-timeline d-none d-md-block">
-      <a class="cz-timeline-item " href="#" th:href="@{/blog/{id}(id=${memory.id})}" th:each="memory : ${memoryList}">
-        <div class="cz-timeline-content d-flex justify-content-between ">
-          <div>
-            <div class="cz-timeline-date" th:text="${#temporals.format(memory.createTime)}">2023-01-01 17:52</div>
-            <div class="cz-timeline-title text-break" th:text="${memory.title}">文章标题 1</div>
-            <div class="cz-timeline-description text-break" th:text="${memory.description}">
-              这是第一篇文章的内容摘要或描述。可以添加更多细节和内容。
+    <!--/* model 来自 ArchivesController：memoryList（BlogService.getArchiveList()，
+           已发布的全部文章、按 create_time 倒序、描述在 service 层截到 100 字以内）、author。
+           改版前这里是一条 45vh 的背景图带，新版的 .page-head 是纯排版的，
+           而且 archives.jpg 已经派生出首页 hero 的第三张图，不算丢。 */-->
+    <header class="page-head">
+        <div class="wrap">
+            <div class="eyebrow">
+                <span class="bar"></span>
+                <span class="mono">Archive / 流年记</span>
             </div>
-          </div>
-          <div class="d-flex align-items-center" th:if="${memory.firstPicture != null && !memory.firstPicture.isEmpty()}">
-            <img height="100" width="200" src="../static/images/recommendPicture.png" th:src="@{${memory.firstPicture}}">
-          </div>
+            <h1 class="page-title">归档</h1>
+            <!--/* 原文是「Welcome to my website ——by 陈震 （Chen Zhen）」。
+                   规范禁用破折号，这里换成与全站一致的正斜杠分隔；
+                   括号也从全角改成半角，与导航、页脚的写法统一。 */-->
+            <p class="page-lead">Welcome to my website / by 陈震 (Chen Zhen)</p>
+            <p class="mono-sm" style="color: var(--ink-2); margin-top: 16px;">
+                共 <span th:text="${#lists.size(memoryList)}">0</span> 篇，按写作时间从新到旧
+            </p>
         </div>
-      </a>
-  </div>
+    </header>
 
-  <!--移动端展示-->
-  <div class="cz-timeline d-md-none">
-    <a class="cz-timeline-item " href="#" th:href="@{/blog/{id}(id=${memory.id})}" th:each="memory : ${memoryList}">
-      <div class="cz-timeline-content ">
-        <div class="cz-timeline-date" th:text="${#temporals.format(memory.createTime)}">2023-01-01 17:52</div>
-        <div class="d-flex justify-content-between mb-1">
-          <div class="cz-timeline-title text-break" th:text="${memory.title}">文章标题 1</div>
-          <div class="d-flex align-items-center" th:if="${memory.firstPicture != null && !memory.firstPicture.isEmpty()}">
-            <img height="100" width="200" src="../static/images/recommendPicture.png" th:src="@{${memory.firstPicture}}">
-          </div>
+    <section class="section">
+        <div class="wrap">
+            <div class="arc">
+
+                <!--/* 年份分组。getBlogList() 已按 create_time 倒序，所以在模板里比一句
+                       「上一条的年份不等于这一条」就等价于「该起一个新分组」，
+                       不需要再为分组去动 Controller / Service（本次范围不改既有接口）。
+
+                       注意 st.first 必须写在 or 的左边：SpEL 的 or 会短路，
+                       首条时右边根本不求值，因此 st.index - 1 不会算成 -1 去索引列表尾。 */-->
+                <th:block th:each="memory, st : ${memoryList}">
+                    <h2 class="arc-year"
+                        th:if="${st.first or #temporals.format(memoryList[st.index - 1].createTime, 'yyyy') != #temporals.format(memory.createTime, 'yyyy')}"
+                        th:text="${#temporals.format(memory.createTime, 'yyyy')}">2024</h2>
+
+                    <a class="arc-row row-fill" th:href="@{/blog/{id}(id=${memory.id})}">
+                        <span class="arc-date mono" th:text="${#temporals.format(memory.createTime, 'MM-dd')}">01-01</span>
+                        <span>
+                            <span class="arc-title" th:text="${memory.title}">文章标题</span>
+                            <!--/* 描述为空时整块不渲染。t_blog.description 允许为 NULL，
+                                   service 层已经不再拿空值去 length()（那个 NPE 是 Phase 1b 修的），
+                                   这里只是不给空描述留一行空白。 */-->
+                            <span class="arc-desc" th:if="${not #strings.isEmpty(memory.description)}"
+                                  th:text="${memory.description}">文章摘要</span>
+                        </span>
+                        <!--/* 封面是库里的 firstPicture，实际都指向 CSDN 的外链。
+                               lazy 是必须的：不留神就是一次并发 33 个跨域请求。
+                               没有封面的 13 篇不占位，整列由 grid 自动让开。 */-->
+                        <img class="arc-thumb" th:if="${not #strings.isEmpty(memory.firstPicture)}"
+                             th:src="${memory.firstPicture}" alt="" width="148" height="84"
+                             loading="lazy" decoding="async">
+                    </a>
+                </th:block>
+
+                <p class="idx-empty" th:if="${#lists.isEmpty(memoryList)}">还没有发布的文章。</p>
+            </div>
         </div>
-        <div class="cz-timeline-description text-break" th:text="${memory.description}">
-            这是第一篇文章的内容摘要或描述。可以添加更多细节和内容。
-        </div>
+    </section>
 
-      </div>
+</main>
 
-    </a>
-  </div>
+<th:block th:replace="~{fragments/chrome :: footer}"/>
 
+<th:block th:replace="~{fragments/chrome :: searchDialog}"/>
+<th:block th:replace="~{fragments/chrome :: scripts}"/>
 
-</div>
-
-<!--底部栏-->
-<th:block th:replace="~{fragments/legacy :: footer}"/>
-
-
-<script src="../static/lib/bootstrap.bundle.min.js" th:src="@{/lib/bootstrap.bundle.min.js}"></script>
-<script src="../static/lib/jquery-3.2.1/jquery-3.2.1.min.js" th:src="@{/lib/jquery-3.2.1/jquery-3.2.1.min.js}"></script>
-<script src="../static/lib/clickEffect.js" th:src="@{/lib/clickEffect.js}"></script>
-
-
-
-<th:block th:replace="~{fragments/legacy :: scripts}"/>
-<script>
-
-  $('.menu.toggle').click(function () {
-    $('.m-item').toggleClass('m-mobile-hide');
-  });
-
-</script>
 </body>
 </html>
