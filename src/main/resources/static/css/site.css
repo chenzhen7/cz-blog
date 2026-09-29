@@ -606,20 +606,30 @@ button { font: inherit; }
 
 /* ==========================================================================
    13. 动画初始态
+
    整块用 .anim 门控：只有 JS 在 <html> 上加了 .anim 才生效。
    否则一旦脚本没跑起来（被墙、出错、禁用 JS），.rise 的 opacity:0
    会让整页内容凭空消失 —— 这是这套动效最容易踩的坑。
+
+   范围收在 .section / .footer 之内，Hero 不在其中。原因：
+   Hero 那几处的初值（.hero-sub / .hero-actions / .hero-stats / .eyebrow / .field-wrap）
+   由首页脚本用 GSAP 自己设，GSAP 的 from / fromTo 在建实例时就写好初值，不依赖这两个类。
+   让 CSS 去藏它们的话，首页脚本只要在哪一步出错，首屏就是一片空白 ——
+   而首屏空白和整页空白在观感上没有区别，还查不出是动画的锅。
+
+   选择器与 fragments/chrome 的 motion 片段里那三处 toArray 一一对应，改一边要同时改另一边。
    ========================================================================== */
-.anim .wipe-in  { clip-path: inset(0 100% 0 0); }
-.anim .rise     { opacity: 0; transform: translateY(22px); }
-.anim .depth-in { opacity: 0; transform: translateZ(-260px); }
+.anim .section .wipe-in,  .anim .footer .wipe-in  { clip-path: inset(0 100% 0 0); }
+.anim .section .rise,     .anim .footer .rise     { opacity: 0; transform: translateY(22px); }
+.anim .section .depth-in, .anim .footer .depth-in { opacity: 0; transform: translateZ(-260px); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .ticker-track, .status .dot, #wipe { animation: none; }
   /* 静止态本来就是躲开的，停掉动画即等于不出现，不需要额外的 display: none */
-  .anim .wipe-in { clip-path: none; }
-  .anim .rise, .anim .depth-in { opacity: 1; transform: none; }
+  .anim .section .wipe-in,  .anim .footer .wipe-in  { clip-path: none; }
+  .anim .section .rise,     .anim .section .depth-in,
+  .anim .footer .rise,      .anim .footer .depth-in { opacity: 1; transform: none; }
   *, *::before, *::after { transition-duration: .01ms !important; }
 }
 

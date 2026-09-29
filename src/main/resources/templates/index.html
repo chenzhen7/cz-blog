@@ -22,6 +22,9 @@
     <link rel="stylesheet" th:href="@{/fonts/fonts.css}">
     <link rel="stylesheet" th:href="@{/css/site.css}">
     <link rel="alternate" type="application/rss+xml" title="ChenZhen的客栈" th:href="@{/rss}">
+
+    <!--/* 动效初始态的门控。必须留在 <head> 里，不能挪到 </body> 前 —— 理由见片段内注释。 */-->
+    <th:block th:replace="~{fragments/chrome :: animGate}"/>
 </head>
 <body>
 
@@ -32,7 +35,8 @@
 <div class="layer">
 
     <!--/* 侧边轨：装饰性的栏目编号，≥1280px 才出现。
-           滚动联动留给 Phase 4 的 IntersectionObserver，现在先把 01 标为当前，静态也是对的。 */-->
+           滚动联动在 chrome 的 motion 片段里（IntersectionObserver，按「压住视口中线」判定）。
+           这里先把 01 标为当前：脚本没跑起来时静态也是对的。 */-->
     <aside class="rail" aria-hidden="true">
         <div class="rail-idx">
             <span data-on data-rail="0">01</span><span data-rail="1">02</span>
@@ -47,7 +51,9 @@
 
         <!-- ================= HERO ================= -->
         <section class="hero" id="hero">
-            <!--/* 3D 等高线地形画布，Phase 4 接 Three.js。在此之前是空画布，不占版面也不挡点击 */-->
+            <!--/* 3D 等高线地形画布。WebGL 走 #gl；拿不到 WebGL 时隐藏 #gl、改用 2D 的 #flat。
+                   两张都不挡点击（site.css 里 pointer-events: none），脚本没跑起来时是空白，
+                   不占版面也不影响阅读。 */-->
             <canvas id="gl" aria-hidden="true"></canvas>
             <canvas id="flat" aria-hidden="true"></canvas>
             <div class="hero-scrim" aria-hidden="true"></div>
@@ -259,44 +265,437 @@
 
 <th:block th:replace="~{fragments/chrome :: searchDialog}"/>
 <th:block th:replace="~{fragments/chrome :: scripts}"/>
+<!--/* 动效运行时（GSAP + ScrollTrigger + 滚动揭示）。排在本页自己的脚本之前：
+     那边会用到 window.gsap，而它的 <script src> 是同步加载的，到这里一定已经就位。 */-->
+<th:block th:replace="~{fragments/chrome :: motion}"/>
 
-<!--/* 首页自己的脚本：3D 分层图像场随指针倾斜。
-     遵守规范 §5.2：只写 transform 不动 top/left；单一 rAF 循环 + 变量插值，
-     不用 state 追踪连续值；离屏与标签页隐藏时停掉循环。 */-->
-<script>
+<!--/* 3D 地形要用的 three.js，600KB，只有首页引。同步加载（不加 defer）：
+     下面的脚本一执行就要用 THREE，defer 的话它会排在内联脚本之后，反而更晚。
+
+     代价是这个标签会挡住下面的内联脚本，首屏入场动画要等它下完才排得上。
+     所以它放在 </body> 前 —— 页面这时已经画出来了，被挡住的只有动画，不是内容。
+     更不该挪到 <head>：那会连首屏渲染一起挡住。 */-->
+<script th:src="@{/lib/three/three.min.js}"></script>
+
+<!--/* 首页专属动效：3D 等高线地形 + Hero 入场时间轴 + 三维图像场跟随。
+
+     与 fragments/chrome 的 motion 片段两条约定：
+     一、顺序。本段排在 motion 之后，gsap / ScrollTrigger 已经就位；若 motion 因
+           GSAP 缺失而提前返回，window.gsap 就是 undefined，下面第三段第一句挡掉。
+     二、分工。Hero 里的 .rise / .depth-in / .wipe-in 归本段管，motion 的滚动揭示
+           只管 .section / .footer 里的元素，两边不会争同一批元素。
+
+     Hero 这几处的初值由本段的 fromTo 自己设，site.css 第 13 节的 .anim 规则
+     特意没有把 Hero 包进去 —— 首屏元素被 CSS 藏起来、而脚本又出了错的话，
+     整页看起来就是坏的，且查不出是动画的锅。
+
+     全页只有一个 rAF 循环，地形重力感应、缓慢自转、图像场倾斜都在这一处插值。
+     遵守规范 §5.2：只写 transform 不动 top/left；不用 state 追踪连续值；
+     离屏与标签页隐藏时停掉循环。
+
+     th:inline="none" 不能删。Thymeleaf 默认会在 <script> 里做内联求值：
+       [[...]] 是转义输出、[(...)] 是非转义输出。
+     这段脚本里有 field[(j + 1) * cols + i] —— 那个 [( 会被当成非转义内联的开头，
+     一路吞到最近的 )] 为止。表现是页面 200 但响应体在中间断掉、
+     后面直接接一个错误页，而报错位置指向几十行以外，极难定位。
+     关掉内联后，脚本内容对 Thymeleaf 就是一段纯文本。 */-->
+<script th:inline="none">
     (function () {
-        var field = document.getElementById('field');
-        if (!field) return;
-        // 触摸设备没有指针悬停这回事，直接不动
-        if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-        // 系统要求减少动效时不做任何跟随
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        'use strict';
 
-        var wrap = field.parentElement;          // .field-wrap 提供 perspective
-        var tx = 0, ty = 0, cx = 0, cy = 0, raf = null, running = false;
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        var hero = document.getElementById('hero');
+        if (!hero) return;
 
-        function loop() {
-            // 插值收敛，避免指针一动就硬切
-            cx += (tx - cx) * .08;
-            cy += (ty - cy) * .08;
-            field.style.transform = 'rotateY(' + (cx * 7).toFixed(2) + 'deg) rotateX('
-                + (-cy * 6).toFixed(2) + 'deg)';
-            // 收敛到位就停，不空转
-            if (Math.abs(tx - cx) < .001 && Math.abs(ty - cy) < .001) { running = false; raf = null; return; }
-            raf = requestAnimationFrame(loop);
+        /* 地形墨线浓度。白底比纸底更显墨（#111 对白 19.1:1，对纸只有 15.5:1），
+           所以浓度要压下来，否则整页会重新变暗。换背景色时必须回来复查这一个数。 */
+        var TERRAIN_OPACITY = 0.22;
+
+        // 指针只记目标值，插值统一在下面的 rAF 循环里做。
+        // 挂在 window 而不是 hero 上：这是「重力感应」，指针在页面任何位置都该带动地形。
+        var ptr = { x: 0, y: 0, tx: 0, ty: 0 };
+        if (fine) {
+            window.addEventListener('pointermove', function (e) {
+                ptr.tx = (e.clientX / window.innerWidth - .5) * 2;    // 归一化到 -1..1
+                ptr.ty = (e.clientY / window.innerHeight - .5) * 2;
+            }, { passive: true });
         }
-        function start() { if (!running) { running = true; raf = requestAnimationFrame(loop); } }
-        function stop() { running = false; if (raf) { cancelAnimationFrame(raf); raf = null; } }
 
-        wrap.addEventListener('pointermove', function (e) {
-            var r = wrap.getBoundingClientRect();
-            tx = ((e.clientX - r.left) / r.width - .5) * 2;   // 归一化到 [-1, 1]
-            ty = ((e.clientY - r.top) / r.height - .5) * 2;
-            start();
+        /* ==================================================================
+           1. 3D 等高线地形
+
+           顶点着色器按噪声抬升网格，片元着色器用同一个噪声、按世界坐标独立算等高线。
+           等高线必须在片元里重算：按顶点高度插值的话，线宽会随网格疏密变化，
+           远处糊成一片；从 vXY 重新求值就与网格密度完全解耦，永远锐利。
+           ================================================================== */
+        var NOISE = [
+            'float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }',
+            'float vnoise(vec2 p) {',
+            '  vec2 i = floor(p), f = fract(p);',
+            '  vec2 u = f * f * (3.0 - 2.0 * f);',
+            '  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),',
+            '             mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);',
+            '}',
+            'float fbm(vec2 p) {',
+            '  float s = 0.0, a = 0.5;',
+            '  for (int i = 0; i < 5; i++) { s += a * vnoise(p); p *= 2.03; a *= 0.5; }',
+            '  return s;',
+            '}',
+            'float terrainH(vec2 p, float t) {',
+            '  vec2 q = p * 0.00085;',
+            // t 参与进来让噪声场随时间缓慢平移，等高线像活地图一样在爬，
+            // 这是「活着的系统」这个观感的来源
+            '  float n = fbm(q + vec2(t * 0.012, t * 0.008));',
+            // (n - 0.5) * 2.6：fbm 的输出挤在 0.5 附近，不拉开动态范围的话
+            // 等值线只会集中在地形中部几圈，撑不满整场
+            '  return (n - 0.5) * 2.6;',
+            '}'
+        ].join('\n');
+
+        var VERT = NOISE + '\n' + [
+            'uniform float uTime;',
+            'varying vec2  vXY;',
+            'varying float vDepth;',
+            'void main() {',
+            '  vec3 p = position;',
+            '  vXY = p.xy;',                                  // 未位移的平面坐标，传给片元
+            '  float h = terrainH(p.xy, uTime);',
+            '  p.z += h * 92.0;',                              // 沿平面法线抬升
+            '  vec4 mv = modelViewMatrix * vec4(p, 1.0);',
+            '  vDepth = -mv.z;',                               // 视深，用于远处淡出
+            '  gl_Position = projectionMatrix * mv;',
+            '}'
+        ].join('\n');
+
+        var FRAG = NOISE + '\n' + [
+            'uniform float uTime;',
+            'uniform vec3  uInk;',
+            'uniform float uOpacity;',
+            'varying vec2  vXY;',
+            'varying float vDepth;',
+            // 抗锯齿等高线：取到最近等值线的距离，用 fwidth 归一化
+            'float contour(float h, float freq, float w) {',
+            '  float v = h * freq;',
+            '  float f = fract(v);',
+            '  float d = min(f, 1.0 - f);',
+            '  float aaw = fwidth(v) * w;',
+            '  return 1.0 - smoothstep(0.0, aaw, d);',
+            '}',
+            'void main() {',
+            '  float h = terrainH(vXY, uTime);',
+            '  float main1 = contour(h, 26.0, 1.5);',          // 主等高线
+            '  float minor = contour(h, 82.0, 1.0) * 0.30;',    // 次级等高线，更密更淡
+            '  float line = max(main1, minor);',
+            '  if (line <= 0.002) discard;',
+            // 边界反转的 smoothstep（边0 > 边1）在部分 GPU 上属未定义行为，
+            // 一律写成 1.0 - smoothstep(边0, 边1, x) 且保证 边0 < 边1
+            '  float fog = 1.0 - smoothstep(620.0, 2400.0, vDepth);',        // 远处沉入纸面
+            '  float rad = 1.0 - smoothstep(520.0, 1650.0, length(vXY));',   // 边缘淡出
+            // 两重淡出缺一不可：只有一重的话地形边缘会留下生硬的一道截断
+            '  gl_FragColor = vec4(uInk, line * fog * rad * uOpacity);',
+            '}'
+        ].join('\n');
+
+        var glCanvas = document.getElementById('gl');
+        var flatCanvas = document.getElementById('flat');
+        var terrain = null, renderer = null, scene = null, camera = null;
+        var hasGL = false;
+
+        function initGL() {
+            try {
+                renderer = new THREE.WebGLRenderer({
+                    canvas: glCanvas, alpha: true, antialias: false, powerPreference: 'high-performance'
+                });
+                renderer.setClearColor(0x000000, 0);   // 画布透明，地形直接叠在纸面上
+                // 像素比封顶 1.5：地形是柔和的，不需要满视网膜分辨率，
+                // 而每个片元都要算一次 fbm，这是全页最贵的一项
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(40, 1, 1, 6000);
+                camera.position.set(0, 0, 640);
+
+                var mat = new THREE.ShaderMaterial({
+                    transparent: true,
+                    depthWrite: false,                  // 否则半透明的线互相遮挡会压出黑边
+                    extensions: { derivatives: true },  // WebGL1 下 fwidth 要靠这个开关
+                    uniforms: {
+                        uTime:    { value: 0 },
+                        uInk:     { value: new THREE.Color('#111111') },
+                        uOpacity: { value: 0 }          // 从 0 起，由入场时间轴拉起来
+                    },
+                    vertexShader: VERT,
+                    fragmentShader: FRAG
+                });
+
+                terrain = new THREE.Mesh(new THREE.PlaneGeometry(2800, 2800, 176, 176), mat);
+                terrain.rotation.x = -1.16;             // 向后倾倒，得到俯视地形的视角
+                terrain.position.set(0, -150, -300);
+                scene.add(terrain);
+
+                resizeGL();
+                renderer.render(scene, camera);
+                return true;
+            } catch (err) {
+                // WebGL 拿不到（无 GPU、被策略禁用、上下文分配失败）。
+                // 这里返回 false 不是「降级掩盖错误」：外面据此切到 2D 等高线，
+                // 那是设计内的第二条路径，地形照样在，只是没有纵深。
+                return false;
+            }
+        }
+
+        function resizeGL() {
+            if (!renderer) return;
+            var w = hero.clientWidth, h = hero.clientHeight;
+            // 第三个参数 false：只改画布的位图尺寸，不写 style。
+            // 宽高由 CSS 的 100% 控制，写 style 反而会和版式打架
+            renderer.setSize(w, h, false);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+
+        /* ---- 2D 兜底：拿不到 WebGL 时退回平面等高线（Marching Squares 网格插值）---- */
+        function drawFlat() {
+            if (!flatCanvas) return;
+            flatCanvas.style.display = 'block';
+            var ctx = flatCanvas.getContext('2d');
+            var w = hero.clientWidth, h = hero.clientHeight;
+            var dpr = Math.min(window.devicePixelRatio || 1, 2);
+            flatCanvas.width = Math.floor(w * dpr);
+            flatCanvas.height = Math.floor(h * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);   // 按设备像素比缩放，线条才不会发虚
+            ctx.clearRect(0, 0, w, h);
+
+            // 与着色器里同名同形的噪声，保证两条路径画出来是同一片地形
+            function hash(x, y) { var n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123; return n - Math.floor(n); }
+            function sm(t) { return t * t * (3 - 2 * t); }
+            function vn(x, y) {
+                var xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+                var u = sm(xf), v = sm(yf);
+                var a = hash(xi, yi), b = hash(xi + 1, yi), c = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
+                return a * (1 - u) * (1 - v) + b * u * (1 - v) + c * (1 - u) * v + d * u * v;
+            }
+            function fbm(x, y) {
+                var s = 0, amp = .5, f = 1;
+                for (var i = 0; i < 4; i++) { s += amp * vn(x * f, y * f); f *= 2.03; amp *= .5; }
+                return s;
+            }
+
+            var step = 13, cols = Math.ceil(w / step) + 1, rows = Math.ceil(h / step) + 1;
+            var field = new Float32Array(cols * rows);
+            var i, j, x, y;
+            for (j = 0; j < rows; j++) {
+                for (i = 0; i < cols; i++) field[j * cols + i] = fbm(i * step * .0026, j * step * .0026);
+            }
+
+            // ctx 与线段工具提到循环外：写在双重循环里的话，每个格子都要新建一个闭包
+            function seg(p, q) { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); }
+
+            ctx.strokeStyle = 'rgba(17,17,17,0.035)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (var L = 0; L < 9; L++) {
+                var iso = .26 + L * .052;    // 9 条等值线，从低到高等距排开
+                for (j = 0; j < rows - 1; j++) {
+                    for (i = 0; i < cols - 1; i++) {
+                        var tl = field[j * cols + i], tr = field[j * cols + i + 1];
+                        var bl = field[(j + 1) * cols + i], br = field[(j + 1) * cols + i + 1];
+                        // 四个角落在等值线的哪一侧，编码成一个 0..15 的格子类型
+                        var idx = 0;
+                        if (tl > iso) idx |= 8;
+                        if (tr > iso) idx |= 4;
+                        if (br > iso) idx |= 2;
+                        if (bl > iso) idx |= 1;
+                        // 0 与 15 是四角同侧，这一格没有线段穿过。其余 14 种在下面的
+                        // switch 里逐一列出，不留 default —— 漏了哪种一眼能看出来
+                        if (idx === 0 || idx === 15) continue;
+                        x = i * step; y = j * step;
+                        // 四条边与等值线的交点，按两端高度线性插值
+                        var top = [x + step * ((iso - tl) / (tr - tl)), y];
+                        var right = [x + step, y + step * ((iso - tr) / (br - tr))];
+                        var bottom = [x + step * ((iso - bl) / (br - bl)), y + step];
+                        var left = [x, y + step * ((iso - tl) / (bl - tl))];
+                        switch (idx) {
+                            case 1: case 14: seg(left, bottom); break;
+                            case 2: case 13: seg(bottom, right); break;
+                            case 3: case 12: seg(left, right); break;
+                            case 4: case 11: seg(top, right); break;
+                            case 5: seg(left, top); seg(bottom, right); break;
+                            case 6: case 9: seg(top, bottom); break;
+                            case 7: case 8: seg(left, top); break;
+                            case 10: seg(top, right); seg(left, bottom); break;
+                        }
+                    }
+                }
+            }
+            ctx.stroke();
+        }
+
+        // 减少动效时不上 three.js：省掉 600KB 下载和一个常驻的 WebGL 上下文。
+        // 直接走静态的 2D 等高线 —— 地形还在，只是不动
+        if (window.THREE && !reduce) {
+            hasGL = initGL();
+        }
+        if (hasGL) {
+            if (glCanvas) glCanvas.style.display = 'block';
+        } else {
+            if (glCanvas) glCanvas.style.display = 'none';
+            drawFlat();
+        }
+
+        /* ==================================================================
+           2. 唯一的 rAF 循环
+           ================================================================== */
+        var field = document.getElementById('field');
+        var clock = 0, running = false, rafId = null;
+        var fieldRot = { x: 0, y: 0 };
+
+        /* uOpacity 的取值算式有两个输入，都不是 uniform 本身：
+             reveal.p   —— 入场进度，由下面的 GSAP 时间轴写
+             scrollFade —— 滚动淡出，由 ScrollTrigger 写
+           这个 uniform 全程只有 tick() 一个写入方。
+           反过来做（GSAP 补间与 ScrollTrigger 各写一次 uniform）会出问题：
+           ScrollTrigger 建实例时会立刻按 progress 0 写一次终值，
+           把刚起步的淡入打回全浓度，表现为「地形一上来就是最浓的」。 */
+        var reveal = { p: 0 };
+        var scrollFade = 1;
+
+        function tick() {
+            if (!running) return;
+            rafId = requestAnimationFrame(tick);
+
+            // 插值收敛，避免指针一动就硬切。0.055 是跟随速度，越大越跟手
+            ptr.x += (ptr.tx - ptr.x) * 0.055;
+            ptr.y += (ptr.ty - ptr.y) * 0.055;
+            clock += 0.016;
+
+            if (terrain) {
+                // 指针倾斜 + 两个正弦的自动漂移：没人操作时地形也在极缓慢地呼吸，
+                // 不会像一张死图
+                var tx = -1.16 + ptr.y * 0.085 + Math.sin(clock * 0.22) * 0.012;
+                var tz = ptr.x * 0.05 + Math.sin(clock * 0.13) * 0.018;
+                terrain.rotation.x += (tx - terrain.rotation.x) * 0.045;
+                terrain.rotation.z += (tz - terrain.rotation.z) * 0.045;
+                // position.y 归这里，position.z 归 ScrollTrigger，两个属性互不干涉
+                terrain.position.y += ((-150 - ptr.y * 26) - terrain.position.y) * 0.045;
+                terrain.material.uniforms.uTime.value = clock;
+                terrain.material.uniforms.uOpacity.value = TERRAIN_OPACITY * reveal.p * scrollFade;
+                renderer.render(scene, camera);
+            }
+
+            // 三块图停在不同 translateZ，父级一转就自然分层。
+            // 触摸设备没有悬停这回事，不跟着动
+            if (field && fine) {
+                fieldRot.x += (-ptr.y * 5.5 - fieldRot.x) * 0.06;
+                fieldRot.y += (ptr.x * 7.5 - fieldRot.y) * 0.06;
+                field.style.transform = 'rotateX(' + fieldRot.x.toFixed(2) + 'deg) rotateY(' + fieldRot.y.toFixed(2) + 'deg)';
+            }
+        }
+
+        function start() { if (running || reduce) return; running = true; rafId = requestAnimationFrame(tick); }
+        function stop() { running = false; if (rafId) { cancelAnimationFrame(rafId); rafId = null; } }
+
+        /* 两条停摆条件记在两个变量里，再合成一个 sync()。
+           而不是在 visibilitychange 里无条件 start()：那样标签页切回来时，
+           即使 hero 早就滚出视野了，循环也会重新跑起来。 */
+        var heroVisible = true;
+        function sync() { if (heroVisible && !document.hidden) start(); else stop(); }
+
+        if (!reduce) {
+            if ('IntersectionObserver' in window) {
+                new IntersectionObserver(function (entries) {
+                    entries.forEach(function (e) { heroVisible = e.isIntersecting; });
+                    sync();
+                }, { threshold: 0 }).observe(hero);
+            }
+            document.addEventListener('visibilitychange', sync);
+            sync();
+        }
+
+        var resizeTimer = null;
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeTimer);
+            // 防抖 200ms：拖窗口时每帧重建 WebGL 尺寸会掉帧
+            resizeTimer = setTimeout(function () {
+                if (hasGL) resizeGL();
+                else drawFlat();
+            }, 200);
         });
-        wrap.addEventListener('pointerleave', function () { tx = 0; ty = 0; start(); });
-        // 标签页切走就停，别在后台烧帧
-        document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); });
+
+        /* ==================================================================
+           3. Hero 入场时间轴
+           ================================================================== */
+        // GSAP 没到位就到此为止：motion 片段已经把 .anim 摘掉了，页面是完整的静态版，
+        // 这里不再自己兜一层（兜了反而会把「动效坏了」藏起来）
+        if (!window.gsap || !window.ScrollTrigger || reduce) return;
+
+        // 逐字拆开才能做 3D 入场。只在真要动画时才拆：拆了不动的收益是零，
+        // 代价是每个字多一个行内块元素
+        var chars = [];
+        var thunderEl = document.getElementById('thunderText');
+        if (thunderEl) {
+            var text = thunderEl.textContent;
+            thunderEl.textContent = '';
+            text.split('').forEach(function (c) {
+                var span = document.createElement('span');
+                span.className = 'ch';
+                span.textContent = c;
+                thunderEl.appendChild(span);
+                chars.push(span);
+            });
+        }
+
+        /* #wipe 的擦除是 site.css 里的 CSS 动画，不由本段控制 —— 它得在 GSAP
+           还没下载完时就跑起来，交给 JS 会让首屏白等一个网络往返。
+           代价是本段脚本执行时动画已经起跑了一段，所以要按「已过去多久」把延迟补齐，
+           否则慢一点的网络下会出现「黄块早抽走了，字还在原地等着」的空档。 */
+        var WIPE_MS = 1150;          // 必须与 site.css 里 wipe-curtain 的时长一致
+        var WIPE_HOLD_RATIO = 0.45;  // 与 keyframes 里停在满屏的那一帧一致
+        var elapsedMs = window.performance ? performance.now() : WIPE_MS;
+        // 多留 60ms：擦除是向右抽走的，大字在左边，等它露出来一点再起飞
+        var heroDelay = Math.max(0, (WIPE_MS * WIPE_HOLD_RATIO + 60 - elapsedMs) / 1000);
+
+        /* 以下全部用 fromTo，不用 to：这几处在 site.css 里没有隐藏初始态，
+           用 to 的话补间会从「已经可见」补到「可见」，等于没有动画。
+           初值写在 from 里，GSAP 建实例的同一次同步执行里就把它们设好了，
+           所以首屏不会先亮一下再被藏起来。 */
+        var tl = gsap.timeline({ defaults: { ease: 'power3.out' }, delay: heroDelay });
+
+        // 地形与大字同时起步：黄块抽走的过程中地形浮出来，
+        // 感受上是「揭开纸看到地形」，而不是「动画把地形叫出来」
+        tl.to(reveal, { p: 1, duration: 1.8, ease: 'power2.out' }, 0)
+          // 雷霆大字逐字从纵深飞入并回正
+          .fromTo(chars,
+              { z: -820, rotationX: -78, opacity: 0 },
+              { z: 0, rotationX: 0, opacity: 1, duration: 1.25, stagger: 0.075, ease: 'power4.out' }, 0)
+          .fromTo('.hero .eyebrow',
+              { clipPath: 'inset(0 100% 0 0)' },
+              { clipPath: 'inset(0 0% 0 0)', duration: .7 }, '-=0.95')
+          .fromTo('.hero-sub',     { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: .7 }, '-=0.5')
+          .fromTo('.hero-actions', { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: .7 }, '-=0.55')
+          .fromTo('.field-wrap',   { opacity: 0, z: -260 }, { opacity: 1, z: 0, duration: 1.1, ease: 'power3.out' }, '-=0.85')
+          .fromTo('.hero-stats',   { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: .7 }, '-=0.6');
+
+        // 地形随滚动退向纵深并淡出：感受上是「从地表沉入档案层」。
+        // 这里只写 scrollFade 这个普通变量，不直接写 uniform —— 见上面 uOpacity 的说明
+        ScrollTrigger.create({
+            trigger: hero, start: 'top top', end: 'bottom top', scrub: true,
+            onUpdate: function (self) {
+                scrollFade = 1 - self.progress * 0.85;
+                if (terrain) terrain.position.z = -300 - self.progress * 620;
+            }
+        });
+
+        // Hero 文案同步退场，滚走时不硬切
+        gsap.to('.hero-grid', {
+            y: -50, opacity: .25, ease: 'none',
+            scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true }
+        });
+
+        // 字体是 swap 的，加载完会挤动版式；ScrollTrigger 的起止点是建实例那刻
+        // 算出来的像素值，版式一变就全偏了。刷新由 motion 片段统一负责，这里只管画布尺寸
+        window.addEventListener('load', function () { if (hasGL) resizeGL(); });
     })();
 </script>
 

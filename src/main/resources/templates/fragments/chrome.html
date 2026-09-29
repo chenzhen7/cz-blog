@@ -18,6 +18,37 @@
 <body>
 
 <!--/* ============================================================
+     动效初始态的开关。这个片段要放进页面的 <head>，不是 <body>。
+
+     加在 <html> 上的 .anim 是 site.css 里那批隐藏初始态（.rise 的 opacity: 0 等）
+     唯一的开关。三条约束，漏掉任何一条都会坏事：
+
+     一、必须在 <head> 里同步执行。挪到 </body> 前的话，浏览器已经把首屏画过一遍了，
+           加类的那一刻内容会「闪一下、消失、再飞进来」。
+     二、JS 不可用时不加。脚本被禁用或文件加载失败时这个类都不该存在，
+           否则整页内容会永久停在 opacity: 0 —— 这是这套动效最危险的失败模式。
+     三、prefers-reduced-motion 下不加。让「减少动效」从第一帧就生效，
+           而不是先藏起来、再由脚本补一次显示。
+
+     必须与 motion 片段成对使用：只加这个不加 motion，内容会一直藏着没人来放。
+     motion 那头有兜底（GSAP 没到位就把这个类摘掉），但别指望它。
+     ============================================================ */-->
+<th:block th:fragment="animGate">
+<!--/* th:inline="none"：关掉 Thymeleaf 在 <script> 里的内联求值。
+     不关的话，脚本里任何 [[...]] 或 [(...)] 都会被当成表达式去求值（前者转义、后者不转义），
+     而这两串字符在普通 JS 里很常见（数组下标、嵌套括号），炸起来是「页面 200 但响应体断在半路」，
+     报错位置还指向别处。新写的脚本一律带上这个属性。 */-->
+<script th:inline="none">
+    (function () {
+        // 只在「JS 确实可用」且「系统没有要求减少动效」时开门
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('anim');
+        }
+    })();
+</script>
+</th:block>
+
+<!--/* ============================================================
      页眉（顶栏 + 移动端抽屉）
      参数 active：当前页标识，取值 index / tags / archives / message / friends / about。
      取其它值（如文章详情页传 blog）时七个导航项都不高亮。
@@ -134,6 +165,119 @@
 <div th:fragment="wipe" id="wipe" aria-hidden="true">
     <span class="wipe-code">CZ ARCHIVE / 地形加载中</span>
 </div>
+
+<!--/* ============================================================
+     动效运行时：GSAP + ScrollTrigger（自托管，不走 CDN）+ 滚动揭示 + 侧边轨联动。
+
+     只有 index 与 about 两页引入。全站只有这两页有 .rise / .depth-in / .wipe-in
+     这些揭示目标（其余页在 Phase 3 迁移时没有加），没目标的页引它等于白下 115KB。
+
+     首页的 3D 地形与 Hero 入场时间轴不在这个片段里，留在 index.html 自己的 <script>：
+     地形还要额外引 600KB 的 three.js，更不该让别的页陪跑。
+     本片段的揭示范围只认 .section 与 .footer 里的元素，Hero 里那几个同名的类
+     （.rise / .depth-in / .wipe-in）因此天然落在范围外，归首页那段脚本管。
+
+     引入位置：在 chrome :: scripts 之后、各页自己的 <script> 之前。
+     ============================================================ */-->
+<th:block th:fragment="motion">
+<script th:src="@{/lib/gsap/gsap.min.js}"></script>
+<script th:src="@{/lib/gsap/ScrollTrigger.min.js}"></script>
+<!--/* th:inline="none"：理由见 animGate 片段里的说明。内联求值会把 [[...]] / [(...)]
+     当成表达式，而这两串字符在普通 JS 里很常见。 */-->
+<script th:inline="none">
+    (function () {
+        'use strict';
+        var doc = document.documentElement;
+
+        // GSAP 没到位（文件缺失、被拦、解析出错）就把 .anim 摘掉，让整页回到完整可见。
+        // 不做「用 CSS 动画凑合一下」的降级：那只会把「动效坏了」伪装成「动效本来就长这样」，
+        // 而这里真正要保住的是内容看得见，不是动画跑得起来。
+        if (!window.gsap || !window.ScrollTrigger) {
+            doc.classList.remove('anim');
+            return;
+        }
+        gsap.registerPlugin(ScrollTrigger);
+
+        // 减少动效时 head 里的开关本来就没加 .anim，这里再挡一次，
+        // 免得白白建一堆 ScrollTrigger 实例（它们每个都要监听滚动）
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            doc.classList.remove('anim');
+            return;
+        }
+
+        /* 揭示范围只认 .section 与 .footer 里的元素，与 site.css 第 13 节那三条
+           .anim 规则是同一套范围，改一边要同时改另一边。
+           这样也就自然避开了 Hero：Hero 里同样有 .rise / .depth-in / .wipe-in，
+           但那几处归首页脚本管，同一批元素被两个 tween 同时写 transform / opacity
+           会互相覆盖，表现为动画卡顿或回跳。 */
+
+        // 章节揭示
+        gsap.utils.toArray('.section .rise, .footer .rise').forEach(function (el, i) {
+            gsap.to(el, {
+                opacity: 1, y: 0, duration: .85, ease: 'power3.out',
+                delay: (i % 4) * .06,       // 同一屏里错开一点，整排同时弹出会很齐很假
+                scrollTrigger: { trigger: el, start: 'top 88%' }
+            });
+        });
+
+        // 标题与图片：从纵深浮出。父级要有 perspective，否则 translateZ 看不出纵深感
+        gsap.utils.toArray('.section .depth-in, .footer .depth-in').forEach(function (el) {
+            gsap.to(el, {
+                opacity: 1, z: 0, duration: 1, ease: 'power3.out',
+                scrollTrigger: { trigger: el, start: 'top 86%' }
+            });
+        });
+
+        // 眉标签：定向擦除
+        gsap.utils.toArray('.section .wipe-in, .footer .wipe-in').forEach(function (el) {
+            gsap.to(el, {
+                clipPath: 'inset(0 0% 0 0)', duration: .8, ease: 'power3.out',
+                scrollTrigger: { trigger: el, start: 'top 88%' }
+            });
+        });
+
+        // 章节编号随滚动反向漂移，像压在纸下的一枚水印
+        gsap.utils.toArray('.ghost-num').forEach(function (el) {
+            gsap.fromTo(el, { y: 60 }, {
+                y: -60, ease: 'none',
+                scrollTrigger: { trigger: el.parentElement, start: 'top bottom', end: 'bottom top', scrub: true }
+            });
+        });
+
+        // 竖版照片随滚动转一点角度
+        gsap.utils.toArray('.about-photo img').forEach(function (el) {
+            gsap.fromTo(el, { rotateY: -14 }, {
+                rotateY: 8, ease: 'none',
+                scrollTrigger: { trigger: el.closest('.about'), start: 'top bottom', end: 'bottom top', scrub: true }
+            });
+        });
+
+        // ---- 侧边轨联动 ----
+        // 用 IntersectionObserver 而不是 ScrollTrigger：这里要的语义是「哪一节正压着视口中线」，
+        // 上下各收 50% 的 rootMargin 把视口压成一条零高度的线，正好等价，还省一个 ScrollTrigger 实例。
+        // 轨本身 ≥1280px 才出现，但观察的是章节元素；窄屏下这段只是白跑，不会出错。
+        var sections = document.querySelectorAll('[data-rail-target]');
+        var marks = document.querySelectorAll('[data-rail]');
+        if (sections.length && marks.length && 'IntersectionObserver' in window) {
+            var io = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (!entry.isIntersecting) return;
+                    var key = entry.target.getAttribute('data-rail-target');
+                    marks.forEach(function (mark) {
+                        if (mark.getAttribute('data-rail') === key) mark.setAttribute('data-on', '');
+                        else mark.removeAttribute('data-on');
+                    });
+                });
+            }, { rootMargin: '-50% 0px -50% 0px' });
+            sections.forEach(function (s) { io.observe(s); });
+        }
+
+        // 字体是 font-display: swap 的，加载完会挤动版式，图片同理。
+        // ScrollTrigger 的起止点是建实例那一刻算出来的像素值，版式一变就全偏了。
+        window.addEventListener('load', function () { ScrollTrigger.refresh(); });
+    })();
+</script>
+</th:block>
 
 <!--/* ============================================================
      公共脚本：抽屉开合、搜索浮层的打开/关闭/防抖检索、博客运行时长。
