@@ -89,6 +89,12 @@ button { font: inherit; }
 /* 纯中文的标签不要给 mono：没有拉丁字符需要等宽对齐时，mono 只剩多余字距和对中文无效的 uppercase */
 .u-plain { font-family: var(--font-sans); font-size: var(--fs-label); letter-spacing: normal; text-transform: none; }
 
+/* 眉标签：一段短划线 + 一行等宽小字，标出「这是哪一块」。
+   首页 hero、三个错误页、五个内页都用它，所以是独立类，不绑在任何一个版块上。
+   全站克制使用：每 3 个章节最多 1 个。 */
+.eyebrow { display: flex; align-items: center; gap: 14px; color: var(--ink-2); margin-bottom: 26px; }
+.eyebrow .bar { width: 40px; height: 1px; background: var(--signal-edge); flex-shrink: 0; }
+
 /* 斜切楔形。clip-path 是 grouping 属性，会拍平子元素的 3D 变换：
    一块图既要斜切又要停在不同纵深时，把 clip-path 和 translateZ 放在同一个元素上，
    它自身的 3D 定位仍生效，只是子元素被拍平。 */
@@ -246,9 +252,6 @@ button { font: inherit; }
 @media (min-width: 1024px) {
   .hero-grid { grid-template-columns: 1.1fr .9fr; gap: 56px; padding: 24px 0 40px; }
 }
-
-.hero-label { display: flex; align-items: center; gap: 14px; color: var(--ink-2); margin-bottom: 26px; }
-.hero-label .bar { width: 40px; height: 1px; background: var(--signal-edge); flex-shrink: 0; }
 
 /* 雷霆大字。收一点字面、减一点重量：屏幕上最大的那块墨，收 20% 面积就轻很多 */
 .thunder {
@@ -689,11 +692,6 @@ button { font: inherit; }
 .err-page .footer { flex-shrink: 0; }
 
 .err { width: 100%; padding: 72px 0 80px; }
-
-/* 眉标签。配方与 .hero-label 相同，但不直接复用那个类：
-   它的类名把样式绑死在 hero 上，复用它会让「改 hero 会不会弄坏错误页」变成每次都要想的问题。 */
-.err-label { display: flex; align-items: center; gap: 14px; color: var(--ink-2); margin-bottom: 28px; }
-.err-label .bar { width: 40px; height: 1px; background: var(--signal-edge); flex-shrink: 0; }
 
 /* 巨型状态码，只描边不填充：实心 10rem 会把整页压成一个色块，
    而这一页真正该被读到的是下面那句人话。
