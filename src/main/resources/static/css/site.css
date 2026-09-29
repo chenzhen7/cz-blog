@@ -92,7 +92,14 @@ button { font: inherit; }
 /* 眉标签：一段短划线 + 一行等宽小字，标出「这是哪一块」。
    首页 hero、三个错误页、五个内页都用它，所以是独立类，不绑在任何一个版块上。
    全站克制使用：每 3 个章节最多 1 个。 */
-.eyebrow { display: flex; align-items: center; gap: 14px; color: var(--ink-2); margin-bottom: 26px; }
+/* keep-all：窄屏上眉标签会折行，而中文默认可以在任意字之间断开，
+   于是「关于这个博客」被拆成「关于这个博 / 客」。keep-all 让中文词组整体不拆，
+   折行点落到那个斜杠的空格上；再配 break-word 兜底 —— 万一某个词长到一行放不下，
+   仍然允许它断，不会撑出横向滚动条。 */
+.eyebrow {
+  display: flex; align-items: center; gap: 14px; color: var(--ink-2); margin-bottom: 26px;
+  word-break: keep-all; overflow-wrap: break-word;
+}
 .eyebrow .bar { width: 40px; height: 1px; background: var(--signal-edge); flex-shrink: 0; }
 
 /* 斜切楔形。clip-path 是 grouping 属性，会拍平子元素的 3D 变换：
@@ -515,7 +522,10 @@ button { font: inherit; }
   border: 1px solid var(--signal-edge);
   font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .1em; padding: 6px 12px;
 }
-.about-body p { color: var(--ink-2); max-width: 60ch; white-space: pre-line; }  /* 库里存的简介带换行，pre-line 让它按原样断行 */
+/* 只挑直接子级的 <p>。写成后代选择器会连 .md-body 里那些富文本段落一起命中，
+   把 white-space: pre-line 带过去 —— 那些段落之间在源码里是有换行的，
+   结果就是正文里凭空多出一堆空行。about.html 的博客自述正好是这个结构。 */
+.about-body > p { color: var(--ink-2); max-width: 60ch; white-space: pre-line; }  /* 库里存的简介带换行，pre-line 让它按原样断行 */
 .about-body .lead { color: var(--ink); font-size: 20px; }
 /* 联系方式清单。键是纯中文，所以不给 mono —— 没有拉丁字符要等宽对齐时 mono 只有副作用 */
 .about-body .contact { list-style: none; margin: 26px 0 0; padding: 0; display: grid; gap: 11px; }
@@ -730,3 +740,39 @@ button { font: inherit; }
 .err-detail .k { flex-shrink: 0; min-width: 76px; color: var(--ink); }
 /* 异常信息可能是任意长的一行（含堆栈里的路径），必须允许在任意字符处断行 */
 .err-detail .v { min-width: 0; word-break: break-word; }
+
+/* ==========================================================================
+   16. 内页公共版式
+   about / archives / tags / friends / message 五页共用。
+   它们没有首页那个 100dvh 的 hero，但都需要一个「这是哪一页」的开场。
+   ========================================================================== */
+
+/* 页头。顶栏是 position: fixed 的 60px，内页没有 hero 撑着，
+   所以这里的上内边距必须自己把顶栏的高度让出来，不能只靠 margin。 */
+.page-head { padding: 132px 0 52px; border-bottom: 1px solid var(--line); }
+@media (min-width: 1024px) { .page-head { padding: 156px 0 60px; } }
+
+/* 与首页 .thunder 同一套配方，这样内页标题和首页大字是一张脸 */
+.page-title {
+  font-family: var(--font-disp); font-variation-settings: 'wdth' 105, 'wght' 800;
+  font-weight: 800;
+  font-size: clamp(34px, 6.4vw, 62px); line-height: 1.06; letter-spacing: -.035em;
+  margin: 0; overflow-wrap: break-word;
+}
+/* 眉标签压在标题上方时把下边距收掉，避免和标题之间出现一道空档 */
+.page-head .eyebrow { margin-bottom: 20px; }
+
+/* 页头下面的导语。库里的自我介绍带换行，pre-line 让它按原样断行
+   （改版前是写在 style 里的，现在收进样式表）。 */
+.page-lead { color: var(--ink-2); margin: 22px 0 0; max-width: 58ch; white-space: pre-line; }
+
+/* 清单式罗列（技能等）。
+   改版前每项下面画一根等宽进度条 —— 所有项宽度都一样，因为那条 bar 的宽度
+   不来自任何数据，等于没有信息量。这里换成等价清单：只呈现「会哪些」，
+   不假装有程度。等真有了分级数据再谈进度条。 */
+.skills { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; margin: 0; padding: 0; }
+.skills li {
+  border: 1px solid var(--line-strong); padding: 10px 18px; font-size: 17px;
+  transition: background .3s, color .3s, border-color .3s;
+}
+.skills li:hover { background: var(--signal-fill); color: var(--ink-on-signal); border-color: var(--signal-edge); }

@@ -1,89 +1,82 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="zh-CN" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta name="referrer" content="no-referrer"/>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>关于我-ChenZhen的客栈-CZ的java学习日记</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于我-ChenZhen的客栈-CZ的java学习日记</title>
     <meta name="description" content="ChenZhen的个人博客，专注于技术生活分享">
     <meta name="keywords" content="ChenZhen,关于我,陈震，个人博客">
 
     <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
-    <link rel="stylesheet" href="../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"  />
-    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
-
+    <link rel="stylesheet" th:href="@{/fonts/fonts.css}">
+    <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 <body>
 
-<!--导航-->
-<th:block th:replace="~{fragments/legacy :: navbar('about')}"/>
+<th:block th:replace="~{fragments/chrome :: grain}"/>
+<th:block th:replace="~{fragments/chrome :: topbar('about')}"/>
 
+<main>
 
-<!-- 搜索框 -->
-<th:block th:replace="~{fragments/legacy :: searchModal}"/>
-
-
-
-<!--顶部填充空白-->
-<div  alt="" class="" style="height: 5vh"></div>
-
-<!--个人资料描述-->
-<div class="container-sm mt-5 " style="max-width: 1000px" align="center">
-    <div class="mb-5 " >
-        <img class="cz-about-me-img" src="../static/images/me.jpg"  th:src="@{/images/me.jpg}"  >
-
-        <div class="cz-about-me">
-            <strong><span class="cz-text-green">HELLO</span> , MY NAME IS👋</strong>
-            <div class="mb-2">
-                <span class="cz-navbar-brand fs-1 cz-text-shadow-3"><strong th:text="${author}">ChenZhen</strong></span>
+    <!--/* 页头。model 来自 AboutController：intro（带换行的自我介绍）、content（富文本）、
+           skills（字符串数组）、author。 */-->
+    <header class="page-head">
+        <div class="wrap">
+            <div class="eyebrow">
+                <span class="bar"></span>
+                <span class="mono">Hello / 关于我</span>
             </div>
-            <p style="white-space: pre-line;" th:text="${intro}">我是陈震，欢迎来到我的博客！我热爱写作、探索技术和分享知识。</p>
+            <h1 class="page-title" th:text="${author}">ChenZhen</h1>
+            <p class="page-lead" th:text="${intro}">我是陈震，欢迎来到我的博客！</p>
         </div>
+    </header>
 
-    </div>
-    <!--简介-->
-    <div class="mb-3  ">
-        <div class="col">
-            <div class="text-center cz-about-me " th:utext="${content}">
-            </div>
-        </div>
-    </div>
-    <div class="cz-about-me">
-        <span class="cz-navbar-brand fs-1 cz-text-shadow-3 mb-4"><strong>我的技能</strong></span>
-        <p class="mb-5"><small>我的技能涵盖Java主流技术栈包含Web框架、微服务、数据库、缓存、消息队列，一些前端技术，以及Docker、Linux等运维相关技术</small></p>
-        <div class="row">
-            <div class="col-12">
-                <div class="row">
-                    <div class="col-3 mb-5"
-                         th:each="skill  : ${skills}">
-                        <span class="mil-upper" th:text="${skill}">Java</span>
-                        <div class="mil-progress-track">
-                            <div class="mil-progress">
-                            </div>
-                        </div>
+    <!--/* 博客自述。content 是后台维护的富文本，照旧用 th:utext 原样输出 ——
+           来源只有管理员自己，与改版前一致。
+           这里用 .md-body 承接，不是 .about-body：后者带 white-space: pre-line，
+           会把这段 HTML 源码里的换行也渲染出来。 */-->
+    <section class="section">
+        <div class="wrap">
+            <div class="about">
+                <div class="about-photo depth-in" data-reveal>
+                    <img class="cut-tr" th:src="@{/images/me.jpg}" alt="陈震的照片" width="750" height="750" decoding="async">
+                    <span class="plate" th:text="'CZ / ' + ${author}">CZ / ChenZhen</span>
+                </div>
+                <div class="about-body">
+                    <div class="eyebrow">
+                        <span class="bar"></span>
+                        <span class="mono">About this blog / 关于这个博客</span>
                     </div>
-
-
+                    <div class="md-body" th:utext="${content}">
+                        <p>博客自述正文。</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
+    <!--/* 技能清单。skills 是 Controller 按 [,，] 切好的数组，
+           这里不做任何判断，遍历输出即可。空数组时整块不渲染，避免留一个空标题。 */-->
+    <section class="section flush" th:if="${not #lists.isEmpty(skills)}">
+        <div class="wrap">
+            <div class="sec-head">
+                <h2 class="sec-title">我的技能</h2>
+            </div>
+            <ul class="skills">
+                <li th:each="skill : ${skills}" th:text="${skill}">Java</li>
+            </ul>
+            <!--/* 这段说明改版前是写死在模板里的，逐字保留，不因为改版改写文案 */-->
+            <p class="mono-sm" style="color: var(--ink-2); margin-top: 24px; max-width: 70ch;">我的技能涵盖Java主流技术栈包含Web框架、微服务、数据库、缓存、消息队列，一些前端技术，以及Docker、Linux等运维相关技术</p>
+        </div>
+    </section>
 
-</div>
+</main>
 
-<!--底部栏-->
-<th:block th:replace="~{fragments/legacy :: footer}"/>
+<th:block th:replace="~{fragments/chrome :: footer}"/>
 
-<!--    动态线条-->
-<script src="../static/lib/bootstrap.bundle.min.js" th:src="@{/lib/bootstrap.bundle.min.js}"></script>
-<script src="../static/lib/jquery-3.2.1/jquery-3.2.1.min.js" th:src="@{/lib/jquery-3.2.1/jquery-3.2.1.min.js}"></script>
-<script src="../static/lib/clickEffect.js" th:src="@{/lib/clickEffect.js}"></script>
+<th:block th:replace="~{fragments/chrome :: searchDialog}"/>
+<th:block th:replace="~{fragments/chrome :: scripts}"/>
 
-<th:block th:replace="~{fragments/legacy :: scripts}"/>
-<script>
-
-
-  </script>
 </body>
 </html>
