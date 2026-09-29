@@ -251,7 +251,7 @@
             <div class="card mb-3 shadow" th:if="${blog.commentabled}" >
                 <div class="card-body border-1" id="comment-container" >
                     <!--评论列表-->
-                    <div class="cz-comment-section" th:fragment="commentList" onload="myfunction()">
+                    <div class="cz-comment-section" th:fragment="commentList">
                         <div class="cz-comment" th:each="comment : ${commentPageInfo.list}">
 
                             <div class="avatar" >
@@ -450,8 +450,6 @@
 <script src="../static/lib/scrollTo/jquery.scrollTo.min.js" th:src="@{/lib/scrollTo/jquery.scrollTo.min.js}"></script>
 <script src="../static/lib/prism/prism.js" th:src="@{/lib/prism/prism.js}"></script>
 <script src="../static/lib/tocbot/tocbot.min.js" th:src="@{/lib/tocbot/tocbot.min.js}"></script>
-<script src="../static/lib/waypoints/jquery.waypoints.min.js"
-        th:src="@{/lib/waypoints/jquery.waypoints.min.js}"></script>
 <script src="../static/lib/clickEffect.js" th:src="@{/lib/clickEffect.js}"></script>
 
 
@@ -474,10 +472,6 @@
 
 
     });
-    // 加载评论区
-    function myfunction() {
-        $("#comment-container").load(/*[[@{/comments/{id}(id=${blog.id})}]]*/);
-    }
 
     // 移动设备导航栏样式切换
     // 获取菜单切换按钮和移动设备菜单列表的引用
@@ -593,7 +587,6 @@
             "content": $("[name='content']").val(),
             "address" : $("[name='address']").val()
         }, function (responseTxt, statusTxt, xhr) {
-            $(window).scrollTo($('#goto'), 500);
             clearContent();
         });
     }
