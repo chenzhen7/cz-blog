@@ -1,52 +1,52 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="zh-CN" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>500</title>
     <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
-    <link rel="stylesheet" href="../../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"  />
-  <style>
-    body {
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #f8f9fa;
-    }
-
-    .container {
-      text-align: center;
-    }
-
-    .error-code {
-      font-size: 10rem;
-      font-weight: bold;
-      color: #007bff;
-    }
-
-    .error-message {
-      font-size: 2rem;
-      margin-top: 20px;
-    }
-
-    .home-link {
-      margin-top: 20px;
-    }
-  </style>
+    <link rel="stylesheet" th:href="@{/fonts/fonts.css}">
+    <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
-<body>
 
+<!--/* 与 error/404 同源：BasicErrorController 渲染，模型里只有 timestamp / status / error / path。
+       注意 Controller 里抛出的异常走不到这里 —— @ControllerAdvice 的 ExceptionHandler(Exception.class)
+       会先接住，渲染的是 error/error。这个文件只负责容器层面的 500。 */-->
+<body class="err-page">
 
+<th:block th:replace="~{fragments/chrome :: grain}"/>
+<th:block th:replace="~{fragments/chrome :: topbar('')}"/>
 
-<div class="container">
-  <div class="error-code">500</div>
-  <div class="error-message">对不起，服务异常，请联系管理员</div>
-  <p class="home-link">
-    <a href="#" th:href="@{/}">返回首页</a>
-  </p>
-</div>
+<main>
+    <div class="wrap">
+        <div class="err">
+            <div class="err-label">
+                <span class="bar"></span>
+                <span class="mono">Error 500 / 服务异常</span>
+            </div>
 
+            <p class="err-code">500</p>
+            <h1 class="err-title">对不起，服务异常，请联系管理员</h1>
+            <p class="err-sub">这次不是地址的问题，是服务端没能把这一页做出来。稍后重试通常就好了。</p>
+
+            <div class="err-actions">
+                <a class="btn-primary" th:href="@{/}">返回首页 <span aria-hidden="true">→</span></a>
+                <a class="btn-outline" th:href="@{/archives}">进入归档</a>
+            </div>
+
+            <div class="err-detail mono-sm" th:if="${path != null or url != null or !#strings.isEmpty(message)}">
+                <div th:if="${url != null}"><span class="k">请求地址</span><span class="v" th:text="${url}">/</span></div>
+                <div th:if="${path != null}"><span class="k">请求路径</span><span class="v" th:text="${path}">/</span></div>
+                <div th:if="${!#strings.isEmpty(message)}"><span class="k">错误详情</span><span class="v" th:text="${message}">无</span></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/chrome :: footer}"/>
+
+<th:block th:replace="~{fragments/chrome :: searchDialog}"/>
+<th:block th:replace="~{fragments/chrome :: scripts}"/>
 
 </body>
 </html>

@@ -1,52 +1,55 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="zh-CN" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>博客</title>
-  <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
-  <link rel="stylesheet" href="../../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"  />
-  <style>
-    body {
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #f8f9fa;
-    }
-
-    .container {
-      text-align: center;
-    }
-
-    .error-code {
-      font-size: 10rem;
-      font-weight: bold;
-      color: #007bff;
-    }
-
-    .error-message {
-      font-size: 2rem;
-      margin-top: 20px;
-    }
-
-    .home-link {
-      margin-top: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客</title>
+    <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
+    <link rel="stylesheet" th:href="@{/fonts/fonts.css}">
+    <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 
-<body>
+<!--/* 这个页面由 Spring Boot 的 BasicErrorController 渲染
+       （DefaultErrorViewResolver 按状态码找 templates/error/404），
+       模型里只有 timestamp / status / error / path，没有 author，也没有任何业务数据。
+       所以下面只引 chrome 里不依赖 model 的那几个片段，导航项一个都不高亮（传空串）。 */-->
+<body class="err-page">
 
+<th:block th:replace="~{fragments/chrome :: grain}"/>
+<th:block th:replace="~{fragments/chrome :: topbar('')}"/>
 
-<div class="container">
-  <div class="error-code">404</div>
-  <div class="error-message">这个页面丢失了~</div>
-  <p class="home-link">
-    <a href="#" th:href="@{/}">返回首页</a>
-  </p>
-</div>
+<main>
+    <div class="wrap">
+        <div class="err">
+            <div class="err-label">
+                <span class="bar"></span>
+                <span class="mono">Error 404 / 页面不存在</span>
+            </div>
 
+            <!--/* 状态码用 <p> 不用 <h1>：标题要让给下面那句人话，读屏与搜索引擎读到的才是「这个页面丢失了」，
+                   而不是一个孤零零的数字 */-->
+            <p class="err-code">404</p>
+            <h1 class="err-title">这个页面丢失了~</h1>
+            <p class="err-sub">地址可能被改过，或者这篇内容已经不在了。可以从归档里重新找找。</p>
+
+            <div class="err-actions">
+                <a class="btn-primary" th:href="@{/}">返回首页 <span aria-hidden="true">→</span></a>
+                <a class="btn-outline" th:href="@{/archives}">进入归档</a>
+            </div>
+
+            <div class="err-detail mono-sm" th:if="${path != null or url != null or !#strings.isEmpty(message)}">
+                <div th:if="${url != null}"><span class="k">请求地址</span><span class="v" th:text="${url}">/</span></div>
+                <div th:if="${path != null}"><span class="k">请求路径</span><span class="v" th:text="${path}">/</span></div>
+                <div th:if="${!#strings.isEmpty(message)}"><span class="k">错误详情</span><span class="v" th:text="${message}">无</span></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/chrome :: footer}"/>
+
+<th:block th:replace="~{fragments/chrome :: searchDialog}"/>
+<th:block th:replace="~{fragments/chrome :: scripts}"/>
 
 </body>
 </html>

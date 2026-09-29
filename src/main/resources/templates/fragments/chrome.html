@@ -28,7 +28,9 @@
         <div class="wrap topbar-inner">
             <a class="brand" th:href="@{/}">
                 <span class="brand-mark">CZ</span>
-                <span class="brand-code mono">/ <span th:text="${author}">ChenZhen</span></span>
+                <!--/* th:if 而不是让 th:text 渲染成空：错误页没有 ${author}（三个错误页都不经过任何 Controller），
+                       那样会只剩下一个孤零零的「/」。缺作者时退回只有字标，是完整的，不是残缺的。 */-->
+                <span class="brand-code mono" th:if="${author}">/ <span th:text="${author}">ChenZhen</span></span>
             </a>
             <nav class="nav" aria-label="主导航">
                 <a th:href="@{/}"         th:attr="aria-current=${active == 'index'}    ? 'page' : null">首页</a>
@@ -91,7 +93,7 @@
     <div class="wrap footer-inner">
         <div class="brand">
             <span class="brand-mark">CZ</span>
-            <span class="brand-code mono">/ <span th:text="${author}">ChenZhen</span></span>
+            <span class="brand-code mono" th:if="${author}">/ <span th:text="${author}">ChenZhen</span></span>
         </div>
         <!--/* 用 mono-sm 而不是 mono：mono 的 .14em 字距是给短的大写标签用的，
                压在这三条长句（备案号、运行时长）上会把整行撑出容器。 */-->
@@ -201,6 +203,19 @@
         });
         // 点 backdrop 关闭：dialog 自身铺满整个视口，点到它自己即为点到背景
         dlg.addEventListener('click', function (e) { if (e.target === dlg) close(); });
+
+        // Esc 关闭要自己补一次。
+        // 原生 <dialog> 的 Esc 关闭是浏览器默认行为，但 <input type="search"> 会把 Escape 据为己有
+        // （Chrome 用它清空搜索框），按键到不了 dialog 的默认处理 —— 实测：焦点在输入框里按 Esc，
+        // cancel 与 close 都不触发，浮层纹丝不动；焦点在浮层别处时才是好的。
+        // 而浮层一打开焦点就在输入框，等于 Esc 从来没生效过。这与旧版 Bootstrap Modal 相比是功能倒退。
+        // 只接管「事件源是输入框」这一种情况，其余交给原生逻辑，免得同一次按键被关两遍。
+        dlg.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && e.target === input && dlg.open) {
+                e.preventDefault();   // 顺带阻止输入框自己清空，反正下面会把浮层整个重置
+                close();
+            }
+        });
 
         function render(items) {
             list.textContent = '';

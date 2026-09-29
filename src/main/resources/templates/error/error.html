@@ -1,54 +1,54 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="zh-CN" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>错误</title>
-  <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
-  <link rel="stylesheet" href="../../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"  />
-  <style>
-    body {
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #f8f9fa;
-    }
-
-    .container {
-      text-align: center;
-    }
-
-    .error-code {
-      font-size: 6rem;
-      font-weight: bold;
-      color: #007bff;
-    }
-
-    .error-message {
-      font-size: 2rem;
-      margin-top: 20px;
-    }
-
-    .home-link {
-      margin-top: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>错误</title>
+    <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
+    <link rel="stylesheet" th:href="@{/fonts/fonts.css}">
+    <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
-<body>
 
+<!--/* 这一页由 @ControllerAdvice（ControllerExceptionHandler）渲染，
+       模型里只有 url 与 message —— 没有 status、没有 timestamp、也没有 author。
+       它是全站兜底页：Controller 里任何未被 @ResponseStatus 标注的异常都落到这里。
+       url / message 是排障的唯一线索，照旧原样显示，不因为视觉改版而藏起来。 */-->
+<body class="err-page">
 
-<div class="container">
-  <div class="error-code">错误</div>
-  <div class="error-message">对不起，服务异常，请联系管理员</div>
-  <div class="mb-3" th:if="${url != null}" th:text="${url}">url</div>
-  <div th:if="${message != null}" th:text="${message}">Exception message</div>
+<th:block th:replace="~{fragments/chrome :: grain}"/>
+<th:block th:replace="~{fragments/chrome :: topbar('')}"/>
 
-  <p class="home-link">
-    <a href="#" th:href="@{/}">返回首页</a>
-  </p>
-</div>
+<main>
+    <div class="wrap">
+        <div class="err">
+            <div class="err-label">
+                <span class="bar"></span>
+                <span class="mono">Error / 运行异常</span>
+            </div>
 
+            <!--/* 这一页拿不到状态码（异常未必带 @ResponseStatus），标题用文字而不是数字，
+                   所以走 .is-word 那档字号，不用巨型描边数字 */-->
+            <p class="err-code is-word">错误</p>
+            <h1 class="err-title">对不起，服务异常，请联系管理员</h1>
+            <p class="err-sub">请求已经记进服务端日志了。带上下面那行地址去反馈，定位会快很多。</p>
+
+            <div class="err-actions">
+                <a class="btn-primary" th:href="@{/}">返回首页 <span aria-hidden="true">→</span></a>
+                <a class="btn-outline" th:href="@{/archives}">进入归档</a>
+            </div>
+
+            <div class="err-detail mono-sm" th:if="${url != null or !#strings.isEmpty(message)}">
+                <div th:if="${url != null}"><span class="k">请求地址</span><span class="v" th:text="${url}">/</span></div>
+                <div th:if="${!#strings.isEmpty(message)}"><span class="k">错误详情</span><span class="v" th:text="${message}">无</span></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/chrome :: footer}"/>
+
+<th:block th:replace="~{fragments/chrome :: searchDialog}"/>
+<th:block th:replace="~{fragments/chrome :: scripts}"/>
 
 </body>
 </html>

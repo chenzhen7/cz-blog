@@ -673,3 +673,62 @@ button { font: inherit; }
 .js-toc .is-active-link { color: var(--signal); font-weight: 700; }
 .js-toc .is-active-link::before { background-color: var(--signal-fill); }
 .js-toc .toc-link::before { display: none; }
+
+/* ==========================================================================
+   15. 错误页
+   error/404、error/500、error/error 三页共用。
+
+   这一节的存在意义之一是自证：错误页拿不到任何业务 model
+   （只有基础错误的 timestamp/status/error/path，或 @ControllerAdvice 给的 url/message），
+   所以这里不能引用 --signal 之外任何与页面数据有关的东西，也不假设导航有高亮项。
+   ========================================================================== */
+
+/* 页脚压到底：错误页正文只有三两行，不撑高的话页脚会浮在屏幕中间 */
+.err-page { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+.err-page main { flex: 1 0 auto; display: flex; align-items: center; padding-top: 60px; }
+.err-page .footer { flex-shrink: 0; }
+
+.err { width: 100%; padding: 72px 0 80px; }
+
+/* 眉标签。配方与 .hero-label 相同，但不直接复用那个类：
+   它的类名把样式绑死在 hero 上，复用它会让「改 hero 会不会弄坏错误页」变成每次都要想的问题。 */
+.err-label { display: flex; align-items: center; gap: 14px; color: var(--ink-2); margin-bottom: 28px; }
+.err-label .bar { width: 40px; height: 1px; background: var(--signal-edge); flex-shrink: 0; }
+
+/* 巨型状态码，只描边不填充：实心 10rem 会把整页压成一个色块，
+   而这一页真正该被读到的是下面那句人话。
+   先给一个浅灰实心兜底，再用 @supports 换成描边 —— 反过来写的话，
+   不认 -webkit-text-stroke 的浏览器会拿到 color: transparent，数字直接消失。 */
+.err-code {
+  font-family: var(--font-disp); font-variation-settings: 'wdth' 105, 'wght' 900;
+  font-size: clamp(88px, 20vw, 220px); line-height: .82; letter-spacing: -.04em;
+  margin: 0 0 8px;
+  color: var(--line-strong);
+}
+@supports (-webkit-text-stroke: 1px #000) {
+  .err-code { color: transparent; -webkit-text-stroke: 1.5px var(--signal-edge); }
+}
+/* error.html 拿不到状态码，那个位置放的是「错误」两个字。
+   中文不能描边：笔画内部空间本来就只有一两像素，1.5px 的描边会把「错」「误」这种字糊成两团墨
+   （实测就是这个效果）。改实心金，做成盖章的感觉；字号也降一档，因为它只有两个字，不出体积。
+   选择器权重 (0,2,0) 高于 @supports 里的 .err-code (0,1,0)，所以能盖掉那套透明填充。 */
+.err-code.is-word {
+  color: var(--signal); -webkit-text-stroke-width: 0;
+  font-size: clamp(44px, 8vw, 76px); letter-spacing: .04em;
+}
+
+.err-title { font-family: var(--font-cjk); font-weight: 900; font-size: 30px; line-height: 1.3; letter-spacing: -.02em; margin: 0; }
+@media (min-width: 768px) { .err-title { font-size: 36px; } }
+.err-sub { color: var(--ink-2); margin: 14px 0 0; max-width: 46ch; }
+.err-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+
+/* 诊断信息。有就给、没有就整块不渲染：404/500 走 BasicErrorController 时只有 path，
+   @ControllerAdvice 兜住的异常只有 url + message，两者拿到的字段不是一套。 */
+.err-detail {
+  margin-top: 44px; border-top: 1px solid var(--line); padding-top: 20px;
+  display: grid; gap: 10px; max-width: 78ch; color: var(--ink-2);
+}
+.err-detail > div { display: flex; gap: 16px; align-items: baseline; }
+.err-detail .k { flex-shrink: 0; min-width: 76px; color: var(--ink); }
+/* 异常信息可能是任意长的一行（含堆栈里的路径），必须允许在任意字符处断行 */
+.err-detail .v { min-width: 0; word-break: break-word; }
