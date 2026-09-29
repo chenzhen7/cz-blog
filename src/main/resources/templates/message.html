@@ -38,12 +38,12 @@
                    所有 name 都是后端 Message 实体的绑定契约，一个字不能改：
                    parentMessageId / rootMessageId / avatar / email / nickname / address / content。
                    三个 hidden 由脚本维护：avatar 由邮箱推出来，另两个由「回复」按钮填。 */-->
-            <div class="msg-form" id="message-form">
-                <div class="msg-form-head">
-                    <div class="msg-avatar">
+            <div class="compose" id="message-form">
+                <div class="compose-head">
+                    <div class="compose-avatar">
                         <img id="avatar" th:src="@{/images/me.jpg}" alt="头像预览" width="56" height="56">
                     </div>
-                    <div class="msg-inputs">
+                    <div class="compose-inputs">
                         <input type="hidden" name="parentMessageId">
                         <input type="hidden" name="rootMessageId">
                         <input type="hidden" name="avatar" value="/images/me.jpg">
@@ -58,11 +58,7 @@
                 <textarea id="message-content" name="content" class="form-textarea" rows="4"
                           placeholder="注意文明发言哦~"></textarea>
 
-                <!--/* 表情条。原来每个表情都挂着内联 onclick="addEmoji('😀')"，
-                       改成 data-emoji + 事件委托：不用把 90 段 JS 写进属性里。 */-->
-                <div class="emoji-bar" id="emojiBar" aria-label="表情">
-                    <button type="button" data-emoji="😀">😀</button><button type="button" data-emoji="😃">😃</button><button type="button" data-emoji="😄">😄</button><button type="button" data-emoji="😁">😁</button><button type="button" data-emoji="😆">😆</button><button type="button" data-emoji="😅">😅</button><button type="button" data-emoji="🤣">🤣</button><button type="button" data-emoji="😂">😂</button><button type="button" data-emoji="🙂">🙂</button><button type="button" data-emoji="🙃">🙃</button><button type="button" data-emoji="😉">😉</button><button type="button" data-emoji="😊">😊</button><button type="button" data-emoji="😇">😇</button><button type="button" data-emoji="🥰">🥰</button><button type="button" data-emoji="😍">😍</button><button type="button" data-emoji="🤩">🤩</button><button type="button" data-emoji="😘">😘</button><button type="button" data-emoji="😗">😗</button><button type="button" data-emoji="😚">😚</button><button type="button" data-emoji="😙">😙</button><button type="button" data-emoji="😋">😋</button><button type="button" data-emoji="😛">😛</button><button type="button" data-emoji="😜">😜</button><button type="button" data-emoji="🤪">🤪</button><button type="button" data-emoji="😝">😝</button><button type="button" data-emoji="🤑">🤑</button><button type="button" data-emoji="🤗">🤗</button><button type="button" data-emoji="🤭">🤭</button><button type="button" data-emoji="🤫">🤫</button><button type="button" data-emoji="🤔">🤔</button><button type="button" data-emoji="🤐">🤐</button><button type="button" data-emoji="🤨">🤨</button><button type="button" data-emoji="😐">😐</button><button type="button" data-emoji="😑">😑</button><button type="button" data-emoji="😶">😶</button><button type="button" data-emoji="😏">😏</button><button type="button" data-emoji="😒">😒</button><button type="button" data-emoji="🙄">🙄</button><button type="button" data-emoji="😬">😬</button><button type="button" data-emoji="🤥">🤥</button><button type="button" data-emoji="😌">😌</button><button type="button" data-emoji="😔">😔</button><button type="button" data-emoji="😪">😪</button><button type="button" data-emoji="🤤">🤤</button><button type="button" data-emoji="😴">😴</button><button type="button" data-emoji="😷">😷</button><button type="button" data-emoji="🤒">🤒</button><button type="button" data-emoji="🤕">🤕</button><button type="button" data-emoji="🤢">🤢</button><button type="button" data-emoji="🤮">🤮</button><button type="button" data-emoji="🤧">🤧</button><button type="button" data-emoji="🥵">🥵</button><button type="button" data-emoji="🥶">🥶</button><button type="button" data-emoji="🥴">🥴</button><button type="button" data-emoji="😵">😵</button><button type="button" data-emoji="🤯">🤯</button><button type="button" data-emoji="🤠">🤠</button><button type="button" data-emoji="🥳">🥳</button><button type="button" data-emoji="😎">😎</button><button type="button" data-emoji="🤓">🤓</button><button type="button" data-emoji="🧐">🧐</button><button type="button" data-emoji="😕">😕</button><button type="button" data-emoji="😟">😟</button><button type="button" data-emoji="🙁">🙁</button><button type="button" data-emoji="☹️">☹️</button><button type="button" data-emoji="😮">😮</button><button type="button" data-emoji="😯">😯</button><button type="button" data-emoji="😲">😲</button><button type="button" data-emoji="😳">😳</button><button type="button" data-emoji="🥺">🥺</button><button type="button" data-emoji="😦">😦</button><button type="button" data-emoji="😧">😧</button><button type="button" data-emoji="😨">😨</button><button type="button" data-emoji="😰">😰</button><button type="button" data-emoji="😥">😥</button><button type="button" data-emoji="😢">😢</button><button type="button" data-emoji="😭">😭</button><button type="button" data-emoji="😱">😱</button><button type="button" data-emoji="😖">😖</button><button type="button" data-emoji="😣">😣</button><button type="button" data-emoji="😞">😞</button><button type="button" data-emoji="😓">😓</button><button type="button" data-emoji="😩">😩</button><button type="button" data-emoji="😫">😫</button><button type="button" data-emoji="🥱">🥱</button><button type="button" data-emoji="😤">😤</button><button type="button" data-emoji="😡">😡</button><button type="button" data-emoji="😠">😠</button><button type="button" data-emoji="🤬">🤬</button>
-                </div>
+                <th:block th:replace="~{fragments/chrome :: emojiBar}"/>
 
                 <button id="messagepost-btn" type="button" class="btn-primary">发送</button>
             </div>

@@ -473,18 +473,21 @@ button { font: inherit; }
 /* 分页：不用 Bootstrap 的 pagination 组件，一列等大方块。
    当前页用墨底反白而不是信号黄：黄是「需要被看见的交互」，当前页是状态不是动作。 */
 .pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin-top: 48px; }
-.pager a, .pager .pg {
+/* 也支持 <button>：文章页的评论分页走 AJAX，没有可跳的地址，只能是非链接元素。
+   用 button 而不是 <a href="#">，这样键盘可用、语义也对。 */
+.pager a, .pager button, .pager .pg {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 46px; height: 46px; padding: 0 15px;
-  border: 1px solid var(--line-strong); color: var(--ink);
+  border: 1px solid var(--line-strong); color: var(--ink); background: none;
   font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .06em;
+  cursor: pointer;
   transition: background .3s, color .3s, border-color .3s;
 }
-.pager a:hover { background: var(--signal-fill); color: var(--ink-on-signal); border-color: var(--signal-edge); }
+.pager a:hover, .pager button:not(:disabled):hover { background: var(--signal-fill); color: var(--ink-on-signal); border-color: var(--signal-edge); }
 /* 用 [aria-current] 而不是 .pg：模板里当前页就是个 <a>，没有额外的类。
    用属性选择器还能顺带把「当前页」这个语义绑在无障碍属性上，不用两处维护。 */
 .pager [aria-current] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.pager .is-off { opacity: .35; pointer-events: none; }
+.pager .is-off, .pager button:disabled { opacity: .35; pointer-events: none; }
 
 /* ==========================================================================
    9. 数据格（原型的「常写的话题」）
@@ -632,7 +635,12 @@ button { font: inherit; }
 
 /* 文章正文（blog.html 的 #content，以及 about.html 的富文本）。
    blog.html 是 Phase 3 最后一页，这一节到时候会再按其实际结构收紧。 */
-.md-body { max-width: 74ch; }
+/* overflow-wrap 这条是必须的，别删：正文里一个长 URL（技术博客里到处都是）就能
+   把 .md-body 的 scrollWidth 顶到 478px，而这一路上没有任何一级 overflow 会裁它，
+   于是整页在 390px 视口下横向溢出到 502px。改版前这条规则由 github-markdown.min.css
+   提供（.markdown-body { word-wrap: break-word }），换掉那个文件时就丢了。
+   注意是 overflow-wrap 不是 word-break：后者会连正常的中文标点换行一起改掉。 */
+.md-body { max-width: 74ch; overflow-wrap: break-word; }
 .md-body > *:first-child { margin-top: 0; }
 .md-body h1, .md-body h2, .md-body h3, .md-body h4 {
   font-family: var(--font-cjk); font-weight: 900; letter-spacing: -.02em;
@@ -969,15 +977,15 @@ button { font: inherit; }
    ========================================================================== */
 
 /* 发帖区 */
-.msg-form { border: 1px solid var(--line); padding: 26px 28px; }
-.msg-form-head { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 20px; }
-.msg-avatar { flex-shrink: 0; width: 56px; height: 56px; }
-.msg-avatar img {
+.compose { border: 1px solid var(--line); padding: 26px 28px; }
+.compose-head { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 20px; }
+.compose-avatar { flex-shrink: 0; width: 56px; height: 56px; }
+.compose-avatar img {
   width: 56px; height: 56px; object-fit: cover;
   filter: grayscale(1) contrast(.96) brightness(1.15);
 }
-.msg-inputs { flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
-@media (min-width: 768px) { .msg-inputs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.compose-inputs { flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+@media (min-width: 768px) { .compose-inputs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 /* 表情条。90 个表情一行放不下，固定高度内滚动；高度压到两行半，
    刚好露出"还有更多"，比做成弹层的成本低得多。 */
@@ -1046,3 +1054,127 @@ button { font: inherit; }
   padding: 0; margin: -1px; overflow: hidden;
   clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
+
+/* ==========================================================================
+   21. 文章详情页
+   ========================================================================== */
+
+/* 页头。与内页的 .page-head 不同：这里没有下边框，正文区自己带分隔，
+   而且宽度要大一些（标题可能很长）。 */
+.post-head { padding: 132px 0 0; }
+@media (min-width: 1024px) { .post-head { padding: 156px 0 0; } }
+.post-head .eyebrow { margin-bottom: 22px; }
+
+.post-title {
+  font-family: var(--font-cjk); font-weight: 900;
+  font-size: clamp(30px, 5vw, 54px); line-height: 1.14; letter-spacing: -.03em;
+  margin: 0; overflow-wrap: break-word;
+}
+.post-lead { color: var(--ink-2); margin: 22px 0 0; max-width: 62ch; }
+
+.post-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px;
+  margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--line);
+  color: var(--ink-2);
+}
+.post-meta img { width: 38px; height: 38px; object-fit: cover; flex-shrink: 0; }
+.post-meta .who { color: var(--ink); font-weight: 700; }
+.post-tags { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-left: auto; }
+.post-tags a {
+  font-family: var(--font-mono); font-size: var(--fs-label); color: var(--signal);
+  border-bottom: 1px solid var(--signal-edge); transition: background .3s, color .3s;
+}
+.post-tags a:hover { background: var(--signal-fill); color: var(--ink-on-signal); }
+
+.post-cover { margin-top: 48px; }
+.post-cover img {
+  width: 100%; max-height: 460px; object-fit: cover;
+  filter: grayscale(1) contrast(.96) brightness(1.2);
+}
+
+/* 正文 + 目录。目录 ≥1280px 才出现（再窄正文就没地方了）。
+   用 align-self: start 让 sticky 生效：默认的 stretch 会把高度撑满，
+   sticky 就没有可移动的余量。 */
+.post-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 56px; }
+@media (min-width: 1280px) {
+  .post-layout { grid-template-columns: minmax(0, 1fr) 260px; gap: 72px; }
+  .post-toc {
+    display: block; position: sticky; top: 88px; align-self: start;
+    max-height: calc(100vh - 120px); overflow-y: auto;
+  }
+}
+.post-toc { display: none; }
+.post-toc .toc-head {
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink-2);
+  padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px solid var(--line);
+}
+
+/* 版权声明 */
+.copyright { margin-top: 64px; padding: 24px 26px; background: var(--bg-sunken); border: 1px solid var(--line); }
+.copyright .h { font-weight: 700; color: var(--ink); margin-bottom: 14px; }
+.copyright p { color: var(--ink-2); margin: 0 0 8px; font-size: 17px; }
+.copyright p:last-child { margin-bottom: 0; }
+.copyright a { color: var(--signal); border-bottom: 1px solid var(--signal-edge); }
+.copyright a:hover { background: var(--signal-fill); color: var(--ink-on-signal); }
+
+/* 相关推荐。
+   用 grid 而不是 flex：flex 下两侧的最小尺寸都是 auto（等于 min-content），
+   右边那串「日期 + 阅读 + 评论」在窄屏放不下时不会缩，左边标题也压不到更窄，
+   于是整行把文档撑宽（实测 390px 视口下 scrollWidth 403）。
+   minmax(0, 1fr) 才是那个能真正缩到 0 的轨道。 */
+.rel-list { border-top: 1px solid var(--line); }
+.rel-row {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px;
+  padding: 20px 20px 20px 0; border-bottom: 1px solid var(--line);
+}
+@media (min-width: 768px) {
+  .rel-row { grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: baseline; }
+}
+.rel-title { font-family: var(--font-cjk); font-weight: 700; font-size: 18px; color: var(--ink); overflow-wrap: break-word; }
+.rel-meta { display: flex; flex-wrap: wrap; gap: 14px; color: var(--ink-2); }
+
+/* 右下角浮动操作。原来靠 scroll 监听做淡入淡出，规范明令不要 scroll 监听，
+   而且那种「往下滚就消失」的行为会让想回到顶部的人找不到按钮，索性常驻。 */
+.float-actions {
+  position: fixed; right: 20px; bottom: 24px; z-index: 45;
+  display: flex; flex-direction: column;
+  border: 1px solid var(--line); background: var(--bg);
+}
+@media (min-width: 1024px) { .float-actions { right: 32px; bottom: 32px; } }
+.float-actions button {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 10px 12px; min-width: 68px;
+  border: 0; border-bottom: 1px solid var(--line); background: none;
+  color: var(--ink-2); font-size: var(--fs-label); cursor: pointer;
+  transition: background .3s, color .3s;
+}
+.float-actions button:last-child { border-bottom: 0; }
+.float-actions button:hover { background: var(--signal-fill); color: var(--ink-on-signal); }
+
+/* 赞赏浮层。
+   原版是 Bootstrap Modal，要引 80KB 的 bundle 才有个居中盒子；
+   原生 <dialog> 自带焦点陷阱、Esc 关闭与 ::backdrop，一分钱不花。
+   注意块级 <dialog> 的默认样式带 border 和 margin:auto，
+   这里显式给宽度与居中，别让它退化成贴边的窄条。 */
+.appr-dlg {
+  width: calc(100% - 32px); max-width: 560px;
+  padding: 0; border: 1px solid var(--line-strong); color: var(--ink);
+  margin: auto;
+}
+.appr-dlg::backdrop { background: rgba(17, 17, 17, .32); }
+.appr-dlg-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 16px 20px; border-bottom: 1px solid var(--line);
+}
+.appr-dlg-body { padding: 24px; text-align: center; }
+.appr-dlg-body > p { color: var(--ink-2); margin: 0 0 22px; }
+.appr-qrs { display: flex; flex-wrap: wrap; gap: 26px; justify-content: center; }
+.appr-qrs figure { margin: 0; }
+.appr-qrs figcaption { margin-bottom: 10px; color: var(--ink-2); font-size: var(--fs-label); }
+.appr-qrs img { width: 180px; border: 1px solid var(--line); }
+
+/* 评论区的分页必须放在 #comment-container 之外 ——
+   那个容器会被 AJAX 整块重写，分页放里面会被一起抹掉（改版前就是这样，
+   加载后整页一个 .pagination 都不剩，评论分页等于不存在）。 */
+#comment-pager { margin-top: 40px; }

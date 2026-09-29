@@ -1,547 +1,507 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="zh-CN" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta name="referrer" content="no-referrer"/>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${blog.title}"></title>
+    <title th:text="${blog.title} + '-ChenZhen的客栈'">文章标题</title>
     <meta name="description" content="ChenZhen的个人博客，博客详情页面，专注技术生活分享">
     <meta name="keywords" content="ChenZhen,博客,博客详情,陈震">
     <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
-
-    <link rel="stylesheet" href="../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"  />
-    <link rel="stylesheet" href="../static/lib/aplayer/APlayer.min.css" th:href="@{/lib/aplayer/APlayer.min.css}">
-    <link rel="stylesheet" href="../static/css/github-markdown.min.css" th:href="@{/css/github-markdown.min.css}">
-    <link rel="stylesheet" href="../static/css/animate.min.css" th:href="@{/css/animate.min.css}">
-    <link rel="stylesheet" href="../static/lib/tocbot/tocbot.css" th:href="@{/lib/tocbot/tocbot.css}">
-    <link rel="stylesheet" href="../static/lib/prism/prism.css" th:href="@{/lib/prism/prism.css}">
-    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
-    <script src="../static/lib/aplayer/Meting.min.js" th:src="@{/lib/aplayer/Meting.min.js}"></script>
-    <script src="../static/lib/aplayer/APlayer.min.js" th:src="@{/lib/aplayer/APlayer.min.js}"></script>
+    <link rel="stylesheet" th:href="@{/fonts/fonts.css}">
+    <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
-<body >
+<body>
 
-<!--导航-->
-<th:block th:replace="~{fragments/legacy :: navbar('blog')}"/>
+<th:block th:replace="~{fragments/chrome :: grain}"/>
+<th:block th:replace="~{fragments/chrome :: topbar('blog')}"/>
 
-<!-- 搜索框 -->
-<th:block th:replace="~{fragments/legacy :: searchModal}"/>
+<main>
+<article>
 
-<!--空白填充-->
-<div class="" style="padding-top: 10vh"></div>
+    <!--/* model 来自 IndexController.blog()：blog（BlogVO，含 tagList）、similarBlogs、
+           commentPageInfo（评论第 1 页）、author。
 
-<!--顶部博文信息 移动端不显示-->
-<div class="container d-none d-md-block" style="max-width: 1200px;padding-top: 5vh;">
-    <div class="row justify-content-between  mb-5">
-        <div class="col-md-5 pt-6 pb-6 pr-6 align-self-center">
-            <h1 class="cz-blog-title cz-text-shadow-3" th:text="${blog.title}">文章标题</h1>
+           引的样式表从 8 个减到 2 个，去掉的都是新的设计系统已经覆盖或根本没用的：
+             bootstrap.min.css      已无用
+             me.css                 新样式改由 site.css 承担
+             github-markdown.min.css 正文排版在 site.css 的 .md-body 一节
+             animate.min.css        全站没有一处 animate__ 类，纯死引用
+             tocbot.css             目录样式在 site.css 的 .js-toc 一节
+             prism.css              代码配色在 site.css 的 .md-body .token 一节
+             aplayer/APlayer.min.css  播放器模块早已下线，见下
+           以及 <head> 里引的 Meting.min.js / APlayer.min.js ——
+           全文件搜不到任何 new APlayer / Meting 调用，是一段没人用的死引用。 */-->
 
-            <p class="mb-3 fw-light cz-text-shadow-4" th:text="${blog.description}">
-                分析师告诉 CNBC，如果该协议获得英国议会通过，英镑汇率可能会升至 1.35 美元至 1.40 美元之间。
-            </p>
-
-            <div class="mb-3">
-                <ul class="cz-blog-tag-menu fs-5 ms-0 ps-0">
-                    <li th:each="tag : ${blog.tagList}">
-                        <a class="cz-tag-link" href="#" th:href="${'/tags?tagIds=' + tag.id}">
-                            <span class="cz-text-green">#</span>
-                            <span  th:text="${tag.name}">实用教程</span>
-                        </a>
-                    </li>
-                </ul>
+    <header class="post-head">
+        <div class="wrap">
+            <div class="eyebrow">
+                <span class="bar"></span>
+                <span class="mono">Article / 文章</span>
             </div>
-            <div class="d-flex align-items-center ">
-                <img class="rounded-circle " src="../static/images/me.jpg" th:src="@{/images/me.jpg}"  width="50">
-                <small class="ml-2">
-                    <span th:text="${author}">ChenZhen</span>
-                    <span th:text="${blog.createTime}" class="text-muted d-block">2023-12-12 17:52</span>
-                </small>
+
+            <h1 class="post-title" th:text="${blog.title}">文章标题</h1>
+
+            <p class="post-lead" th:if="${not #strings.isEmpty(blog.description)}"
+               th:text="${blog.description}">文章摘要</p>
+
+            <div class="post-meta">
+                <img th:src="@{/images/me.jpg}" alt="" width="38" height="38">
+                <span>
+                    <span class="who" th:text="${author}">ChenZhen</span>
+                    <span class="mono-sm" style="display: block;" th:text="${#temporals.format(blog.createTime,'yyyy-MM-dd')}">2024-07-14</span>
+                </span>
+                <span class="mono-sm" th:text="${blog.views} + ' 阅读'">0 阅读</span>
+                <span class="mono-sm" th:text="${blog.commentCount} + ' 评论'">0 评论</span>
+                <span class="cat mono-sm" th:if="${blog.copyright == 1}">原创</span>
+                <span class="cat mono-sm" th:if="${blog.copyright == 0}">转载</span>
+
+                <!--/* 标签跳转到标签页并带上筛选参数，与改版前一致（原来是手拼
+                       '/tags?tagIds=' + tag.id）。 */-->
+                <span class="post-tags" th:if="${not #lists.isEmpty(blog.tagList)}">
+                    <a th:each="tag : ${blog.tagList}" th:href="@{/tags(tagIds=${tag.id})}"
+                       th:text="'#' + ${tag.name}">#标签</a>
+                </span>
+            </div>
+
+            <div class="post-cover" th:if="${not #strings.isEmpty(blog.firstPicture)}">
+                <img class="cut-tr" th:src="${blog.firstPicture}" th:alt="${blog.title} + ' 的封面'"
+                     width="1200" height="460" decoding="async">
             </div>
         </div>
-        <div class="col-md-7 mil-post-cover pe-0 ps-0 " th:if="${blog.firstPicture != null && !blog.firstPicture.isEmpty()}">
-            <img class="cz-blog-title-img border border-1 rounded-3 " alt="cover" src="../static/images/blog.jpg" th:src="${blog.firstPicture}">
-        </div>
-    </div>
-</div>
+    </header>
 
-<!--移动端显示 标题-->
-<h1 class="cz-blog-title cz-text-shadow-3 d-md-none text-center" th:text="${blog.title}">文章标题</h1>
+    <section class="section">
+        <div class="wrap">
+            <div class="post-layout">
 
+                <div class="post-body">
+                    <!--/* #content 三个都不能动：
+                           - 它是 th:utext 的落点；
+                           - 是 tocbot 的 contentSelector（.js-toc-content）；
+                           - 是正文样式（.md-body）的作用域。
+                           里面不放占位内容：渲染时会被 th:utext 整体替换。
+                           原来这里塞着一份 700 多行的 GitHub Markdown 演示文档，永远不会显示。 */-->
+                    <div id="content" class="md-body js-toc-content" th:utext="${blog.content}"></div>
 
-<!--中间内容-->
-<div id="waypoint" class="container-md mt-3">
-    <div class="row">
-        <!--左边-->
-        <div class="col-xxl-9 col-12">
-            <!--文章内容-->
-            <div class="mb-3">
-                <!--中间主要内容部分-->
-                <div id="content" class="markdown-body js-toc-content" th:utext="${blog.content}" >
-                    <!-- 占位内容：渲染时被 th:utext="${blog.content}" 整体替换，可以留空。
-                         这里原先塞着一份 GitHub Markdown CSS 演示文档（700 多行），
-                         永远不会显示，已删除。保留 #content 元素本身，因为
-                         它是 tocbot 的 contentSelector，也是正文样式的作用域。 -->
+                    <!--/* 版权声明。链接地址与改版前逐字一致（github 那行文案写的是
+                           chenzhen-blog，链接指向 cz-blog，这是原文如此，没有改）。 */-->
+                    <div class="copyright" th:if="${blog.shareStatement}">
+                        <div class="h">© 版权声明</div>
+                        <p>作者：ChenZhen</p>
+                        <p>博客地址：<a href="https://www.chenzhen.space/" target="_blank" rel="noopener">https://www.chenzhen.space/</a></p>
+                        <p>版权：本文为博主 ChenZhen 的原创文章，本文版权归作者所有，转载请附上原文出处链接及本声明。</p>
+                        <p>如果对你有帮助，请到github👇给项目一个小小的star⭐</p>
+                        <p>github地址：<a href="https://github.com/chenzhen7/chenzhen-blog" target="_blank" rel="noopener">https://github.com/chenzhen7/cz-blog</a></p>
                     </div>
-
-                <div class="mb-3 p-md-4 bg-white" th:if="${blog.shareStatement}">
-                        <div class="mb-3"><strong>© 版权声明</strong></div>
-                        <div class="cz-copyright-content">
-                            <p>作者：ChenZhen</p>
-                            <p>博客地址：<a href="https://www.chenzhen.space/" target="_blank">https://www.chenzhen.space/</a></p>
-                            <p>版权：本文为博主 ChenZhen 的原创文章，本文版权归作者所有，转载请附上原文出处链接及本声明。</p>
-                            <p>如果对你有帮助，请到github👇给项目一个小小的star⭐</p>
-                            <p>github地址：<a href="https://github.com/chenzhen7/chenzhen-blog" target="_blank">https://github.com/chenzhen7/cz-blog</a></p>
-                        </div>
-                    </div>
-
-            </div>
-        </div>
-        <!--右边-->
-        <div class="col-xxl-3 d-xxl-block d-none">
-            <!--目录-->
-            <div class=" mb-3 overflow-hidden cz-toc-sticky">
-                <div class="cz-toc js-toc"></div>
-            </div>
-        </div>
-
-        <div class="p-md-5">
-            <!--相关推荐-->
-            <div class="card shadow mb-3">
-                <div class="card-body border-1">
-                    <a href="" class="cz-link" th:href=" '/blog/' + ${similarBlog.id}" th:each="similarBlog : ${similarBlogs}">
-                        <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
-                            <div>
-                                <p class="mb-2 fw-bold" th:text="${similarBlog.title}">
-                                    最新版ES8的client API操作 Elasticsearch Java API client 8.0
-                                </p>
-                                <div class="text-muted d-flex align-items-center ">
-                                    <small class="me-3" th:text="${#temporals.format(similarBlog.createTime)}">2023-12-12 17:52</small>
-                                    <small class="d-flex align-items-center ">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
-                                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
-                                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
-                                        </svg>
-                                        <div class="me-3" th:text="${similarBlog.views}">1000</div>
-                                    </small>
-                                    <small class="d-flex align-items-center ">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-chat-text" viewBox="0 0 16 16">
-                                            <path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
-                                            <path d="M4 5.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zM4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8zm0 2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
-                                        </svg>
-                                        <div class="me-1" th:text="${similarBlog.commentCount}">1000</div>
-                                    </small>
-                                </div>
-                            </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32"><path d="M13.1714 12.0007L8.22168 7.05093L9.63589 5.63672L15.9999 12.0007L9.63589 18.3646L8.22168 16.9504L13.1714 12.0007Z" fill="var(--B)"></path></svg>
-                        </div>
-
-                    </a>
                 </div>
+
+                <!--/* 目录。tocbot 的 tocSelector 是 .js-toc，不改。
+                       窄屏不渲染（.post-toc 默认 display: none），因为正文要让位。 */-->
+                <aside class="post-toc" aria-label="目录">
+                    <div class="toc-head">On this page</div>
+                    <div class="js-toc"></div>
+                </aside>
+
+            </div>
+        </div>
+    </section>
+
+    <!--/* 相关推荐 */-->
+    <section class="section flush" th:if="${not #lists.isEmpty(similarBlogs)}">
+        <div class="wrap">
+            <div class="sec-head">
+                <h2 class="sec-title">相关推荐</h2>
+            </div>
+            <div class="rel-list">
+                <a class="rel-row row-fill" th:each="similarBlog : ${similarBlogs}"
+                   th:href="@{/blog/{id}(id=${similarBlog.id})}">
+                    <span class="rel-title" th:text="${similarBlog.title}">文章标题</span>
+                    <span class="rel-meta mono-sm">
+                        <span th:text="${#temporals.format(similarBlog.createTime,'yyyy-MM-dd')}">2024-07-14</span>
+                        <span th:text="${similarBlog.views} + ' 阅读'">0 阅读</span>
+                        <span th:text="${similarBlog.commentCount} + ' 评论'">0 评论</span>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!--/* 评论区。blog.commentabled 为 false 时整块不渲染，与改版前一致。 */-->
+    <section class="section flush" th:if="${blog.commentabled}" id="comment-section">
+        <div class="wrap">
+            <div class="sec-head">
+                <h2 class="sec-title">评论</h2>
+                <span class="mono-sm" style="color: var(--ink-2);">
+                    共 <span th:text="${commentPageInfo.total}">0</span> 条
+                </span>
             </div>
 
-            <!--评论输入-->
-            <div class="card mb-3 shadow" th:if="${blog.commentabled}">
-                <!--表单-->
-                <div id="comment-form"  class="card-body border-1">
-                    <div class="row align-items-center mb-3">
-                        <!--头像-->
-                        <div class="col-auto">
-                            <a class="avatar">
-                                <img id="avatar" class="img-thumbnail w-100 h-100" >
+            <!--/* 评论输入。契约与留言板同构，五个 name 一个都不能改：
+                   blogId / parentCommentId / rootCommentId / avatar / email / nickname / address / content。
+                   改版前这里还有一个内联 oninput="checkQQEmail()"，现在改成事件监听。 */-->
+            <div class="compose" id="comment-form">
+                <div class="compose-head">
+                    <div class="compose-avatar">
+                        <img id="avatar" th:src="@{/images/me.jpg}" alt="头像预览" width="56" height="56">
+                    </div>
+                    <div class="compose-inputs">
+                        <input type="hidden" name="blogId" th:value="${blog.id}">
+                        <input type="hidden" name="parentCommentId">
+                        <input type="hidden" name="rootCommentId">
+                        <input type="hidden" name="avatar" value="/images/me.jpg">
+                        <input id="emailInput" name="email" type="email" class="form-input" placeholder="邮箱"
+                               th:value="${session.user != null ? session.user.email : ''}">
+                        <input name="nickname" type="text" class="form-input" placeholder="昵称"
+                               th:value="${session.user != null ? session.user.nickname : ''}">
+                        <input name="address" type="text" class="form-input" placeholder="站点">
+                    </div>
+                </div>
+
+                <textarea id="comment-content" name="content" class="form-textarea" rows="4"
+                          placeholder="注意文明发言哦~"></textarea>
+
+                <th:block th:replace="~{fragments/chrome :: emojiBar}"/>
+
+                <button id="commentpost-btn" type="button" class="btn-primary">发送</button>
+            </div>
+
+            <!--/* 评论列表。
+                   #comment-container 会被 AJAX 整块重写（发评论后、翻页后），
+                   所以里面的一切都必须来自 commentList 片段本身。
+
+                   分页这次挪进了片段里 —— 改版前它在容器外面，用的是 ${blog.id} 拼地址，
+                   而 CommentController.comments() 渲染片段时只给 commentPageInfo、
+                   拿不到 blog，所以只能放外面；放外面的后果是 .load() 重写容器时分页被一起抹掉，
+                   实测页面加载完一个 .pagination 都不剩，评论分页等于不存在。
+                   现在分页改成 data-page 的按钮（不拼地址、不需要 blog.id），
+                   就能跟着片段一起被重新渲染，页码窗口和当前页高亮始终是对的。 */-->
+            <div id="comment-container">
+                <div class="cm-list" th:fragment="commentList">
+                    <div class="cm" th:each="comment : ${commentPageInfo.list}">
+                        <div class="cm-avatar">
+                            <img th:src="@{${comment.avatar}}" alt="" width="48" height="48" loading="lazy" decoding="async">
+                            <a class="link-mask" th:if="${comment.address != null}"
+                               target="_blank" rel="noopener" th:href="@{${comment.address}}"
+                               th:title="${comment.nickname} + ' 的站点'">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                                    <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
+                                    <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
+                                </svg>
+                                <span class="visually-hidden">访问站点</span>
                             </a>
                         </div>
-                        <!--输入-->
-                        <div class="col">
-                            <div class="row">
-                                <input type="hidden" name="blogId" th:value="${blog.id}">
-                                <input type="hidden" name="parentCommentId" >
-                                <input type="hidden" name="rootCommentId">
-                                <input type="hidden" name="avatar">
-
-                                <div class="col-md-4 mb-1">
-                                    <input name="email" type="email" class="form-control" placeholder="邮箱" id="emailInput" oninput="checkQQEmail()" th:value="${session.user != null ? session.user.email : ''}">
-                                </div>
-                                <div class="col-md-4 mb-1">
-                                    <input name="nickname" type="text" class="form-control" placeholder="昵称" th:value="${session.user != null ? session.user.nickname : ''}">
-                                </div>
-                                <div class="col-md-4 mb-1">
-                                    <input name="address"  type="text" class="form-control" placeholder="站点">
-                                </div>
+                        <div class="cm-body">
+                            <div class="cm-head">
+                                <span class="cm-name" th:text="${comment.nickname}">ChenZhen</span>
+                                <span class="cm-badge" th:if="${comment.adminComment}">站主</span>
                             </div>
-                        </div>
+                            <div class="cm-text" th:text="${comment.content}">快来说点什么吧</div>
+                            <div class="cm-foot">
+                                <span th:text="${#temporals.format(comment.createTime)}">2023-12-15 23:46</span>
+                                <a data-reply
+                                   th:data-parentcommentid="${comment.id}"
+                                   th:data-commentnickname="${comment.nickname}"
+                                   th:data-rootcommentid="${comment.id}">回复</a>
+                                <a th:if="${session.user}"
+                                   th:href="@{/comments/delete/{id}(id=${comment.id},blogId=${comment.blogId},pageNum=${commentPageInfo.pageNum})}"
+                                   th:attr="data-confirm='确定要删除该评论吗？三思啊! 删了可就没了！'">删除</a>
+                            </div>
 
-
-                    </div>
-                    <!--留言内容-->
-                    <div class="row align-items-center mb-3">
-                        <div class="col">
-                            <textarea id="comment-content" name="content" class="form-control" rows="3" placeholder="注意文明发言哦~"></textarea>
-                        </div>
-                    </div>
-                    <!--表情框-->
-                    <div class="cz-emoji-container mb-3">
-                        <div class="cz-emoji-content">
-                            <!-- Emoji 列表 -->
-                            <span onclick="addEmoji('😀')">😀</span><span onclick="addEmoji('😃')">😃</span><span onclick="addEmoji('😄')">😄</span><span onclick="addEmoji('😁')">😁</span><span onclick="addEmoji('😆')">😆</span><span onclick="addEmoji('😅')">😅</span><span onclick="addEmoji('🤣')">🤣</span><span onclick="addEmoji('😂')">😂</span><span onclick="addEmoji('🙂')">🙂</span><span onclick="addEmoji('🙃')">🙃</span><span onclick="addEmoji('😉')">😉</span><span onclick="addEmoji('😊')">😊</span><span onclick="addEmoji('😇')">😇</span><span onclick="addEmoji('🥰')">🥰</span><span onclick="addEmoji('😍')">😍</span><span onclick="addEmoji('🤩')">🤩</span><span onclick="addEmoji('😘')">😘</span><span onclick="addEmoji('😗')">😗</span><span onclick="addEmoji('😚')">😚</span><span onclick="addEmoji('😙')">😙</span><span onclick="addEmoji('😋')">😋</span><span onclick="addEmoji('😛')">😛</span><span onclick="addEmoji('😜')">😜</span><span onclick="addEmoji('🤪')">🤪</span><span onclick="addEmoji('😝')">😝</span><span onclick="addEmoji('🤑')">🤑</span><span onclick="addEmoji('🤗')">🤗</span><span onclick="addEmoji('🤭')">🤭</span><span onclick="addEmoji('🤫')">🤫</span><span onclick="addEmoji('🤔')">🤔</span><span onclick="addEmoji('🤐')">🤐</span><span onclick="addEmoji('🤨')">🤨</span><span onclick="addEmoji('😐')">😐</span><span onclick="addEmoji('😑')">😑</span><span onclick="addEmoji('😶')">😶</span><span onclick="addEmoji('😏')">😏</span><span onclick="addEmoji('😒')">😒</span><span onclick="addEmoji('🙄')">🙄</span><span onclick="addEmoji('😬')">😬</span><span onclick="addEmoji('🤥')">🤥</span><span onclick="addEmoji('😌')">😌</span><span onclick="addEmoji('😔')">😔</span><span onclick="addEmoji('😪')">😪</span><span onclick="addEmoji('🤤')">🤤</span><span onclick="addEmoji('😴')">😴</span><span onclick="addEmoji('😷')">😷</span><span onclick="addEmoji('🤒')">🤒</span><span onclick="addEmoji('🤕')">🤕</span><span onclick="addEmoji('🤢')">🤢</span><span onclick="addEmoji('🤮')">🤮</span><span onclick="addEmoji('🤧')">🤧</span><span onclick="addEmoji('🥵')">🥵</span><span onclick="addEmoji('🥶')">🥶</span><span onclick="addEmoji('🥴')">🥴</span><span onclick="addEmoji('😵')">😵</span><span onclick="addEmoji('🤯')">🤯</span><span onclick="addEmoji('🤠')">🤠</span><span onclick="addEmoji('🥳')">🥳</span><span onclick="addEmoji('😎')">😎</span><span onclick="addEmoji('🤓')">🤓</span><span onclick="addEmoji('🧐')">🧐</span><span onclick="addEmoji('😕')">😕</span><span onclick="addEmoji('😟')">😟</span><span onclick="addEmoji('🙁')">🙁</span><span onclick="addEmoji('☹️')">☹️</span><span onclick="addEmoji('😮')">😮</span><span onclick="addEmoji('😯')">😯</span><span onclick="addEmoji('😲')">😲</span><span onclick="addEmoji('😳')">😳</span><span onclick="addEmoji('🥺')">🥺</span><span onclick="addEmoji('😦')">😦</span><span onclick="addEmoji('😧')">😧</span><span onclick="addEmoji('😨')">😨</span><span onclick="addEmoji('😰')">😰</span><span onclick="addEmoji('😥')">😥</span><span onclick="addEmoji('😢')">😢</span><span onclick="addEmoji('😭')">😭</span><span onclick="addEmoji('😱')">😱</span><span onclick="addEmoji('😖')">😖</span><span onclick="addEmoji('😣')">😣</span><span onclick="addEmoji('😞')">😞</span><span onclick="addEmoji('😓')">😓</span><span onclick="addEmoji('😩')">😩</span><span onclick="addEmoji('😫')">😫</span><span onclick="addEmoji('🥱')">🥱</span><span onclick="addEmoji('😤')">😤</span><span onclick="addEmoji('😡')">😡</span><span onclick="addEmoji('😠')">😠</span><span onclick="addEmoji('🤬')">🤬</span>
-                        </div>
-                    </div>
-                    <!--发送-->
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <button id="commentpost-btn" type="button" class="btn btn-secondary w-100">发送</button>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            <!--评论列表-->
-            <div class="card mb-3 shadow" th:if="${blog.commentabled}" >
-                <div class="card-body border-1" id="comment-container" >
-                    <!--评论列表-->
-                    <div class="cz-comment-section" th:fragment="commentList">
-                        <div class="cz-comment" th:each="comment : ${commentPageInfo.list}">
-
-                            <div class="avatar" >
-                                <img class="img-thumbnail w-100 h-100" src="../static/images/me.jpg" th:src="@{${comment.avatar}}">
-                                <a href="#" target="_blank" th:href="@{${comment.address}}" th:if="${comment.address != null}">
-                                    <div class="img-thumbnail cz-avatar-overlay">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" class="bi bi-link-45deg" viewBox="0 0 16 16">
-                                            <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
-                                            <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
-                                        </svg>
+                            <div class="cm-replies" th:if="${#arrays.length(comment.commentReplyList)} > 0">
+                                <div class="cm" th:each="reply : ${comment.commentReplyList}">
+                                    <div class="cm-avatar">
+                                        <img th:src="@{${reply.avatar}}" alt="" width="48" height="48" loading="lazy" decoding="async">
+                                        <a class="link-mask" th:if="${reply.address != null}"
+                                           target="_blank" rel="noopener" th:href="@{${reply.address}}"
+                                           th:title="${reply.nickname} + ' 的站点'">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                                                <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
+                                                <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
+                                            </svg>
+                                            <span class="visually-hidden">访问站点</span>
+                                        </a>
                                     </div>
-                                </a>
-                            </div>
-
-                            <div class="cz-comment-content" >
-                                <div class="cz-user-info" th:text="${comment.nickname}">
-                                    <span th:text="${comment.nickname}">ChenZhen</span>
-                                    <span class="badge text-bg-secondary" th:if="${comment.adminComment}">站主</span>
-                                </div>
-                                <div class="cz-comment-text" th:text="${comment.content}" >快来说点什么吧</div>
-                                <div class="cz-comment-footer">
-                                    <span th:text="${#temporals.format(comment.createTime)}">2023-12-15 23:46</span>
-                                    <!--<span>Like</span>-->
-                                    <a href="#" class="me-1"
-                                       th:data-parentcommentid="${comment.id}"
-                                       th:data-commentnickname="${comment.nickname}"
-                                       th:data-rootcommentid="${comment.id}"
-                                       onclick="reply(this)" >
-                                        回复
-                                    </a>
-                                    <a href="#"
-                                       th:if="${session.user}"
-                                       th:href="@{/comments/delete/{id}(id=${comment.id},blogId=${comment.blogId},pageNum=${commentPageInfo.pageNum})}"
-                                       onclick="return confirm('确定要删除该评论吗？三思啊! 删了可就没了！')">
-                                        删除
-                                    </a>
-                                </div>
-                                <!--评论回复列表-->
-                                <div class="cz-reply-section" th:if="${#arrays.length(comment.commentReplyList)} > 0">
-                                    <div class="cz-comment" th:each="reply : ${comment.commentReplyList}">
-                                        <div class="avatar" >
-                                            <img class="img-thumbnail w-100 h-100" src="../static/images/me.jpg" th:src="@{${reply.avatar}}">
-                                            <a href="#" target="_blank" th:href="@{${reply.address}}" th:if="${reply.address != null}">
-                                                <div class="img-thumbnail cz-avatar-overlay">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" class="bi bi-link-45deg" viewBox="0 0 16 16">
-                                                        <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
-                                                        <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
-                                                    </svg>
-                                                </div>
-                                            </a>
+                                    <div class="cm-body">
+                                        <div class="cm-head">
+                                            <span class="cm-name" th:text="${reply.nickname}">ChenZhen</span>
+                                            <span class="cm-badge" th:if="${reply.adminComment}">站主</span>
+                                            <span class="cm-at" th:if="${reply.parentCommentId != reply.rootCommentId}"
+                                                  th:text="'@' + ${reply.parentNickname}">@小白</span>
                                         </div>
-                                        <div class="cz-comment-content">
-                                            <div class="cz-user-info">
-                                                <span th:text="${reply.nickname}">ChenZhen</span>
-                                                <span class="badge text-bg-secondary" th:if="${reply.adminComment}">站主</span>
-                                                <span th:if="${reply.parentCommentId != reply.rootCommentId}" th:text="'@' + ${reply.parentNickname}" class="ps-2 text-primary">@小白</span>
-                                            </div>
-                                            <div class="cz-comment-text" th:text="${reply.content}">快来说点什么吧</div>
-                                            <div class="cz-comment-footer">
-                                                <span th:text="${#temporals.format(reply.createTime)}">2023-12-15 23:46</span>
-                                                <!--                                <span>Like</span>-->
-                                                <a href="#" class="me-1"
-                                                   th:data-parentcommentid="${reply.id}"
-                                                   th:data-commentnickname="${reply.nickname}"
-                                                   th:data-rootcommentid="${comment.id}"
-                                                   onclick="reply(this)" >
-                                                    回复
-                                                </a>
-                                                <a href="#"
-                                                   th:if="${session.user}"
-                                                   th:href="@{/comments/delete/{id}(id=${reply.id},blogId=${comment.blogId},pageNum=${commentPageInfo.pageNum})}"
-                                                   onclick="return confirm('确定要删除该评论吗？三思啊! 删了可就没了！')">
-                                                    删除
-                                                </a>
-                                            </div>
+                                        <div class="cm-text" th:text="${reply.content}">快来说点什么吧</div>
+                                        <div class="cm-foot">
+                                            <span th:text="${#temporals.format(reply.createTime)}">2023-12-15 23:46</span>
+                                            <a data-reply
+                                               th:data-parentcommentid="${reply.id}"
+                                               th:data-commentnickname="${reply.nickname}"
+                                               th:data-rootcommentid="${comment.id}">回复</a>
+                                            <a th:if="${session.user}"
+                                               th:href="@{/comments/delete/{id}(id=${reply.id},blogId=${comment.blogId},pageNum=${commentPageInfo.pageNum})}"
+                                               th:attr="data-confirm='确定要删除该评论吗？三思啊! 删了可就没了！'">删除</a>
                                         </div>
                                     </div>
-
-
                                 </div>
-
-
                             </div>
                         </div>
-
-
                     </div>
 
-                    <!--分页-->
-                    <!--
-                        必须留在 commentList 片段之外、整页渲染的位置。
-                        这里用 ${blog.id} 拼分页地址，而 blog 只有 IndexController.blog()
-                        会放进 model；CommentController.comments() 走 AJAX 单渲染片段时
-                        只给 commentPageInfo。一旦把这块挪进片段，AJAX 场景下 ${blog.id}
-                        就会取不到值。真要挪，得先让 CommentController 也提供 blogId。
-                    -->
-                    <nav th:if="${not #lists.isEmpty(commentPageInfo.list)}">
-                        <ul class="pagination justify-content-center">
-                            <li class="page-item" th:classappend="${commentPageInfo.hasPreviousPage} ? 'page-item' : 'page-item disabled' ">
-                                <a class="page-link text-black" href="#" th:href="@{ '/comments/' + ${blog.id} + '?pageNum=' +${commentPageInfo.prePage}}">上一页</a>
-                            </li>
+                    <p class="cm-empty" th:if="${#lists.isEmpty(commentPageInfo.list)}">还没有评论，来说第一句吧。</p>
 
-                            <li class="page-item"
-                                th:each="num : ${commentPageInfo.navigatepageNums}"
-                                th:classappend="${commentPageInfo.pageNum == num} ? 'page-item active' : 'page-item'">
-                                <a class="page-link text-black fw-bold" href="#" th:href="@{ '/comments/' + ${blog.id} + '?pageNum=' +${num}}" th:text="${num}">1</a>
-                            </li>
-
-                            <li class="page-item" th:classappend="${commentPageInfo.hasNextPage} ? 'page-item' : 'page-item disabled' ">
-                                <a class="page-link text-black" href="#" th:href="@{ '/comments/' + ${blog.id} + '?pageNum=' +${commentPageInfo.nextPage}}" >下一页</a>
-                            </li>
-                        </ul>
+                    <!--/* 评论分页。按钮而不是链接：地址指向的 /comments/{id} 是只返回片段的端点，
+                           做成 href 一点过去就是一坨没有样式的 HTML。走 AJAX 就没有可跳的地址。
+                           data-page 由页面脚本读取。 */-->
+                    <nav class="pager" th:if="${commentPageInfo.pages > 1}" aria-label="评论分页">
+                        <button type="button" th:disabled="${!commentPageInfo.hasPreviousPage}"
+                                th:attr="data-page=${commentPageInfo.prePage}">上一页</button>
+                        <button type="button" th:each="num : ${commentPageInfo.navigatepageNums}"
+                                th:attr="data-page=${num}, aria-current=${commentPageInfo.pageNum == num} ? 'page' : null"
+                                th:text="${num}">1</button>
+                        <button type="button" th:disabled="${!commentPageInfo.hasNextPage}"
+                                th:attr="data-page=${commentPageInfo.nextPage}">下一页</button>
                     </nav>
                 </div>
             </div>
+
         </div>
+    </section>
 
+</article>
+</main>
 
-
-    </div>
-
-
-</div>
-
-
-
-<div class="bg-white border shadow rounded-3 me-2 cz-float-action " id="float-action">
-
-    <button th:if="${blog.appreciation}" class="cz-float-action-btn" id="showAppreciation-button" data-bs-toggle="modal" data-bs-target="#appreciationModal">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-coin cz-float-action-icon" viewBox="0 0 16 16">
+<!--/* 右下角浮动操作。原来靠 scroll 监听淡入淡出，规范明确不要 scroll 监听；
+       而且「往下滚就藏起来」会让想回顶部的人找不到按钮，改成常驻。 */-->
+<div class="float-actions">
+    <button type="button" th:if="${blog.appreciation}" data-appr-open>
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
             <path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9H5.5zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518l.087.02z"/>
             <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-            <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11zm0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12z"/>
         </svg>
-        <span class="cz-float-action-text">赞赏</span>
+        <span>赞赏</span>
     </button>
-
-
-    <button class="cz-float-action-btn" id="toComment-button">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-chat cz-float-action-icon" viewBox="0 0 16 16">
+    <button type="button" id="toComment-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
             <path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
         </svg>
-        <span class="cz-float-action-text">评论</span>
+        <span>评论</span>
     </button>
-
-
-    <button class="cz-float-action-btn" id="toTop-button">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-chevron-up cz-float-action-icon" viewBox="0 0 16 16">
+    <button type="button" id="toTop-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
             <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/>
         </svg>
-        <span class="cz-float-action-text">返回顶部</span>
+        <span>回到顶部</span>
     </button>
 </div>
 
-<!-- 赞赏模态框 -->
-<div class="modal fade" id="appreciationModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">赞善码</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-                <p>如果我的博客帮助到了您，您可以友情支持一下。</p>
-                <div class="mb-3">
-                    <p>微信</p>
-                    <img class="img-thumbnail cz-appreciation-qrcode" src="../static/images/wechat.jpg" th:src="@{/images/wechat.jpg}" alt="">
-                </div>
-                <div class="mb-3">
-                    <p>支付宝</p>
-                    <img class="img-thumbnail cz-appreciation-qrcode" src="../static/images/zhifupay.jpg" th:src="@{/images/zhifupay.jpg}" alt="">
-                </div>
-            </div>
+<!--/* 赞赏浮层。原版是 Bootstrap Modal（要引 bootstrap.bundle.js 才有个居中盒子），
+       换成原生 <dialog>：焦点陷阱、Esc 关闭、::backdrop 都是浏览器自带的。
+       两个二维码图片地址与改版前一致。 */-->
+<dialog class="appr-dlg" id="appreciationModal" aria-labelledby="apprTitle">
+    <div class="appr-dlg-head">
+        <span class="mono" id="apprTitle">赞赏码</span>
+        <button type="button" class="btn-sq" data-appr-close>关闭</button>
+    </div>
+    <div class="appr-dlg-body">
+        <p>如果我的博客帮助到了您，您可以友情支持一下。</p>
+        <div class="appr-qrs">
+            <figure>
+                <figcaption>微信</figcaption>
+                <img th:src="@{/images/wechat.jpg}" alt="微信赞赏码" width="180" loading="lazy">
+            </figure>
+            <figure>
+                <figcaption>支付宝</figcaption>
+                <img th:src="@{/images/zhifupay.jpg}" alt="支付宝赞赏码" width="180" loading="lazy">
+            </figure>
         </div>
     </div>
-</div>
+</dialog>
 
+<th:block th:replace="~{fragments/chrome :: footer}"/>
 
-<!--底部栏-->
-<th:block th:replace="~{fragments/legacy :: footer}"/>
+<th:block th:replace="~{fragments/chrome :: searchDialog}"/>
+<th:block th:replace="~{fragments/chrome :: scripts}"/>
 
-<!--    动态线条-->
-<script src="../static/lib/bootstrap.bundle.min.js" th:src="@{/lib/bootstrap.bundle.min.js}"></script>
-<script src="../static/lib/jquery-3.2.1/jquery-3.2.1.min.js" th:src="@{/lib/jquery-3.2.1/jquery-3.2.1.min.js}"></script>
-<script src="../static/lib/scrollTo/jquery.scrollTo.min.js" th:src="@{/lib/scrollTo/jquery.scrollTo.min.js}"></script>
-<script src="../static/lib/prism/prism.js" th:src="@{/lib/prism/prism.js}"></script>
-<script src="../static/lib/tocbot/tocbot.min.js" th:src="@{/lib/tocbot/tocbot.min.js}"></script>
-<script src="../static/lib/clickEffect.js" th:src="@{/lib/clickEffect.js}"></script>
+<!--/* Prism 与 tocbot 是仅此一页需要的两个库，所以留在这一页引，不进公共片段。 */-->
+<script th:src="@{/lib/prism/prism.js}"></script>
+<script th:src="@{/lib/tocbot/tocbot.min.js}"></script>
 
+<!--/* 页面脚本。
+     与留言板同一个思路：全部事件委托挂在 document 上，因为评论列表会被 AJAX
+     整块重写，绑在具体节点上的监听会随节点一起消失。 */-->
+<script>
+    (function () {
 
-<th:block th:replace="~{fragments/legacy :: scripts}"/>
-<script th:inline="javascript">
-    // 代码高亮
-    Prism.highlightAll({ autoDetect: true });
+        // ---------- 代码高亮与目录 ----------
+        Prism.highlightAll({ autoDetect: true });
+        tocbot.init({
+            tocSelector: '.js-toc',
+            contentSelector: '.js-toc-content',
+            headingSelector: 'h1, h2, h3',
+            collapseDepth: 3,
+        });
 
-    // 加载tocbot目录
-    tocbot.init({
-        // 在哪里渲染目录
-        tocSelector: '.js-toc',
-        // 用于构建目录的内容位置
-        contentSelector: '.js-toc-content',
-        // 在contentSelector元素内要抓取的标题
-        headingSelector: 'h1, h2, h3',
-        // 不应折叠的标题级别数
-        // 例如，数字6将显示所有内容，因为只有6个标题级别，数字0将折叠所有内容。
-        // 隐藏的部分将随着滚动到其中的标题而打开和关闭。
-        collapseDepth: 3,
+        // ---------- 工具 ----------
+        function val(name) {
+            var el = document.querySelector('[name="' + name + '"]');
+            return el ? el.value : '';
+        }
+        function setVal(name, v) {
+            var el = document.querySelector('[name="' + name + '"]');
+            if (el) el.value = v;
+        }
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
 
-
-    });
-
-    function addEmoji(emoji) {
-        var contentTextarea = document.getElementById('comment-content');
-        contentTextarea.value = contentTextarea.value + emoji;
-    }
-
-    $('#toTop-button').click(function () {
-        $(window).scrollTo(0, 100);
-    });
-
-    $('#toComment-button').click(function () {
-        $(window).scrollTo($('#comment-container'), 100);
-    });
-
-    $(document).ready(function() {
-        var lastScrollTop = 0;
-
-        // 监听滚动事件
-        $(window).scroll(function() {
-            var st = $(this).scrollTop();
-
-            // 判断滚动方向
-            if (st > lastScrollTop) {
-                // 向下滚动
-                $('#float-action').fadeOut();
-            } else {
-                // 向上滚动
-                $('#float-action').fadeIn();
+        // ---------- 赞赏浮层 ----------
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('[data-appr-open]')) {
+                var d = document.getElementById('appreciationModal');
+                if (typeof d.showModal === 'function') { d.showModal(); } else { d.setAttribute('open', ''); }
+                return;
             }
-
-            lastScrollTop = st;
+            if (e.target.closest('[data-appr-close]')) {
+                var d2 = document.getElementById('appreciationModal');
+                if (typeof d2.close === 'function') { d2.close(); } else { d2.removeAttribute('open'); }
+            }
+        });
+        // 点背景关闭：dialog 自身铺满视口，点到它自己即为点到背景
+        document.getElementById('appreciationModal').addEventListener('click', function (e) {
+            if (e.target === this && typeof this.close === 'function') this.close();
         });
 
-
-    });
-
-
-
-    $('#commentpost-btn').click(function () {
-        console.log("1")
-        // 获取输入的值
-        var nickname = $('input[name="nickname"]').val();
-        var email = $('input[name="email"]').val();
-        var content = $('textarea[name="content"]').val();
-
-        // 校验邮箱
-        if (!isValidEmail(email)) {
-            alert('请输入有效的邮箱地址');
-            return ;
-        }
-        // 校验昵称
-        if (!nickname.trim()) {
-            alert('昵称不能为空');
-            return ;
-        }
-
-        // 校验留言内容
-        if (!content.trim()) {
-            alert('留言内容不能为空');
-            return ;
-        }
-        postData();
-    });
-
-    function checkQQEmail() {
-        var emailInput = document.getElementById('emailInput');
-        var avatar = document.getElementById('avatar');
-
-        // 正则表达式匹配QQ邮箱
-        var qqEmailRegex = /^[1-9]\d{4,10}@qq\.com$/;
-        var userEmail = emailInput.value.trim();
-
-        if (qqEmailRegex.test(userEmail)) {
-            // 提取QQ号码
-            var qqNumber = userEmail.split('@')[0];
-            // 构建QQ头像URL
-            var avatarURL = 'http://q1.qlogo.cn/g?b=qq&nk=' + qqNumber + '&s=100';
-            // 更新头像
-            avatar.src = avatarURL;
-            $("[name='avatar']").val(avatarURL);
-        } else {
-            // 如果不是QQ邮箱，显示默认图片
-            avatar.src = '/images/me.jpg';
-            $("[name='avatar']").val('/images/me.jpg');
-
-        }
-    }
-
-    // 简单的邮箱格式校验函数
-    function isValidEmail(email) {
-        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    }
-
-    function postData() {
-        $("#comment-container").load(/*[[@{/comments(pageNum=${commentPageInfo.pageNum})}]]*/"", {
-            "rootCommentId": $("[name='rootCommentId']").val(),
-            "parentCommentId": $("[name='parentCommentId']").val(),
-            "blogId": $("[name='blogId']").val(),
-            "nickname": $("[name='nickname']").val(),
-            "email": $("[name='email']").val(),
-            "avatar" : $("[name='avatar']").val(),
-            "content": $("[name='content']").val(),
-            "address" : $("[name='address']").val()
-        }, function (responseTxt, statusTxt, xhr) {
-            clearContent();
+        // ---------- 浮动操作 ----------
+        // 原来是 jQuery 的 scrollTo 插件，换成原生。参数 100 是动画时长，原生没这个概念，
+        // 直接瞬移；html 上已有 scroll-behavior: smooth，实际仍是平滑的。
+        document.getElementById('toTop-button').addEventListener('click', function () {
+            window.scrollTo(0, 0);
         });
-    }
+        document.getElementById('toComment-button').addEventListener('click', function () {
+            var el = document.getElementById('comment-section') || document.getElementById('comment-form');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
 
-    function clearContent() {
-        $("[name='content']").val('');
-        $("[name='parentCommentId']").val(null);
-        $("[name='rootCommentId']").val(null);
-        $("[name='content']").attr("placeholder", "请输入评论信息...");
-    }
+        // ---------- 头像随邮箱变 ----------
+        function syncAvatar() {
+            var email = document.getElementById('emailInput').value.trim();
+            var avatar = document.getElementById('avatar');
+            var qq = /^[1-9]\d{4,10}@qq\.com$/;
+            var url = qq.test(email)
+                ? 'http://q1.qlogo.cn/g?b=qq&nk=' + email.split('@')[0] + '&s=100'
+                : '/images/me.jpg';
+            avatar.src = url;
+            setVal('avatar', url);
+        }
+        document.getElementById('emailInput').addEventListener('input', syncAvatar);
 
-    function reply(obj) {
-        var parentCommentId = $(obj).data('parentcommentid');
-        var rootCommentId = $(obj).data('rootcommentid');
-        var commentNickname = $(obj).data('commentnickname');
-        $("[name='content']").attr("placeholder", "@" + commentNickname).focus();
-        $("[name='parentCommentId']").val(parentCommentId);
-        $("[name='rootCommentId']").val(rootCommentId);
-        $(window).scrollTo($('#comment-form'), 100);
-    }
+        // ---------- 表情 ----------
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('#emojiBar [data-emoji]');
+            if (!btn) return;
+            var ta = document.getElementById('comment-content');
+            ta.value += btn.getAttribute('data-emoji');
+            ta.focus();
+        });
 
+        // ---------- 回复 ----------
+        document.addEventListener('click', function (e) {
+            var a = e.target.closest('[data-reply]');
+            if (!a) return;
+            e.preventDefault();
+            var ta = document.getElementById('comment-content');
+            ta.placeholder = '@' + a.getAttribute('data-commentnickname') + '：';
+            setVal('parentCommentId', a.getAttribute('data-parentcommentid'));
+            setVal('rootCommentId', a.getAttribute('data-rootcommentid'));
+            document.getElementById('comment-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            ta.focus();
+        });
 
-    $(function () {
-        $("#comment-container").load(/*[[@{/comments/{id}(id=${blog.id})}]]*/);
-    });
+        // ---------- 删除确认 ----------
+        // 原来写在 onclick 属性里。改成委托后，AJAX 换过的新节点也照样有确认。
+        document.addEventListener('click', function (e) {
+            var a = e.target.closest('[data-confirm]');
+            if (!a) return;
+            if (!window.confirm(a.getAttribute('data-confirm'))) e.preventDefault();
+        });
 
+        // ---------- 换评论列表 ----------
+        // 整个 #comment-container 换掉，分页也在里面（片段自带），所以页码窗口与
+        // 当前页高亮会一起更新 —— 这正是改版前做不到的：那时分页在容器外，
+        // .load() 一重写就被抹掉，加载完一个分页都不剩。
+        function replaceComments(html) {
+            var c = document.getElementById('comment-container');
+            if (c) c.innerHTML = html;
+        }
 
+        function fetchComments(page) {
+            var blogId = val('blogId');
+            return fetch('/comments/' + blogId + '?pageNum=' + page)
+                .then(function (r) {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.text();
+                })
+                .then(replaceComments);
+        }
+
+        // ---------- 分页 ----------
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('#comment-container [data-page]');
+            if (!btn || btn.disabled) return;
+            fetchComments(btn.getAttribute('data-page'))
+                .catch(function (err) { alert('加载评论失败：' + err.message); });
+        });
+
+        // ---------- 发送评论 ----------
+        function clearContent() {
+            var ta = document.getElementById('comment-content');
+            ta.value = '';
+            ta.placeholder = '注意文明发言哦~';
+            setVal('parentCommentId', '');
+            setVal('rootCommentId', '');
+        }
+
+        document.getElementById('commentpost-btn').addEventListener('click', function () {
+            var content = val('content');
+            if (!isValidEmail(val('email'))) { alert('请输入有效的邮箱地址'); return; }
+            if (!val('nickname').trim()) { alert('昵称不能为空'); return; }
+            if (!content.trim()) { alert('留言内容不能为空'); return; }
+
+            // 发到当前评论页：POST /comments 存库后 302 到
+            // /comments/{blogId}?pageNum={pageNum}，fetch 会跟到那个只返回片段的端点。
+            var page = document.querySelector('#comment-container [aria-current]');
+            var pageNum = (page && page.getAttribute('data-page')) || '1';
+
+            var body = new URLSearchParams();
+            ['rootCommentId', 'parentCommentId', 'blogId', 'nickname', 'email', 'avatar', 'content', 'address']
+                .forEach(function (k) { body.append(k, val(k)); });
+
+            var btn = this;
+            btn.disabled = true;
+
+            fetch('/comments?pageNum=' + pageNum, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                body: body.toString()
+            })
+                .then(function (r) {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.text();
+                })
+                .then(function (html) {
+                    replaceComments(html);
+                    clearContent();
+                })
+                .catch(function (err) {
+                    // 失败保留输入内容并把原因说出来，原来的 complete 回调是无条件清空的
+                    alert('发送失败：' + err.message);
+                })
+                .finally(function () { btn.disabled = false; });
+        });
+
+        // 页面脚本不再需要「打开时先 .load() 一次」：服务端渲染的就是第 1 页，
+        // 那次多余的请求只会把分页抹掉（改版前就是这么坏的）。
+    })();
 </script>
+
 </body>
 </html>
