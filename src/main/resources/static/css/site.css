@@ -438,9 +438,9 @@ button { font: inherit; }
 .idx-row:hover .idx-title,
 .idx-row:hover .idx-desc,
 .idx-row:hover .idx-num,
-.idx-row:hover .idx-meta,
-.idx-row:hover .idx-tags { color: var(--ink-on-signal); }
-.idx-row:hover .idx-meta .cat { border-color: var(--ink-on-signal); }
+.idx-row:hover .row-meta,
+.idx-row:hover .row-tags { color: var(--ink-on-signal); }
+.idx-row:hover .row-meta .cat { border-color: var(--ink-on-signal); }
 
 .idx-num {
   font-family: var(--font-disp); font-variation-settings: 'wdth' 100, 'wght' 800;
@@ -459,10 +459,13 @@ button { font: inherit; }
   overflow: hidden;
   color: var(--ink-2); font-size: 17px; transition: color .35s;
 }
-.idx-tags { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; color: var(--ink-2); transition: color .35s; }
-.idx-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; color: var(--ink-2); transition: color .35s; }
-@media (min-width: 1024px) { .idx-meta { justify-content: flex-end; } }
-.idx-meta .cat { border: 1px solid var(--line-strong); padding: 3px 9px; transition: border-color .35s; }
+/* 列表行里那两条附属信息：标签串与元数据串。
+   首页索引与标签页都用，所以名字不绑页面。 */
+.row-tags { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; color: var(--ink-2); transition: color .35s; }
+.row-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; color: var(--ink-2); transition: color .35s; }
+.row-meta .cat { border: 1px solid var(--line-strong); padding: 3px 9px; transition: border-color .35s; }
+/* 只有首页把元数据甩到行的最右边（它在第三列）；标签页的元数据跟在摘要下面，左对齐 */
+@media (min-width: 1024px) { .idx-row .row-meta { justify-content: flex-end; } }
 
 /* 空列表：三张表全空时也给一句人话，而不是一片留白 */
 .idx-empty { padding: 64px 0; color: var(--ink-2); border-bottom: 1px solid var(--line); }
@@ -801,18 +804,20 @@ button { font: inherit; }
 
 /* 行。移动端单栏堆叠，≥1024px 才排成 日期 / 标题描述 / 封面 三栏 ——
    断点与 .idx-row 一致，两页的节奏感才是同一个。 */
-.arc-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 22px 20px 22px 0; border-bottom: 1px solid var(--line); }
+.post-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 22px 20px 22px 0; border-bottom: 1px solid var(--line); }
 /* baseline 而不是 center：行高随摘要行数变（一到两行），居中会让日期在行与行之间
    上下浮动，看着像没对齐。baseline 让日期始终咬住标题那一行。
    封面反过来要居中，否则会跟着标题基线掉下来。 */
+/* 第一列 120px：归档页只放 MM-dd，标签页要放完整的 yyyy-MM-dd。
+   15px 等宽体 + .14em 字距下，10 个字符约 111px，96px 会把日期挤断行。 */
 @media (min-width: 1024px) {
-  .arc-row { grid-template-columns: 96px minmax(0, 1fr) 148px; gap: 32px; align-items: baseline; padding: 24px 20px 24px 0; }
-  .arc-thumb { align-self: center; }
+  .post-row { grid-template-columns: 120px minmax(0, 1fr) 148px; gap: 32px; align-items: baseline; padding: 24px 20px 24px 0; }
+  .post-thumb { align-self: center; }
 }
 
-.arc-date { color: var(--ink-2); transition: color .35s; }
-.arc-title { display: block; font-family: var(--font-cjk); font-weight: 700; font-size: 21px; line-height: 1.45; color: var(--ink); margin: 0 0 6px; overflow-wrap: break-word; transition: color .35s; }
-.arc-desc {
+.post-date { color: var(--ink-2); transition: color .35s; }
+.post-title { display: block; font-family: var(--font-cjk); font-weight: 700; font-size: 21px; line-height: 1.45; color: var(--ink); margin: 0 0 6px; overflow-wrap: break-word; transition: color .35s; }
+.post-desc {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   color: var(--ink-2); font-size: 17px; transition: color .35s;
 }
@@ -820,14 +825,41 @@ button { font: inherit; }
 /* 封面。库里存的是 CSDN 的外链，33 条里 33 条都在别人域名上，
    所以必须 loading="lazy"：不留神就是进页面并发 33 个跨域请求。
    与 .tile img 用同一套印刷滤镜，保证站内所有图片是一张脸。 */
-.arc-thumb { display: none; }
+.post-thumb { display: none; }
 @media (min-width: 1024px) {
-  .arc-thumb {
+  .post-thumb {
     display: block; width: 148px; height: 84px; object-fit: cover;
     filter: grayscale(1) contrast(.96) brightness(1.2);
   }
 }
 
-.arc-row:hover .arc-date,
-.arc-row:hover .arc-title,
-.arc-row:hover .arc-desc { color: var(--ink-on-signal); }
+.post-row:hover .post-date,
+.post-row:hover .post-title,
+.post-row:hover .post-desc,
+.post-row:hover .row-meta,
+.post-row:hover .row-tags { color: var(--ink-on-signal); }
+.post-row:hover .row-meta .cat { border-color: var(--ink-on-signal); }
+
+/* ==========================================================================
+   18. 标签页
+   ========================================================================== */
+
+/* 标签选择器。整块是一张真表单（method=get、action=/tags）：
+   点一个标签就把它的 id 并进隐藏域再提交，与改版前完全一致。
+   不做成 AJAX 局部刷新 —— 那样虽然快，但会让「选了哪些标签」不再进 URL，
+   刷新和分享就都丢了状态。 */
+.tag-picker { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 52px; }
+
+.tag-chip {
+  display: inline-flex; align-items: baseline; gap: 8px;
+  padding: 9px 16px; border: 1px solid var(--line-strong);
+  font-size: 17px; color: var(--ink-2); cursor: pointer;
+  transition: background .3s, color .3s, border-color .3s;
+}
+.tag-chip .hash { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--signal); transition: color .3s; }
+.tag-chip .count { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-2); transition: color .3s; }
+.tag-chip:hover { border-color: var(--signal); color: var(--ink); }
+/* 选中态沿用列表行悬停的那套语言：实心信号黄 + 墨字，全站只有一个「被选中」的样子 */
+.tag-chip.active { background: var(--signal-fill); border-color: var(--signal-edge); color: var(--ink-on-signal); }
+.tag-chip.active .hash,
+.tag-chip.active .count { color: var(--ink-on-signal); }

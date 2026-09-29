@@ -148,11 +148,11 @@
                         <span>
                             <span class="idx-title" th:text="${b.title}">文章标题</span>
                             <span class="idx-desc" th:text="${b.description}">文章摘要</span>
-                            <span class="idx-tags mono-sm" th:if="${not #lists.isEmpty(b.tagList)}">
+                            <span class="row-tags mono-sm" th:if="${not #lists.isEmpty(b.tagList)}">
                                 <span th:each="t : ${b.tagList}" th:text="${'#' + t.name}">#标签</span>
                             </span>
                         </span>
-                        <span class="idx-meta mono">
+                        <span class="row-meta mono">
                             <span th:text="${#temporals.format(b.updateTime,'yyyy-MM-dd')}">2026-09-21</span>
                             <span class="cat" th:if="${b.copyright == 1}">原创</span>
                             <span class="cat" th:if="${b.copyright == 0}">转载</span>
