@@ -21,61 +21,12 @@
 
 <!--固定在顶部的导航-->
 <div class="cz-navbar fixed d-none" id="fixed-navbar">
-    <div class="cz-pc-menu">
-        <a href="index.html" th:href="@{/}" class="cz-navbar-brand text-decoration-none"><strong th:text="${author}">ChenZhen</strong></a>
-        <div class="cz-navbar-links fs-6 fw-light">
-            <a href="index.html"    th:href="@{/}" class="cz-nav-link cz-active-link">首页</a>
-            <a href="tags.html"     th:href="@{/tags}" class="cz-nav-link">标签</a>
-            <a href="archives.html" th:href="@{/archives}" class="cz-nav-link">归档</a>
-            <a href="message.html"  th:href="@{/message}" class="cz-nav-link">留言板</a>
-            <a href="friends.html"  th:href="@{/friends}" class="cz-nav-link">友链</a>
-            <a href="https://www.travellings.cn/go.html" class="cz-nav-link">🚇开往</a>
-            <a href="about.html"    th:href="@{/about}" class="cz-nav-link">关于我</a>
-        </div>
-        <a href="#" class="cz-navbar-brand" data-bs-toggle="modal" data-bs-target="#searchModal">
-            <strong>搜索</strong>
-        </a>
-
-
-        <button class="cz-menu-toggle-btn">菜单</button>
-    </div>
-    <div class="cz-mobile-menu fw-light fs-6">
-        <a href="index.html"    th:href="@{/}" class="cz-nav-link cz-active-link">首页</a>
-        <a href="tags.html"     th:href="@{/tags}" class="cz-nav-link">标签</a>
-        <a href="archives.html" th:href="@{/archives}" class="cz-nav-link">归档</a>
-        <a href="message.html"  th:href="@{/message}" class="cz-nav-link">留言板</a>
-        <a href="friends.html"  th:href="@{/friends}" class="cz-nav-link">友链</a>
-        <a href="https://www.travellings.cn/go.html" class="cz-nav-link">🚇开往</a>
-        <a href="about.html"    th:href="@{/about}" class="cz-nav-link">关于我</a>
-    </div>
+    <th:block th:replace="~{fragments/legacy :: navbarInner('index')}"/>
 </div>
 
 
 <!-- 搜索框 -->
-<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content p-2 ">
-            <div class="modal-body ">
-                <button type="button" class="btn-close float-end" data-bs-dismiss="modal" aria-label="Close"></button>
-                <div class="text-center fs-5 mb-3">搜　索</div>
-                <div class="input-group mb-4">
-                    <span class="input-group-text" id="basic-addon1">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                        </svg>
-                    </span>
-                    <input id="keywordInput" type="text" class="form-control" placeholder="输入关键词" aria-describedby="basic-addon1">
-                </div>
-
-                <div class="mb-2">搜索结果</div>
-                <!-- 搜索结果展示区域 -->
-                <div id="searchResults" class="list-group">
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
+<th:block th:replace="~{fragments/legacy :: searchModal}"/>
 
 <!--顶部图片-->
 <div alt="" id="cz-bg-img" class="cz-bg-section cz-bg-img "
@@ -488,18 +439,7 @@
 </div>
 
 <!--底部栏-->
-<footer class="border-top p-3 bg-white text-muted small">
-    <div class="container pb-5 ">
-        <div class=" d-flex align-items-center justify-content-between">
-            <div>
-                <span class="cz-navbar-brand mr-2"><strong th:text="${author}">ChenZhen</strong></span>我的博客已营业：<span id="htmer_time">1年105天8时13分28秒</span>
-            </div>
-            <div>
-                <a target="_blank" class="text-secondary fw-bold" href="#">粤ICP备2022122083号-1</a>
-            </div>
-        </div>
-    </div>
-</footer>
+<th:block th:replace="~{fragments/legacy :: footer}"/>
 
 <!--    动态线条-->
 <script src="../static/lib/clickEffect.js" th:src="@{/lib/clickEffect.js}"></script>
@@ -509,6 +449,7 @@
 
 
 
+<th:block th:replace="~{fragments/legacy :: scripts}"/>
 <script th:inline="javascript">
     //设置滚动视差效果
     // 获取相关元素
@@ -530,23 +471,6 @@
     });
 
 
-    // 移动设备导航栏样式切换
-    // 获取菜单切换按钮和移动设备菜单列表的引用
-    const menuToggleBtns = document.querySelectorAll('.cz-menu-toggle-btn');
-    const mobileMenus = document.querySelectorAll('.cz-mobile-menu');
-    // 点击菜单切换按钮时的事件处理函数
-    menuToggleBtns.forEach(menuToggleBtn =>{
-        menuToggleBtn.addEventListener('click', () => {
-                // 切换移动设备菜单列表的显示状态
-                // 循环遍历所有 mobileMenu 元素，为它们添加 show 类
-                mobileMenus.forEach(mobileMenu => {
-                    mobileMenu.classList.toggle('show');
-                });
-            }
-        )
-    });
-
-
     // 向下滚动 导航栏固定在顶部
     // 获取导航栏元素的引用 id="fixed-navbar"的元素
     const fixedNavbar = document.querySelector('#fixed-navbar');
@@ -562,83 +486,6 @@
         } else {
             fixedNavbar.classList.add('d-none');
         }
-    });
-
-    // 运行时间统计
-    function secondToDate(second) {
-        if (!second) {
-            return 0;
-        }
-        var time = new Array(0, 0, 0, 0, 0);
-        if (second >= 365 * 24 * 3600) {
-            time[0] = parseInt(second / (365 * 24 * 3600));
-            second %= 365 * 24 * 3600;
-        }
-        if (second >= 24 * 3600) {
-            time[1] = parseInt(second / (24 * 3600));
-            second %= 24 * 3600;
-        }
-        if (second >= 3600) {
-            time[2] = parseInt(second / 3600);
-            second %= 3600;
-        }
-        if (second >= 60) {
-            time[3] = parseInt(second / 60);
-            second %= 60;
-        }
-        if (second > 0) {
-            time[4] = second;
-        }
-        return time;
-    }
-    function setTime() {
-        /*此处为网站的创建时间*/
-        var create_time = Math.round(new Date(Date.UTC(2022, 8, 21, 15, 15, 15)).getTime() / 1000);
-        var timestamp = Math.round((new Date().getTime() + 8 * 60 * 60 * 1000) / 1000);
-        currentTime = secondToDate((timestamp - create_time));
-        currentTimeHtml = currentTime[0] + '年' + currentTime[1] + '天'
-            + currentTime[2] + '时' + currentTime[3] + '分' + currentTime[4]
-            + '秒';
-        document.getElementById("htmer_time").innerHTML = currentTimeHtml;
-    }
-    setInterval(setTime, 1000);
-
-    // 获取关键词输入框
-    const keywordInput = $('#keywordInput');
-    //搜索 当用户输入结束时触发事件
-    keywordInput.on('input', function() {
-        // 使用定时器延迟发送 AJAX 请求，以确保用户输入结束
-        clearTimeout(this.timer);
-        this.timer = setTimeout(function () {
-            // 获取用户输入的关键词
-            const keyword = keywordInput.val();
-            // 发送 AJAX 请求
-            $.ajax({
-                url: '/search',
-                method: 'GET',
-                data: { keyword: keyword },
-                success: function(response) {
-                    // 处理从后端返回的数据
-                    if (response.code === 20000){
-                        var resultList = response.data.blogs;
-                        // 获取搜索结果列表容器
-                        var searchResults = $('#searchResults');
-                        // 清空原来的结果
-                        searchResults.empty();
-                        if (resultList){
-                            // 渲染搜索结果列表
-                            resultList.forEach(function(blog) {
-                                var blogItem = $('<a>').attr('href', `/blog/${blog.id}`).addClass('list-group-item list-group-item-action').text(blog.title);
-                                searchResults.append(blogItem);
-                            });
-                        }
-                    }
-                },
-                error: function(error) {
-                    console.error('Error:', error);
-                }
-            });
-        }, 1000); // 1000 毫秒延迟
     });
 
     const audioPlayer = document.getElementById('audioPlayer');
