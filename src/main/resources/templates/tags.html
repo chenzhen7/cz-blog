@@ -27,12 +27,12 @@
            改版前那条 45vh 的背景图带去掉，改用全站统一的 .page-head。 */-->
     <header class="page-head">
         <div class="wrap">
-            <div class="eyebrow">
+            <div class="eyebrow wipe-in">
                 <span class="bar"></span>
                 <span class="mono">Tags / 文章分类</span>
             </div>
-            <h1 class="page-title">标签</h1>
-            <p class="page-lead">点一个标签，只看它底下的文章；再点一次取消。可以多选。</p>
+            <h1 class="page-title wipe-in">标签</h1>
+            <p class="page-lead rise">点一个标签，只看它底下的文章；再点一次取消。可以多选。</p>
         </div>
     </header>
 
@@ -46,7 +46,7 @@
                    只换了 class 名（cz-tag-link -> tag-chip），对应的脚本一并在下面重写了。 */-->
             <form id="tagForm" action="/tags" th:if="${not #lists.isEmpty(tagList)}">
                 <div class="tag-picker">
-                    <a class="tag-chip" href="#" th:each="tag : ${tagList}" th:data-tag-id="${tag.id}">
+                    <a class="tag-chip magnet" href="#" th:each="tag : ${tagList}" th:data-tag-id="${tag.id}">
                         <span class="hash">#</span>
                         <span th:text="${tag.name}">实用教程</span>
                         <span class="count" th:text="${tag.blogCount}">25</span>
@@ -68,7 +68,7 @@
                 <!--/* 行结构与归档页共用 .post-row（日期 / 标题+摘要 / 封面）。
                        这里比归档多一条 .row-meta：原创转载、阅读、评论。
                        日期用 updateTime，与改版前一致（归档页用的是 createTime）。 */-->
-                <a class="post-row row-fill" th:each="blog : ${page.list}"
+                <a class="post-row row-fill rise" th:each="blog : ${page.list}"
                    th:classappend="${#strings.isEmpty(blog.firstPicture)} ? '' : 'has-thumb'"
                    th:href="@{/blog/{id}(id=${blog.id})}">
                     <span class="post-date mono" th:text="${#temporals.format(blog.updateTime,'yyyy-MM-dd')}">2024-07-14</span>
@@ -140,13 +140,15 @@
             .filter(function (n) { return !isNaN(n); });
 
         // 高亮当前选中的标签
-        var chips = document.querySelectorAll('.tag-chip');
-        chips.forEach(function (chip) {
+        var chips = document.querySelectorAll('.tag-chip');        chips.forEach(function (chip) {
             var id = parseInt(chip.getAttribute('data-tag-id'), 10);
             if (selected.indexOf(id) !== -1) chip.classList.add('active');
         });
 
-        // 点标签：选中/取消后立即提交
+        // 点标签：选中/取消后延迟 280ms 再提交 —— 让信号黄的定向擦入先播完。
+        // 立即提交的话新页面直接带着「已选中」的终态渲染，这段擦入永远没机会亮相。
+        // 连续点多个标签时清掉上一个计时器，只按最后一次的选中集合提交一次。
+        var submitTimer = null;
         chips.forEach(function (chip) {
             chip.addEventListener('click', function (event) {
                 event.preventDefault();
@@ -155,8 +157,27 @@
                 if (at === -1) { selected.push(id); } else { selected.splice(at, 1); }
                 // 显式 join 成逗号串，不依赖数组到字符串的隐式转换
                 hidden.value = selected.join(',');
-                form.submit();
+                this.classList.toggle('active', at === -1);
+                clearTimeout(submitTimer);
+                submitTimer = setTimeout(function () { form.submit(); }, 280);
             });
+        });
+    })();
+</script>
+
+<!--/* 标签云入场：chips 按序 pop。与筛选脚本分开，因为它是纯增强。
+     clearProps 播完交出 transform 所有权 —— 之后悬停位移归 chrome 的
+     指针物理循环（.magnet）管，两个系统不抢同一个属性（规范 §5.2）。
+     GSAP 没到位就安静跳过：.anim 已被 motion 摘掉，chips 本来就全显示。 */-->
+<script th:inline="none">
+    (function () {
+        'use strict';
+        if (!window.gsap || !window.ScrollTrigger) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        gsap.fromTo('.tag-chip', { opacity: 0, y: 14 }, {
+            opacity: 1, y: 0, duration: .5, ease: 'power3.out',
+            stagger: 0.035, clearProps: 'transform',
+            scrollTrigger: { trigger: '.tag-picker', start: 'top 88%' }
         });
     })();
 </script>

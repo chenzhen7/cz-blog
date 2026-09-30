@@ -949,6 +949,7 @@ button { font: inherit; }
 
 .tag-chip {
   display: inline-flex; align-items: baseline; gap: 8px;
+  position: relative; isolation: isolate;    /* 给 ::before 的擦入填充层兜底，同 .idx-row 的写法 */
   padding: 9px 16px; border: 1px solid var(--line-strong);
   font-size: 17px; color: var(--ink-2); cursor: pointer;
   transition: background .3s, color .3s, border-color .3s;
@@ -956,10 +957,24 @@ button { font: inherit; }
 .tag-chip .hash { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--signal); transition: color .3s; }
 .tag-chip .count { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-2); transition: color .3s; }
 .tag-chip:hover { border-color: var(--signal); color: var(--ink); }
-/* 选中态沿用列表行悬停的那套语言：实心信号黄 + 墨字，全站只有一个「被选中」的样子 */
-.tag-chip.active { background: var(--signal-fill); border-color: var(--signal-edge); color: var(--ink-on-signal); }
+/* 选中态沿用列表行悬停的那套语言：实心信号黄从左边擦进来 + 墨字，
+   全站只有一个「被选中」的样子。填充放在 ::before 上是为了让擦入有方向；
+   整页跳转的契约不变，页内脚本会留 280ms 让这段擦入播完再提交表单。 */
+.tag-chip::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: var(--signal-fill);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path .45s cubic-bezier(.16, 1, .3, 1);
+}
+.tag-chip.active { border-color: var(--signal-edge); color: var(--ink-on-signal); }
+.tag-chip.active::before { clip-path: inset(0 0 0 0); }
 .tag-chip.active .hash,
 .tag-chip.active .count { color: var(--ink-on-signal); }
+
+/* 入场初始态：标签云按序 pop（页内脚本 GSAP stagger）。
+   与第 13 节同逻辑：.anim 门控保证 JS 不可用 / reduce 时直接可见。
+   播完脚本会 clearProps 掉 transform —— 之后悬停位移归指针物理循环（.magnet）管。 */
+.anim .tag-picker .tag-chip { opacity: 0; }
 
 /* ==========================================================================
    19. 友链页
