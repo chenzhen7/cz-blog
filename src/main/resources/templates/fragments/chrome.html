@@ -503,15 +503,21 @@
             el.addEventListener('mouseleave', function () { magState[i].tx = 0; magState[i].ty = 0; kick(); });
         });
 
-        tilts.forEach(function (el, i) {
-            el.addEventListener('mousemove', function (e) {
-                var r = el.getBoundingClientRect();
-                // 光标在卡片内的相对位置映射到 ±4°。纵向取反号：光标在上半，卡片上缘迎上来
-                tiltState[i].try = ((e.clientX - r.left) / r.width - 0.5) * 8;
-                tiltState[i].trx = -((e.clientY - r.top) / r.height - 0.5) * 8;
-                kick();
-            });
-            el.addEventListener('mouseleave', function () { tiltState[i].trx = 0; tiltState[i].try = 0; kick(); });
+        // tilts 不按元素绑 mousemove/mouseleave，而是全局追踪指针、每帧按矩形判定。
+        // 原因：嵌套倾斜（友链页整墙 + 墙上单卡）里，墙的转动会把卡片从静止的光标下
+        // 推走，mouseleave 把卡片目标清零，光标再不动卡片就再也抬不起来 ——
+        // 改成每帧重算「指针在不在我里面」，元素滑动、悬停震荡都不影响判定。
+        var tiltCfg = tilts.map(function (el) {
+            // data-tilt 的值是最大倾角（缺省 4°）；带 data-tilt-outer 表示透视由父级
+            // 提供（整墙倾斜，perspective 在父容器上），此时只写 rotate 不写 perspective()
+            var maxDeg = parseFloat(el.getAttribute('data-tilt'), 10);
+            if (isNaN(maxDeg) || maxDeg <= 0) maxDeg = 4;
+            return { maxDeg: maxDeg, outer: el.hasAttribute('data-tilt-outer') };
+        });
+        var pointerX = 0, pointerY = 0;
+        document.addEventListener('mousemove', function (e) {
+            pointerX = e.clientX; pointerY = e.clientY;
+            kick();
         });
 
         function tick() {
@@ -527,12 +533,24 @@
             }
             for (i = 0; i < tilts.length; i++) {
                 s = tiltState[i];
+                // 每帧按当前矩形重算目标：光标在元素内则按其相对位置给倾角
+                // （纵向取反号：光标在上半，元素上缘迎上来），在元素外归零
+                var r = tilts[i].getBoundingClientRect();
+                var inside = pointerX >= r.left && pointerX <= r.right && pointerY >= r.top && pointerY <= r.bottom;
+                if (inside) {
+                    s.try = ((pointerX - r.left) / r.width - 0.5) * 2 * tiltCfg[i].maxDeg;
+                    s.trx = -((pointerY - r.top) / r.height - 0.5) * 2 * tiltCfg[i].maxDeg;
+                } else {
+                    s.trx = 0; s.try = 0;
+                }
                 s.rx += (s.trx - s.rx) * 0.12;
                 s.ry += (s.try - s.ry) * 0.12;
                 if (Math.abs(s.trx - s.rx) < 0.02 && Math.abs(s.try - s.ry) < 0.02) { s.rx = s.trx; s.ry = s.try; }
                 else { settled = false; }
-                // perspective 写在变换里而不是父级：卡片各自独立成透视场，父级不用改
-                tilts[i].style.transform = 'perspective(700px) rotateX(' + s.rx.toFixed(2) + 'deg) rotateY(' + s.ry.toFixed(2) + 'deg)';
+                // 单卡各自独立成透视场（perspective 写在自己的变换里）；
+                // 整墙倾斜（data-tilt-outer）的透视在父容器上，这里只写 rotate
+                var rot = 'rotateX(' + s.rx.toFixed(2) + 'deg) rotateY(' + s.ry.toFixed(2) + 'deg)';
+                tilts[i].style.transform = s.outer ? rot : 'perspective(700px) ' + rot;
             }
             // 全部收敛就停：下一次指针活动由 kick() 重新拉起
             if (settled) { rafId = null; return; }

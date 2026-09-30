@@ -1072,60 +1072,76 @@ button { font: inherit; }
 .form-input:focus, .form-textarea:focus { border-color: var(--signal); outline: none; }
 .form-textarea { min-height: 108px; resize: vertical; }
 
-/* 友链名片墙。
-   这里**不能**照搬首页「站点统计」那套 `gap: 1px + 容器底色画线`：
-   那套的线其实是容器底色从格缝里透出来的，一旦某一行没填满，
-   空出来的格子会把底色整片露出来（22 张卡在 5 列下最后一行只剩 2 张，
-   右下角就是一大块灰）。站点统计固定 3 格刚好填满，所以那边没暴露这个问题。
-   改成把线画在单元格上：容器只负责上边与左边，格子各自负责右边与下边，
-   没有格子就没有线，填不满也不会漏底，且相邻边不会叠成 2px。 */
+/* 悬浮名片墙。
+   3D 结构：.fl-wall（透视容器）→ .fl-grid（preserve-3d，整墙随指针 ±1.4°）
+   → .fl-card（preserve-3d，单卡 ±4°，自己的透视场）→ .fl-inner（hover 浮出）。
+   墙与卡的倾斜都由 chrome 的指针物理循环写 transform（规范 §5.2：一个元素一个主人）。
+
+   网格线仍然画在单元格上（不用 gap:1px 透底色那套 —— 那套在行没填满时会把
+   容器底色整片漏出来，22 张卡在 5 列下右下角就是一大块灰）：
+   容器只负责上边与左边，格子各自负责右边与下边。 */
+.fl-wall-sec { position: relative; overflow: hidden; }
+/* 幽灵字 LINKS：压在墙后面随滚动漂移（motion 片段驱动 .ghost-num）。
+   基类字号是为两位数设计的（22vw），五个字母按它放会冲出右缘，这里收窄 */
+.fl-ghost { top: -24px; font-size: clamp(5rem, 13vw, 11rem); letter-spacing: .06em; }
+.fl-wall { perspective: 1400px; }
 .fl-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   border-top: 1px solid var(--line); border-left: 1px solid var(--line);
-  counter-reset: fl;                 /* 流水号计数器，.fl-card::after 逐个取号 */
-  perspective: 1200px;               /* 入场「发牌」的透视场：卡片从桌面逐张翻起 */
+  transform-style: preserve-3d;
 }
 .fl-card {
-  position: relative; display: flex; align-items: flex-start; gap: 14px;
+  position: relative; display: flex; align-items: flex-start;
   padding: 22px 24px; background: var(--bg);
-  transition: background .3s, box-shadow .3s;
   border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
-  /* 悬停「拿起名片」的 3D 上下文：卡片自身的倾斜由指针物理循环写 inline transform
-     （它含 perspective(700px)），这里两个属性是给子层用的 —— preserve-3d 让子层的
-     translateZ 在卡片平面里成立，perspective: 400px 给子层自己的近大远小。
-     卡片的 transform 只有指针循环一个主人，hover 的「拿起」感全部交给子层和投影。 */
+  outline: 1px solid transparent; outline-offset: -1px;
+  transition: background .3s, outline-color .3s;
+  /* 子层 translateZ 的透视场。指针循环接管后写的是 perspective(700px) rotate…，
+     透视一致；这里是还没碰过指针时的默认 */
+  transform: perspective(700px);
   transform-style: preserve-3d;
-  perspective: 400px;
 }
-/* 硬投影是工业语言里的「拿起」：直角、实心、不模糊。z-index 抬一层，
-   免得投影被右边/下边的卡片裁掉 */
-.fl-card:hover { background: var(--panel); box-shadow: 10px 10px 0 rgba(17, 17, 17, .10); z-index: 2; }
-/* 流水号：CSS 计数器生成，不动模板。平时是纸面上一道浅墨，悬停转信号黄并浮起 */
-.fl-card::after {
-  counter-increment: fl;
-  content: counter(fl, decimal-leading-zero);
-  position: absolute; right: 14px; bottom: 10px;
-  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em;
-  color: rgba(17, 17, 17, .16); transition: color .3s, transform .3s;
-}
-.fl-card:hover::after { color: var(--signal); transform: translateZ(24px) translateY(-2px); }
-/* 描述第二行可能流进右下角的流水号区，留出让位 */
-.fl-desc { padding-right: 30px; }
-/* 名片墙入场的初始态（.anim 门控）：透明度归 0，等页面脚本的 stagger 播入。
+.fl-card:hover { background: var(--panel); outline-color: var(--signal-edge); }
+/* 名片墙入场的初始态（.anim 门控）：透明度归 0，等页面脚本的纵深 stagger 播入。
    只藏 opacity 不写 transform —— transform 归指针物理循环（data-tilt）管，
    两个系统不能抢同一个属性（规范 §5.2）。reduce 下没有 .anim，卡片直接可见。 */
 .anim .fl-grid .fl-card { opacity: 0; }
+/* 悬停浮层：内容整体抬出卡面 30px，头像再抬 16px，名片「悬」在墙上 */
+.fl-inner {
+  display: flex; align-items: flex-start; gap: 14px; flex: 1; min-width: 0;
+  transform-style: preserve-3d;
+  transition: transform .35s cubic-bezier(.16, 1, .3, 1);
+}
+.fl-card:hover .fl-inner { transform: translateZ(30px); }
 .fl-avatar {
   flex-shrink: 0; width: 44px; height: 44px; object-fit: cover;
   filter: grayscale(1) contrast(.96) brightness(1.15);
-  transition: filter .3s, transform .3s;
+  transition: filter .3s, transform .35s cubic-bezier(.16, 1, .3, 1);
 }
-/* 悬停「拿起」的三层浮起：头像离纸面最远，正文次之，流水号/状态块再各错一层。
-   同一动作分三个纵深，产生的视差就是「名片被拿起来」的感觉（hero 图像场的微观版）。
-   transform 落在子层上：卡片自身的 transform 归指针物理循环管，互不抢属性（§5.2） */
-.fl-card:hover .fl-avatar { filter: none; transform: translateZ(34px) scale(1.06); }
-.fl-body { min-width: 0; transition: transform .3s; }
-.fl-card:hover .fl-body { transform: translateZ(18px); }
+.fl-card:hover .fl-avatar { filter: none; transform: translateZ(16px); }
+/* 扫光：一束斜切的信号黄从左到右扫过卡面。独立一层挂 overflow:hidden ——
+   overflow 不能挂 .fl-card 上，那会拍平它子元素的 3D（transform-style 失效） */
+.fl-sheen { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.fl-sheen::before {
+  content: ""; position: absolute; top: -20%; bottom: -20%; left: 0; width: 34%;
+  background: linear-gradient(105deg, transparent, rgba(var(--signal-rgb), .22) 50%, transparent);
+  transform: translateX(-140%) skewX(-14deg);
+  transition: transform .7s cubic-bezier(.16, 1, .3, 1);
+}
+.fl-card:hover .fl-sheen::before { transform: translateX(420%) skewX(-14deg); }
+/* 名字下的高亮笔：hover 时从左往右划一道信号黄 */
+.fl-name { position: relative; }
+.fl-name::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 3px;
+  background: var(--signal-fill);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .35s cubic-bezier(.16, 1, .3, 1);
+}
+.fl-card:hover .fl-name::after { transform: scaleX(1); }
+/* 状态方块 hover 时放大一拍，提示「它是活的」 */
+.fl-card:hover .fl-status { transform: scale(1.35); }
+.fl-status { transition: transform .3s; }
+.fl-body { min-width: 0; }
 .fl-name { display: block; font-weight: 700; font-size: 17px; color: var(--ink); overflow-wrap: break-word; }
 .fl-desc {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
@@ -1138,10 +1154,7 @@ button { font: inherit; }
 .fl-status {
   position: absolute; top: 14px; right: 14px;
   width: 10px; height: 10px; border: 1px solid var(--line-strong);
-  transition: transform .3s;
 }
-/* 状态块浮得最高：它是这张名片上「正在呼吸」的那枚铆钉 */
-.fl-card:hover .fl-status { transform: translateZ(46px); }
 .fl-status[data-net="0"] { background: #2f6b3a; border-color: #2f6b3a; }   /* 网络状态良好 */
 .fl-status[data-net="1"] { background: var(--signal-edge); border-color: var(--signal-edge); }  /* 状态一般 */
 .fl-status[data-net="2"] { background: #8a2b1f; border-color: #8a2b1f; }   /* 网络异常 */
