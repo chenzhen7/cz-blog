@@ -191,7 +191,21 @@
                        按原顺序排着头像墙，标签也不显示 —— 没分组就不声称分过组。 */-->
                 <div class="fr-zone" id="frZone">
                     <span class="fr-zone-tag">
-                        <span class="fr-zone-rule" aria-hidden="true"></span>
+                        <!--/* 信号不通。四根递升的信号条被一道斜杠划掉 —— 就是那个
+                               「无信号」的通用字形，不用另造一个只有本站看得懂的符号。
+                               斜杠要先用底色描粗一遍再画本体：同色的杠压在同色的条上会糊成
+                               一团，先「挖空」一道缝，交叉处才看得出是两笔。
+                               颜色用 --signal 而不是 --signal-edge：#edc800 对白底只有
+                               1.63:1，那是给 1px 下划线的装饰档；这个是 17px 要认得出的图形，
+                               得走「要读的黄」那一档。 */-->
+                        <svg class="fr-zone-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                            <rect x="1" y="9.6" width="2.6" height="5.4" fill="currentColor"/>
+                            <rect x="4.8" y="7" width="2.6" height="8" fill="currentColor"/>
+                            <rect x="8.6" y="4.4" width="2.6" height="10.6" fill="currentColor"/>
+                            <rect x="12.4" y="1.8" width="2.6" height="13.2" fill="currentColor"/>
+                            <line x1="1.6" y1="1.6" x2="14.4" y2="14.4" stroke="var(--bg-sunken)" stroke-width="4.4"/>
+                            <line x1="1.6" y1="1.6" x2="14.4" y2="14.4" stroke="currentColor" stroke-width="1.7"/>
+                        </svg>
                         <!--/* 英文只在头像墙那版出现：星图那版是缩在右下角的小牌子，
                                放不下「Unreachable / 」这12个字符。中英并列是眉标签的写法，
                                角落图例不需要。 */-->

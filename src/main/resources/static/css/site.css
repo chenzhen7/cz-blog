@@ -1228,7 +1228,9 @@ button { font: inherit; }
   border-top: 1px dashed var(--line-strong);
 }
 .fr-zone-tag > * { white-space: nowrap; }
-.fr-zone-rule { width: 40px; height: 1px; background: var(--signal-edge); flex-shrink: 0; }
+/* 标签前的「信号不通」图形。走「要读的黄」那一档（--signal，白底 6.58:1）而不是
+   --signal-edge 的装饰档（1.63:1）—— 17px 的图形要靠形状被认出来，不是 1px 下划线。 */
+.fr-zone-icon { width: 17px; height: 17px; flex-shrink: 0; color: var(--signal); }
 .fr-zone-count {
   font-family: var(--font-mono); font-size: var(--fs-label); font-style: normal;
   color: var(--ink);
@@ -1264,9 +1266,11 @@ button { font: inherit; }
   width: var(--zone-dot, 22px);
 }
 .fr-board.is-map .fr-zone .fr-node-name { display: none; }
-/* 牌子右上角。头像墙那套边距在这里全部作废，位置按 --zone-h 从底往上推 */
+/* 牌子内左上角。头像墙那套边距在这里全部作废，位置按牌子尺寸从右下角反推。
+   左对齐而不是右对齐：图标要跟下面那一列小点从同一条竖线起排，
+   贴右边的话标签的起点在小点列的中间，看着像飘着的。 */
 .fr-board.is-map .fr-zone-tag {
-  position: absolute; right: 10px; gap: 8px;
+  position: absolute; left: calc(100% - var(--zone-w, 0px) + 10px); gap: 8px;
   bottom: calc(var(--zone-h, 0px) - 10px - 20px);
   margin: 0; padding: 0; height: 20px; border-top: 0;
 }
