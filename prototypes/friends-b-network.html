@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>友链原型 B · 据点星图</title>
+<link rel="stylesheet" href="../src/main/resources/static/fonts/fonts.css">
+<link rel="stylesheet" href="../src/main/resources/static/css/site.css">
+<style>
+/* ==========================================================================
+   友链原型 B · 据点星图
+   把友链当成一张网络拓扑图：本站是中心节点，每个友链是一个据点，细线连回中心，
+   整张图铺在等高线地形上（用真实 terrain.js 的 2D 版画底图，零 three.js 依赖）。
+   指针靠近哪个据点，哪个就抬起、它那条线变成信号黄。
+   ========================================================================== */
+
+.fr-head { padding: 120px 0 40px; }
+
+/* 舞台：等高线铺底，节点与连线浮在上面 */
+.stage {
+  position: relative;
+  height: clamp(560px, 78vh, 860px);
+  margin-bottom: 40px;
+}
+#contour {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none;
+}
+/* 连线层。viewBox 用 0 0 100 100 + preserveAspectRatio=none，
+   这样 SVG 坐标是百分比，缩放时不用重算 */
+#links {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; overflow: visible;
+}
+#links line {
+  stroke: var(--line-strong); stroke-width: 1;
+  transition: stroke .3s, stroke-width .3s;
+}
+#links line.on { stroke: var(--signal-edge); stroke-width: 2; }
+
+/* 节点。位置由脚本按极坐标算好写进 left/top 百分比 */
+.node {
+  position: absolute; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  width: 116px; text-align: center;
+  transition: transform .35s cubic-bezier(.16, 1, .3, 1);
+}
+.node .ava {
+  width: 46px; height: 46px; object-fit: cover;
+  background: var(--bg-sunken); border: 1px solid var(--line);
+  color: transparent;
+  filter: grayscale(1) contrast(.96) brightness(1.15);
+  transition: filter .3s, border-color .3s, box-shadow .3s;
+}
+.node .nm {
+  font-size: var(--fs-label); line-height: 1.3; color: var(--ink-2);
+  transition: color .3s;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+/* 据点抬起：指针靠近时放大 + 头像转彩色 + 描一圈信号边 */
+.node.near { transform: translate(-50%, -50%) scale(1.22); z-index: 5; }
+.node.near .ava { filter: none; border-color: var(--signal-edge); }
+.node.near .nm { color: var(--ink); }
+
+/* 中心：本站。实心信号黄块 + 硬边（规范 §2.2）——全图唯一的实心黄 */
+.hub {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  z-index: 6; text-align: center;
+}
+.hub .core {
+  width: 74px; height: 74px; margin: 0 auto;
+  background: var(--signal-fill); border: 1px solid var(--signal-edge);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-disp); font-weight: 800; font-size: 24px;
+  color: var(--ink-on-signal);
+}
+.hub .lb {
+  margin-top: 10px; font-family: var(--font-mono);
+  font-size: var(--fs-label); letter-spacing: .14em; color: var(--ink);
+}
+
+/* 悬停某据点时浮出的详情条（星图放不下描述文字，用一个条承载） */
+.detail {
+  display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  padding: 18px 4px; min-height: 62px;
+  font-size: 17px; color: var(--ink-2);
+}
+.detail .d-nm { font-family: var(--font-cjk); font-weight: 700; font-size: 20px; color: var(--ink); }
+.detail .d-net { font-family: var(--font-mono); font-size: var(--fs-label); display: inline-flex; align-items: center; gap: 6px; }
+.detail .d-net::before { content: ""; width: 8px; height: 8px; border: 1px solid var(--line-strong); }
+.detail .d-net[data-net="0"]::before { background: #2f6b3a; border-color: #2f6b3a; }
+.detail .d-net[data-net="1"]::before { background: var(--signal-edge); border-color: var(--signal-edge); }
+.detail .d-net[data-net="2"]::before { background: #8a2b1f; border-color: #8a2b1f; }
+.detail .d-net[data-net="3"]::before { background: #8a2b1f; border-color: var(--ink-on-signal); }
+.detail .d-net[data-net="unknown"]::before { background: none; }
+.detail .d-meta { font-family: var(--font-mono); font-size: var(--fs-label); margin-left: auto; }
+
+@media (max-width: 900px) {
+  .stage { height: 620px; }
+  .node { width: 82px; }
+  .node .ava { width: 34px; height: 34px; }
+  .node .nm { font-size: 12px; }
+  .hub .core { width: 56px; height: 56px; font-size: 18px; }
+}
+
+.proto-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+  display: flex; align-items: center; gap: 4px;
+  height: 46px; padding: 0 20px;
+  background: var(--ink); color: var(--bg);
+  font-family: var(--font-mono); font-size: 13px; letter-spacing: .06em;
+}
+.proto-nav b { color: var(--signal-fill); margin-right: 14px; font-weight: 700; }
+.proto-nav a { color: var(--bg); opacity: .55; padding: 4px 10px; transition: opacity .2s, background .2s; }
+.proto-nav a:hover { opacity: 1; }
+.proto-nav a.on { opacity: 1; background: var(--signal-fill); color: var(--ink-on-signal); }
+</style>
+</head>
+<body>
+
+<nav class="proto-nav">
+  <b>友链版面原型</b>
+  <a href="friends-a-rows.html">A 索引行</a>
+  <a class="on" href="friends-b-network.html">B 据点星图</a>
+  <a href="friends-c-carousel.html">C 3D 名片轮</a>
+  <a href="friends-d-avatarwall.html">D 头像墙</a>
+</nav>
+
+<main>
+  <header class="fr-head">
+    <div class="wrap">
+      <div class="eyebrow"><span class="bar"></span><span class="mono">Friends / 友人帐</span></div>
+      <h1 class="page-title">友情链接</h1>
+      <p class="page-lead">一张友链的网。指针靠近哪个据点，哪个就抬起来。</p>
+    </div>
+  </header>
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <div class="stage" id="stage">
+        <canvas id="contour"></canvas>
+        <svg id="links" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+        <div class="hub">
+          <span class="core">CZ</span>
+          <span class="lb">本站</span>
+        </div>
+      </div>
+      <div class="detail" id="detail">
+        <span>指针移到任意据点上，这里显示它的详情。</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="../src/main/resources/static/js/terrain.js"></script>
+<script>
+var FRIENDS = [
+  ['chenzhen的博客',  '一个 Java 开发者的学习笔记与生活记录', 0, '2022-09-17'],
+  ['coderZ编码世界',  '分享后端技术与踩坑记录的个人小站',     3, '2022-10-12'],
+  ['Echo\'s blog',   '前端 / 设计 / 随笔',                   0, '2022-12-11'],
+  ['YuYang',         '在读学生的技术成长记录',               0, '2023-06-06'],
+  ['Abin\'s blog',   '专注 Java 与分布式',                   3, '2023-06-06'],
+  ['豆豆 / Amos',    '生活、摄影与一点点代码',               3, '2023-06-06'],
+  ['Ariasaki的小窝', '随手记录，随便写写',                   1, '2023-06-06'],
+  ['小角落',         '一个安静的角落，放一些碎碎念',         3, '2023-06-06'],
+  ['八尺妖剑',       '游戏 / 动漫 / 技术',                   3, '2023-06-06'],
+  ['XXY的博客',      '后端工程师，关注云原生',               0, '2023-06-06'],
+  ['赵赵卷',         '前端切图仔的日常',                     0, '2023-06-06'],
+  ['Queem',          '独立开发者，做小工具',                 0, '2023-06-18'],
+  ['知录',           '知识管理与笔记方法',                   3, '2023-11-13'],
+  ['Alx962的自留地', '祝你餘生動聽呀～',                     2, '2024-03-15'],
+  ['JavaGPT',        '网站介绍',                             0, '2024-06-29'],
+  ['ガヴのサイト',   '列车一定会到达下一站',                 3, '2024-07-02'],
+  ['东君博客',       '免费技术分享，Java 全栈',               0, '2024-08-11'],
+  ['纤云弄巧',       '存活于互联网边缘的小站',               0, '2024-09-05'],
+  ['沐雨橙风',       '一个专注技术分享的平台',               0, '2024-10-20'],
+  ['拾壹博客',       '记录学习与生活',                       3, '2025-01-08'],
+  ['南山烟雨',       '把盏经年谈笑间',                       0, '2025-03-22'],
+  ['旧时光',         '存一点旧东西',                        'bad', '2025-05-30'],
+];
+
+var NET_TEXT = { '0': '良好', '1': '一般', '2': '异常', '3': '超时', 'unknown': '未知' };
+/* 占位头像池：真实站点里每个友链是各自的头像，原型里用几张本地图轮着放，
+   免得「同一个头像重复 11 次」把版面本身的问题误读成设计问题。 */
+var PICS = ['hero-1.jpg', 'hero-2.jpg', 'hero-3.jpg', 'me.jpg', 'firstPicture.jpg']
+    .map(function (n) { return '../src/main/resources/static/images/' + n; });
+var stage = document.getElementById('stage');
+var links = document.getElementById('links');
+var detail = document.getElementById('detail');
+
+/* 等高线底图：直接复用真实站点的 terrain.js（drawFlat 无 three.js 依赖） */
+if (window.CzTerrain) CzTerrain.drawFlat(document.getElementById('contour'), stage);
+
+/* 极坐标排布：22 个据点分三环（内 6 / 中 8 / 外 8），起始角错开避免上下对齐成列 */
+var RINGS = [
+  { r: 21, from: 0,  n: 6,  phase: -0.26 },
+  { r: 34, from: 6,  n: 8,  phase:  0.20 },
+  { r: 46, from: 14, n: 8,  phase: -0.10 }
+];
+var nodes = [];
+
+RINGS.forEach(function (ring) {
+    for (var k = 0; k < ring.n; k++) {
+        var f = FRIENDS[ring.from + k];
+        if (!f) continue;
+        var a = ring.phase + (k / ring.n) * Math.PI * 2;
+        // 舞台是横长的：x 的百分比半径要按 高/宽 收缩，画出来才是正圆而不是椭圆。
+        // （反过来乘 宽/高 会把外环推到屏幕外 —— 这行踩过一次）
+        var rect = stage.getBoundingClientRect();
+        var shrink = rect.width ? rect.height / rect.width : 0.66;
+        var x = 50 + Math.cos(a) * ring.r * shrink;
+        var y = 50 + Math.sin(a) * ring.r;
+        nodes.push({ f: f, x: x, y: y, el: null });
+    }
+});
+
+/* 用 viewBox 0..100 + preserveAspectRatio=none，所以可以直接用百分比坐标画线 */
+nodes.forEach(function (nd) {
+    var l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    l.setAttribute('x1', 50); l.setAttribute('y1', 50);
+    l.setAttribute('x2', nd.x); l.setAttribute('y2', nd.y);
+    l.setAttribute('vector-effect', 'non-scaling-stroke');
+    links.appendChild(l);
+    nd.line = l;
+});
+
+nodes.forEach(function (nd, i) {
+    var name = nd.f[0], desc = nd.f[1], net = String(nd.f[2]), joined = nd.f[3];
+    var known = net === '0' || net === '1' || net === '2' || net === '3';
+    var key = known ? net : 'unknown';
+    var alive = net === '0' || net === '1';
+    var el = document.createElement('div');
+    el.className = 'node';
+    el.style.left = nd.x + '%';
+    el.style.top = nd.y + '%';
+    el.innerHTML =
+        '<img class="ava" src="' + (alive ? PICS[i % PICS.length] : '') + '" alt="" width="46" height="46">' +
+        '<span class="nm">' + name + '</span>';
+    el.addEventListener('mouseenter', function () {
+        nd.line.classList.add('on');
+        el.classList.add('near');
+        detail.innerHTML =
+            '<span class="d-nm">' + name + '</span>' +
+            '<span>' + desc + '</span>' +
+            '<span class="d-net" data-net="' + key + '">' + NET_TEXT[key] + '</span>' +
+            '<span class="d-meta">加入 ' + joined + ' · 巡检 10-01</span>';
+    });
+    el.addEventListener('mouseleave', function () {
+        nd.line.classList.remove('on');
+        el.classList.remove('near');
+    });
+    stage.appendChild(el);
+    nd.el = el;
+});
+
+/* 指针景深：靠近指针的据点抬起。缓存节点坐标，帧内不读布局。
+   只写 transform，收敛即停（规范 §5.2）。 */
+var fine = window.matchMedia('(pointer: fine)').matches;
+var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (fine && !reduce) {
+    var px = -9999, py = -9999, rafId = null, dirty = false;
+    stage.addEventListener('pointermove', function (e) {
+        var r = stage.getBoundingClientRect();
+        px = (e.clientX - r.left) / r.width * 100;
+        py = (e.clientY - r.top) / r.height * 100;
+        dirty = true;
+        if (rafId === null) rafId = requestAnimationFrame(tick);
+    });
+    stage.addEventListener('pointerleave', function () {
+        px = py = -9999; dirty = true;
+        if (rafId === null) rafId = requestAnimationFrame(tick);
+    });
+    function tick() {
+        rafId = null;
+        // 半径阈值按舞台短边归一，指针附近的据点才响应
+        var R = 22, any = false;
+        nodes.forEach(function (nd) {
+            var dx = (nd.x - px), dy = (nd.y - py);
+            var d = Math.sqrt(dx * dx + dy * dy);
+            var near = d < R;
+            if (near !== nd.el.classList.contains('near')) {
+                nd.el.classList.toggle('near', near);
+                nd.line.classList.toggle('on', near);
+                any = true;
+            }
+        });
+        if (any) dirty = false;
+        // 指针停住后不再有事件，这里做一次收尾即可；循环不常驻
+        if (dirty) { dirty = false; rafId = requestAnimationFrame(tick); }
+    }
+}
+
+/* 入场：据点由内向外依次亮起 */
+if (!reduce) {
+    nodes.forEach(function (nd, i) {
+        nd.el.style.opacity = '0';
+        nd.el.style.transition = 'opacity .6s ease ' + (i * 45) + 'ms, transform .35s cubic-bezier(.16,1,.3,1)';
+        requestAnimationFrame(function () { nd.el.style.opacity = '1'; });
+    });
+}
+</script>
+
+</body>
+</html>
