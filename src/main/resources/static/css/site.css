@@ -651,6 +651,8 @@ button { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .ticker-track, .status .dot, #wipe { animation: none; }
+  /* 留言「对话生长」是纯 CSS keyframes，不在上面那行通用停动画的范围里，单独停 */
+  .anim .cm-list .cm { animation: none; }
   /* 静止态本来就是躲开的，停掉动画即等于不出现，不需要额外的 display: none */
   .anim .section .wipe-in,  .anim .footer .wipe-in,
   .anim .page-head .wipe-in,  .anim .post-head .wipe-in  { clip-path: none; }
@@ -1113,6 +1115,29 @@ button { font: inherit; }
 /* 留言列表 */
 .cm-list { border-top: 1px solid var(--line); }
 .cm { display: flex; gap: 16px; padding: 26px 0; border-bottom: 1px solid var(--line); }
+
+/* 对话生长：留言项入场用纯 CSS keyframes，不用 GSAP。
+   原因：发完留言 #message-container 会被 AJAX 整块替换，新节点上没有任何 JS 实例，
+   纯 CSS 动画在新节点插入时自动重播 —— 「生长」感正是由此而来，零 JS 介入。
+   backwards 填充让 delay 期间元素停在 from 态（藏着），播完停在终态。
+   整条链挂在 .anim 门控上：脚本没跑起来就没有动画，内容直接可见。 */
+@keyframes cm-grow {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.anim .cm-list .cm { animation: cm-grow .5s cubic-bezier(.16, 1, .3, 1) backwards; }
+/* 顶层留言按序错开（回复嵌在父级里，跟着父级一起长出来，不再单独错开）。
+   只错前 10 条：再往后 delay 会拖到半秒以上，看着像卡住而不是生长。 */
+.anim .cm-list > .cm:nth-child(1)  { animation-delay: .04s; }
+.anim .cm-list > .cm:nth-child(2)  { animation-delay: .10s; }
+.anim .cm-list > .cm:nth-child(3)  { animation-delay: .16s; }
+.anim .cm-list > .cm:nth-child(4)  { animation-delay: .22s; }
+.anim .cm-list > .cm:nth-child(5)  { animation-delay: .28s; }
+.anim .cm-list > .cm:nth-child(6)  { animation-delay: .34s; }
+.anim .cm-list > .cm:nth-child(7)  { animation-delay: .40s; }
+.anim .cm-list > .cm:nth-child(8)  { animation-delay: .46s; }
+.anim .cm-list > .cm:nth-child(9)  { animation-delay: .52s; }
+.anim .cm-list > .cm:nth-child(10) { animation-delay: .58s; }
 
 .cm-avatar { position: relative; flex-shrink: 0; width: 48px; height: 48px; }
 .cm-avatar > img {

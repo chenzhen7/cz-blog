@@ -26,12 +26,12 @@
            改版前那条 45vh 的背景图带去掉，改用全站统一的 .page-head。 */-->
     <header class="page-head">
         <div class="wrap">
-            <div class="eyebrow">
+            <div class="eyebrow wipe-in">
                 <span class="bar"></span>
                 <span class="mono">Message / 留言板</span>
             </div>
-            <h1 class="page-title">留言板</h1>
-            <p class="page-lead">有什么对我想说的话，来吧！</p>
+            <h1 class="page-title wipe-in">留言板</h1>
+            <p class="page-lead rise">有什么对我想说的话，来吧！</p>
         </div>
     </header>
 
@@ -42,7 +42,7 @@
                    所有 name 都是后端 Message 实体的绑定契约，一个字不能改：
                    parentMessageId / rootMessageId / avatar / email / nickname / address / content。
                    三个 hidden 由脚本维护：avatar 由邮箱推出来，另两个由「回复」按钮填。 */-->
-            <div class="compose" id="message-form">
+            <div class="compose rise" id="message-form">
                 <div class="compose-head">
                     <div class="compose-avatar">
                         <img id="avatar" th:src="@{/images/me.jpg}" alt="头像预览" width="56" height="56">
@@ -64,7 +64,7 @@
 
                 <th:block th:replace="~{fragments/chrome :: emojiBar}"/>
 
-                <button id="messagepost-btn" type="button" class="btn-primary">发送</button>
+                <button id="messagepost-btn" type="button" class="btn-primary magnet">发送</button>
             </div>
 
             <!--/* 留言列表。
