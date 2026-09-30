@@ -1226,7 +1226,10 @@ button { font: inherit; }
 @media (min-width: 1024px) { .post-head { padding: 156px 0 0; } }
 .post-head .eyebrow { margin-bottom: 22px; }
 
-.post-title {
+/* 文章页大标题。必须收在 .post-head 下：.post-title 这个类同时被归档/标签的
+   列表行用着（那边是 21px 的行标题），裸写 .post-title 两条规则特异性相同，
+   靠后的这条会在所有页面通吃 —— 列表标题被撑到 54px 就是这么来的。 */
+.post-head .post-title {
   font-family: var(--font-cjk); font-weight: 900;
   font-size: clamp(30px, 5vw, 54px); line-height: 1.14; letter-spacing: -.03em;
   margin: 0; overflow-wrap: break-word;
