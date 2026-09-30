@@ -79,8 +79,8 @@
                         </p>
 
                         <div class="hero-actions rise" data-reveal>
-                            <!--/* .magnet 由下面 rAF 循环里的磁性段接管：光标靠近时按钮被吸过去，
-                                   离开时弹回。类名与原型一致，效果逻辑在 tick() 里。 */-->
+                            <!--/* .magnet：光标靠近时按钮被吸过去、离开弹回。
+                                   驱动逻辑在 chrome :: scripts 的「指针物理」共享循环（全站统一）。 */-->
                             <a class="btn-primary magnet" th:href="@{/archives}">进入归档 <span aria-hidden="true">→</span></a>
                             <a class="btn-outline magnet" th:href="@{/about}">关于我</a>
                         </div>
@@ -566,19 +566,9 @@
         var clock = 0, running = false, rafId = null;
         var fieldRot = { x: 0, y: 0 };
 
-        /* 磁性按钮：tx/ty 是目标位移（mousemove 时按光标偏离按钮中心的距离算出），
-           x/y 是每帧向目标收敛的当前位移。离开按钮时目标清零，按钮被 lerp 拉回原点。
-           系数与原型一致：横向吸 0.28、纵向吸 0.42，跟随速度 0.14。 */
-        var magnets = Array.prototype.slice.call(document.querySelectorAll('.magnet'));
-        var magState = magnets.map(function () { return { tx: 0, ty: 0, x: 0, y: 0 }; });
-        magnets.forEach(function (el, i) {
-            el.addEventListener('mousemove', function (e) {
-                var r = el.getBoundingClientRect();
-                magState[i].tx = (e.clientX - r.left - r.width / 2) * 0.28;
-                magState[i].ty = (e.clientY - r.top - r.height / 2) * 0.42;
-            });
-            el.addEventListener('mouseleave', function () { magState[i].tx = 0; magState[i].ty = 0; });
-        });
+        /* 磁性按钮不在这个循环里：.magnet 已全站化，由 chrome :: scripts 的
+           「指针物理」共享循环统一驱动（那里是按需启停的）。同一个 transform
+           只能有一个写入方，首页这个常驻循环再写一次就会两边打架。 */
 
         /* uOpacity 的取值算式有两个输入，都不是 uniform 本身：
              reveal.p   —— 入场进度，由下面的 GSAP 时间轴写
@@ -619,15 +609,6 @@
                 fieldRot.x += (-ptr.y * 5.5 - fieldRot.x) * 0.06;
                 fieldRot.y += (ptr.x * 7.5 - fieldRot.y) * 0.06;
                 field.style.transform = 'rotateX(' + fieldRot.x.toFixed(2) + 'deg) rotateY(' + fieldRot.y.toFixed(2) + 'deg)';
-            }
-
-            // 磁性按钮。每帧都写 transform（静止时写的是 0,0），与原型一致：
-            // 只碰 transform 不触发重排，省去「是否已在原点」的判断分支
-            for (var mi = 0; mi < magnets.length; mi++) {
-                var s = magState[mi];
-                s.x += (s.tx - s.x) * 0.14;
-                s.y += (s.ty - s.y) * 0.14;
-                magnets[mi].style.transform = 'translate3d(' + s.x.toFixed(2) + 'px,' + s.y.toFixed(2) + 'px,0)';
             }
         }
 

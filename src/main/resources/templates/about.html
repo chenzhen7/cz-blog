@@ -81,9 +81,8 @@
 
 <th:block th:replace="~{fragments/chrome :: searchDialog}"/>
 <th:block th:replace="~{fragments/chrome :: scripts}"/>
-<!--/* 本页只有 .about-photo 一处揭示目标，引 GSAP 有点奢侈，但它是全站第二处
-     有 data-reveal 的页面，不引的话那张照片会比别的页面「硬邦邦地戳在那里」。
-     其余六页没有任何揭示目标，所以不引。 */-->
+<!--/* 前台七页统一引 motion：揭示范围含 .page-head / .post-head / .section / .footer，
+     细节见片段头注释。 */-->
 <th:block th:replace="~{fragments/chrome :: motion}"/>
 
 </body>

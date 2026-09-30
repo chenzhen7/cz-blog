@@ -11,6 +11,9 @@
     <link rel="stylesheet" th:href="@{/fonts/fonts.css}">
     <link rel="stylesheet" th:href="@{/css/site.css}">
     <link rel="alternate" type="application/rss+xml" title="ChenZhen的客栈" th:href="@{/rss}">
+
+    <!--/* 动效初始态的门控。必须留在 <head> 里，不能挪到 </body> 前 —— 理由见片段内注释。 */-->
+    <th:block th:replace="~{fragments/chrome :: animGate}"/>
 </head>
 <body>
 
@@ -164,6 +167,7 @@
 
 <th:block th:replace="~{fragments/chrome :: searchDialog}"/>
 <th:block th:replace="~{fragments/chrome :: scripts}"/>
+<th:block th:replace="~{fragments/chrome :: motion}"/>
 
 <!--/* 页面自己的脚本。
      全部改成事件委托，不再绑在具体元素上 —— 这是必须的：发送完留言会整个替换

@@ -169,13 +169,13 @@
 <!--/* ============================================================
      动效运行时：GSAP + ScrollTrigger（自托管，不走 CDN）+ 滚动揭示 + 侧边轨联动。
 
-     只有 index 与 about 两页引入。全站只有这两页有 .rise / .depth-in / .wipe-in
-     这些揭示目标（其余页在 Phase 3 迁移时没有加），没目标的页引它等于白下 115KB。
+     前台七个页面全部引入（Phase 7 起每页都有揭示目标）。GSAP + ScrollTrigger 共约
+     115KB，是唯一一笔全站共享的动效税；three.js（约 600KB）仍只归首页与归档页，
+     不在这里引。
 
-     首页的 3D 地形与 Hero 入场时间轴不在这个片段里，留在 index.html 自己的 <script>：
-     地形还要额外引 600KB 的 three.js，更不该让别的页陪跑。
-     本片段的揭示范围只认 .section 与 .footer 里的元素，Hero 里那几个同名的类
-     （.rise / .depth-in / .wipe-in）因此天然落在范围外，归首页那段脚本管。
+     首页的 3D 地形与 Hero 入场时间轴不在这个片段里，留在 index.html 自己的 <script>。
+     本片段的揭示范围认 .page-head / .post-head / .section / .footer 里的元素，
+     Hero 里那几个同名的类（.rise / .depth-in / .wipe-in）天然落在范围外，归首页脚本管。
 
      引入位置：在 chrome :: scripts 之后、各页自己的 <script> 之前。
      ============================================================ */-->
@@ -205,14 +205,14 @@
             return;
         }
 
-        /* 揭示范围只认 .section 与 .footer 里的元素，与 site.css 第 13 节那三条
+        /* 揭示范围认 .page-head / .post-head / .section / .footer，与 site.css 第 13 节那三条
            .anim 规则是同一套范围，改一边要同时改另一边。
            这样也就自然避开了 Hero：Hero 里同样有 .rise / .depth-in / .wipe-in，
            但那几处归首页脚本管，同一批元素被两个 tween 同时写 transform / opacity
            会互相覆盖，表现为动画卡顿或回跳。 */
 
         // 章节揭示
-        gsap.utils.toArray('.section .rise, .footer .rise').forEach(function (el, i) {
+        gsap.utils.toArray('.page-head .rise, .post-head .rise, .section .rise, .footer .rise').forEach(function (el, i) {
             gsap.to(el, {
                 opacity: 1, y: 0, duration: .85, ease: 'power3.out',
                 delay: (i % 4) * .06,       // 同一屏里错开一点，整排同时弹出会很齐很假
@@ -228,8 +228,8 @@
             });
         });
 
-        // 眉标签：定向擦除
-        gsap.utils.toArray('.section .wipe-in, .footer .wipe-in').forEach(function (el) {
+        // 眉标签与内页大标题：定向擦除
+        gsap.utils.toArray('.page-head .wipe-in, .post-head .wipe-in, .section .wipe-in, .footer .wipe-in').forEach(function (el) {
             gsap.to(el, {
                 clipPath: 'inset(0 0% 0 0)', duration: .8, ease: 'power3.out',
                 scrollTrigger: { trigger: el, start: 'top 88%' }
@@ -432,6 +432,80 @@
             list.textContent = '';
             if (hint) hint.textContent = defaultHint;
         });
+    })();
+
+    // ---------- 指针物理：磁性吸附 + 追踪倾斜 ----------
+    /* 全站共享的一个小循环，驱动两类元素：
+         .magnet     —— 按钮 / 标签被光标「吸」过去，离开弹回（位移）
+         [data-tilt] —— 卡片随光标倾斜（rotateX / rotateY）
+       设计要点：
+       - 按需启停：有指针活动才开 rAF，全部收敛（距目标小于阈值）后自停，不做常驻循环，
+         所以不受「离屏停渲染」那条约束 —— 它本来就只在用户正操作时存在。
+       - 只写 transform，不碰布局属性。
+       - 同一个元素的 transform 只能由这里写：.magnet / [data-tilt] 不要再挂 .rise 之类的
+         GSAP 揭示类，两个系统抢一个属性会抖动（规范 §5.2）。
+       - 位移系数沿用首页原型：横向 0.28、纵向 0.42、跟随 0.14。 */
+    (function () {
+        // 触摸设备没有悬停，这套机制不存在目标；减少动效时整段不初始化
+        if (!window.matchMedia('(pointer: fine)').matches) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        var magnets = Array.prototype.slice.call(document.querySelectorAll('.magnet'));
+        var tilts = Array.prototype.slice.call(document.querySelectorAll('[data-tilt]'));
+        if (!magnets.length && !tilts.length) return;
+
+        // tx/ty 与 trx/try 是目标值（事件里算），x/y 与 rx/ry 每帧向目标收敛（循环里插值）
+        var magState = magnets.map(function () { return { tx: 0, ty: 0, x: 0, y: 0 }; });
+        var tiltState = tilts.map(function () { return { trx: 0, try: 0, rx: 0, ry: 0 }; });
+
+        var rafId = null;
+        function kick() { if (rafId === null) rafId = requestAnimationFrame(tick); }
+
+        magnets.forEach(function (el, i) {
+            el.addEventListener('mousemove', function (e) {
+                var r = el.getBoundingClientRect();
+                magState[i].tx = (e.clientX - r.left - r.width / 2) * 0.28;
+                magState[i].ty = (e.clientY - r.top - r.height / 2) * 0.42;
+                kick();
+            });
+            el.addEventListener('mouseleave', function () { magState[i].tx = 0; magState[i].ty = 0; kick(); });
+        });
+
+        tilts.forEach(function (el, i) {
+            el.addEventListener('mousemove', function (e) {
+                var r = el.getBoundingClientRect();
+                // 光标在卡片内的相对位置映射到 ±4°。纵向取反号：光标在上半，卡片上缘迎上来
+                tiltState[i].try = ((e.clientX - r.left) / r.width - 0.5) * 8;
+                tiltState[i].trx = -((e.clientY - r.top) / r.height - 0.5) * 8;
+                kick();
+            });
+            el.addEventListener('mouseleave', function () { tiltState[i].trx = 0; tiltState[i].try = 0; kick(); });
+        });
+
+        function tick() {
+            var settled = true, i, s;
+            for (i = 0; i < magnets.length; i++) {
+                s = magState[i];
+                s.x += (s.tx - s.x) * 0.14;
+                s.y += (s.ty - s.y) * 0.14;
+                // 距目标小于 0.1px 直接吸附到位，免得无限逼近留下一个永远不结束的循环
+                if (Math.abs(s.tx - s.x) < 0.1 && Math.abs(s.ty - s.y) < 0.1) { s.x = s.tx; s.y = s.ty; }
+                else { settled = false; }
+                magnets[i].style.transform = 'translate3d(' + s.x.toFixed(2) + 'px,' + s.y.toFixed(2) + 'px,0)';
+            }
+            for (i = 0; i < tilts.length; i++) {
+                s = tiltState[i];
+                s.rx += (s.trx - s.rx) * 0.12;
+                s.ry += (s.try - s.ry) * 0.12;
+                if (Math.abs(s.trx - s.rx) < 0.02 && Math.abs(s.try - s.ry) < 0.02) { s.rx = s.trx; s.ry = s.try; }
+                else { settled = false; }
+                // perspective 写在变换里而不是父级：卡片各自独立成透视场，父级不用改
+                tilts[i].style.transform = 'perspective(700px) rotateX(' + s.rx.toFixed(2) + 'deg) rotateY(' + s.ry.toFixed(2) + 'deg)';
+            }
+            // 全部收敛就停：下一次指针活动由 kick() 重新拉起
+            if (settled) { rafId = null; return; }
+            rafId = requestAnimationFrame(tick);
+        }
     })();
 </script>
 </th:block>
