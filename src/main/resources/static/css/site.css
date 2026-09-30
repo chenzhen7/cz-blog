@@ -833,7 +833,34 @@ button { font: inherit; }
 /* ==========================================================================
    17. 归档（流年记）
    ========================================================================== */
-.arc { border-top: 1px solid var(--line); }
+
+/* 「时间地层」：页头背后那层缓慢漂移的等高线地形（/js/terrain.js 驱动，
+   与首页 hero 同一片地形的另一个标本）。只裁在页头范围内；浓度由页内脚本
+   压到 0.09（首页是 0.22）——它是背景装置，不能抢页头标题的阅读。
+   画布默认 display:none，由脚本初始化成功后显示，免得 JS 没跑时留一个空画布占位。 */
+.page-head.has-terrain { position: relative; overflow: hidden; }
+.page-head .head-terrain {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; display: none;
+}
+/* 内容压到画布之上 */
+.page-head.has-terrain .wrap { position: relative; z-index: 1; }
+
+/* 滚动时间轴。左缘一条 1px 墨轨（::before），上面压一段 3px 信号黄进度
+   （.arc-progress，由页内脚本按滚动进度 scaleY 生长）。
+   .arc 让出 28px 左内边距放这条轨，行内容相应右移。
+   亮黄块照例带 --signal-edge 描边：纯 #ffe600 压在白底上边界会消失（§2.2）。 */
+.arc { position: relative; border-top: 1px solid var(--line); padding-left: 28px; }
+.arc::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 1px;
+  background: var(--line);
+}
+.arc-progress {
+  position: absolute; left: -1px; top: 0; bottom: 0; width: 3px;
+  background: var(--signal-fill); outline: 1px solid var(--signal-edge);
+  transform: scaleY(0); transform-origin: top;
+  pointer-events: none;
+}
 
 /* 年份分组头。吸在顶栏下方：46 条滚到一半时，不吸顶就不知道自己在哪一年。
    顶栏是 fixed 的 60px 且 z-index 50，这里给 2，滚上去会从顶栏底下穿过。
@@ -845,6 +872,21 @@ button { font: inherit; }
   font-family: var(--font-disp); font-variation-settings: 'wdth' 105, 'wght' 800;
   font-size: 32px; line-height: 1; letter-spacing: -.03em;
   display: flex; align-items: baseline; gap: 14px;
+}
+
+/* 年份刻度：每个吸顶年份在时间轴墨轨上咬一个 6px 墨块（尺寸与顶栏呼吸状态块一致）。
+   页内脚本用 IntersectionObserver 判「哪个年份正压着视口中线」，给它 .is-current，
+   刻度转信号黄。left 的算式：轨心在 .arc 左缘（内容区左移了 28px），
+   6px 方块要咬住轨心就得再往左让半个块宽。 */
+.arc-year::before {
+  content: ""; position: absolute; left: -31px; top: 50%;
+  width: 6px; height: 6px; margin-top: -3px;
+  background: var(--ink);
+  transition: background .3s;
+}
+.arc-year.is-current::before {
+  background: var(--signal-fill);
+  outline: 1px solid var(--signal-edge);
 }
 
 /* 行。移动端单栏堆叠，≥1024px 才排成 日期 / 标题描述 / 封面 三栏 ——

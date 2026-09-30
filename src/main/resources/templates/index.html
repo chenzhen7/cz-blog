@@ -291,6 +291,8 @@
      所以它放在 </body> 前 —— 页面这时已经画出来了，被挡住的只有动画，不是内容。
      更不该挪到 <head>：那会连首屏渲染一起挡住。 */-->
 <script th:src="@{/lib/three/three.min.js}"></script>
+<!--/* 地形实现（GLSL + WebGL 场景 + 2D 兜底），与归档页页头共用。 */-->
+<script th:src="@{/js/terrain.js}"></script>
 
 <!--/* 首页专属动效：3D 等高线地形 + Hero 入场时间轴 + 三维图像场跟随。
 
@@ -298,7 +300,7 @@
      一、顺序。本段排在 motion 之后，gsap / ScrollTrigger 已经就位；若 motion 因
            GSAP 缺失而提前返回，window.gsap 就是 undefined，下面第三段第一句挡掉。
      二、分工。Hero 里的 .rise / .depth-in / .wipe-in 归本段管，motion 的滚动揭示
-           只管 .section / .footer 里的元素，两边不会争同一批元素。
+           只管 .page-head / .post-head / .section / .footer 里的元素，两边不会争同一批元素。
 
      Hero 这几处的初值由本段的 fromTo 自己设，site.css 第 13 节的 .anim 规则
      特意没有把 Hero 包进去 —— 首屏元素被 CSS 藏起来、而脚本又出了错的话，
@@ -310,7 +312,7 @@
 
      th:inline="none" 不能删。Thymeleaf 默认会在 <script> 里做内联求值：
        [[...]] 是转义输出、[(...)] 是非转义输出。
-     这段脚本里有 field[(j + 1) * cols + i] —— 那个 [( 会被当成非转义内联的开头，
+     这类下标写法在本段脚本里很常见 —— 那个 [( 会被当成非转义内联的开头，
      一路吞到最近的 )] 为止。表现是页面 200 但响应体在中间断掉、
      后面直接接一个错误页，而报错位置指向几十行以外，极难定位。
      关掉内联后，脚本内容对 Thymeleaf 就是一段纯文本。 */-->
@@ -322,6 +324,10 @@
         var fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
         var hero = document.getElementById('hero');
         if (!hero) return;
+        // 地形实现不在这段脚本里：GLSL 与 2D 兜底已收进 /js/terrain.js（归档页共用），
+        // 它在上面以独立 <script> 引入，这里直接调 CzTerrain。库没到位就没有地形可调，
+        // 让它直接抛出来 —— 那是部署缺文件，不该被静默吞掉
+        if (!window.CzTerrain) throw new Error('CzTerrain 未加载：/js/terrain.js 缺失或被拦截');
 
         /* 地形墨线浓度。白底比纸底更显墨（#111 对白 19.1:1，对纸只有 15.5:1），
            所以浓度要压下来，否则整页会重新变暗。换背景色时必须回来复查这一个数。 */
@@ -344,220 +350,27 @@
            等高线必须在片元里重算：按顶点高度插值的话，线宽会随网格疏密变化，
            远处糊成一片；从 vXY 重新求值就与网格密度完全解耦，永远锐利。
            ================================================================== */
-        var NOISE = [
-            'float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }',
-            'float vnoise(vec2 p) {',
-            '  vec2 i = floor(p), f = fract(p);',
-            '  vec2 u = f * f * (3.0 - 2.0 * f);',
-            '  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),',
-            '             mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);',
-            '}',
-            'float fbm(vec2 p) {',
-            '  float s = 0.0, a = 0.5;',
-            '  for (int i = 0; i < 5; i++) { s += a * vnoise(p); p *= 2.03; a *= 0.5; }',
-            '  return s;',
-            '}',
-            'float terrainH(vec2 p, float t) {',
-            '  vec2 q = p * 0.00085;',
-            // t 参与进来让噪声场随时间缓慢平移，等高线像活地图一样在爬，
-            // 这是「活着的系统」这个观感的来源
-            '  float n = fbm(q + vec2(t * 0.012, t * 0.008));',
-            // (n - 0.5) * 2.6：fbm 的输出挤在 0.5 附近，不拉开动态范围的话
-            // 等值线只会集中在地形中部几圈，撑不满整场
-            '  return (n - 0.5) * 2.6;',
-            '}'
-        ].join('\n');
-
-        var VERT = NOISE + '\n' + [
-            'uniform float uTime;',
-            'varying vec2  vXY;',
-            'varying float vDepth;',
-            'void main() {',
-            '  vec3 p = position;',
-            '  vXY = p.xy;',                                  // 未位移的平面坐标，传给片元
-            '  float h = terrainH(p.xy, uTime);',
-            '  p.z += h * 92.0;',                              // 沿平面法线抬升
-            '  vec4 mv = modelViewMatrix * vec4(p, 1.0);',
-            '  vDepth = -mv.z;',                               // 视深，用于远处淡出
-            '  gl_Position = projectionMatrix * mv;',
-            '}'
-        ].join('\n');
-
-        var FRAG = NOISE + '\n' + [
-            'uniform float uTime;',
-            'uniform vec3  uInk;',
-            'uniform float uOpacity;',
-            'varying vec2  vXY;',
-            'varying float vDepth;',
-            // 抗锯齿等高线：取到最近等值线的距离，用 fwidth 归一化
-            'float contour(float h, float freq, float w) {',
-            '  float v = h * freq;',
-            '  float f = fract(v);',
-            '  float d = min(f, 1.0 - f);',
-            '  float aaw = fwidth(v) * w;',
-            '  return 1.0 - smoothstep(0.0, aaw, d);',
-            '}',
-            'void main() {',
-            '  float h = terrainH(vXY, uTime);',
-            '  float main1 = contour(h, 26.0, 1.5);',          // 主等高线
-            '  float minor = contour(h, 82.0, 1.0) * 0.30;',    // 次级等高线，更密更淡
-            '  float line = max(main1, minor);',
-            '  if (line <= 0.002) discard;',
-            // 边界反转的 smoothstep（边0 > 边1）在部分 GPU 上属未定义行为，
-            // 一律写成 1.0 - smoothstep(边0, 边1, x) 且保证 边0 < 边1
-            '  float fog = 1.0 - smoothstep(620.0, 2400.0, vDepth);',        // 远处沉入纸面
-            '  float rad = 1.0 - smoothstep(520.0, 1650.0, length(vXY));',   // 边缘淡出
-            // 两重淡出缺一不可：只有一重的话地形边缘会留下生硬的一道截断
-            '  gl_FragColor = vec4(uInk, line * fog * rad * uOpacity);',
-            '}'
-        ].join('\n');
-
+        /* ---- 地形实现收在 /js/terrain.js（归档页页头共用同一片地形，
+           GLSL 与 2D 兜底只在那里写一次）。这里只留「首页怎么驱动它」：
+           指针、入场时间轴、滚动淡出都在下面自己的 rAF 循环里。 ---- */
         var glCanvas = document.getElementById('gl');
         var flatCanvas = document.getElementById('flat');
-        var terrain = null, renderer = null, scene = null, camera = null;
-        var hasGL = false;
+        // 减少动效时不上 WebGL：省掉一个常驻上下文，直接走静态 2D 等高线 —— 地形还在，只是不动
+        var gl = (window.THREE && !reduce) ? CzTerrain.initGL(glCanvas, hero) : null;
+        var hasGL = !!gl;
+        var terrain = gl ? gl.terrain : null, renderer = gl ? gl.renderer : null,
+            scene = gl ? gl.scene : null, camera = gl ? gl.camera : null;
 
-        function initGL() {
-            try {
-                renderer = new THREE.WebGLRenderer({
-                    canvas: glCanvas, alpha: true, antialias: false, powerPreference: 'high-performance'
-                });
-                renderer.setClearColor(0x000000, 0);   // 画布透明，地形直接叠在纸面上
-                // 像素比封顶 1.5：地形是柔和的，不需要满视网膜分辨率，
-                // 而每个片元都要算一次 fbm，这是全页最贵的一项
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-
-                scene = new THREE.Scene();
-                camera = new THREE.PerspectiveCamera(40, 1, 1, 6000);
-                camera.position.set(0, 0, 640);
-
-                var mat = new THREE.ShaderMaterial({
-                    transparent: true,
-                    depthWrite: false,                  // 否则半透明的线互相遮挡会压出黑边
-                    extensions: { derivatives: true },  // WebGL1 下 fwidth 要靠这个开关
-                    uniforms: {
-                        uTime:    { value: 0 },
-                        uInk:     { value: new THREE.Color('#111111') },
-                        uOpacity: { value: 0 }          // 从 0 起，由入场时间轴拉起来
-                    },
-                    vertexShader: VERT,
-                    fragmentShader: FRAG
-                });
-
-                terrain = new THREE.Mesh(new THREE.PlaneGeometry(2800, 2800, 176, 176), mat);
-                terrain.rotation.x = -1.16;             // 向后倾倒，得到俯视地形的视角
-                terrain.position.set(0, -150, -300);
-                scene.add(terrain);
-
-                resizeGL();
-                renderer.render(scene, camera);
-                return true;
-            } catch (err) {
-                // WebGL 拿不到（无 GPU、被策略禁用、上下文分配失败）。
-                // 这里返回 false 不是「降级掩盖错误」：外面据此切到 2D 等高线，
-                // 那是设计内的第二条路径，地形照样在，只是没有纵深。
-                return false;
-            }
-        }
-
-        function resizeGL() {
-            if (!renderer) return;
-            var w = hero.clientWidth, h = hero.clientHeight;
-            // 第三个参数 false：只改画布的位图尺寸，不写 style。
-            // 宽高由 CSS 的 100% 控制，写 style 反而会和版式打架
-            renderer.setSize(w, h, false);
-            camera.aspect = w / h;
-            camera.updateProjectionMatrix();
-        }
-
-        /* ---- 2D 兜底：拿不到 WebGL 时退回平面等高线（Marching Squares 网格插值）---- */
-        function drawFlat() {
-            if (!flatCanvas) return;
-            flatCanvas.style.display = 'block';
-            var ctx = flatCanvas.getContext('2d');
-            var w = hero.clientWidth, h = hero.clientHeight;
-            var dpr = Math.min(window.devicePixelRatio || 1, 2);
-            flatCanvas.width = Math.floor(w * dpr);
-            flatCanvas.height = Math.floor(h * dpr);
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);   // 按设备像素比缩放，线条才不会发虚
-            ctx.clearRect(0, 0, w, h);
-
-            // 与着色器里同名同形的噪声，保证两条路径画出来是同一片地形
-            function hash(x, y) { var n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123; return n - Math.floor(n); }
-            function sm(t) { return t * t * (3 - 2 * t); }
-            function vn(x, y) {
-                var xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
-                var u = sm(xf), v = sm(yf);
-                var a = hash(xi, yi), b = hash(xi + 1, yi), c = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
-                return a * (1 - u) * (1 - v) + b * u * (1 - v) + c * (1 - u) * v + d * u * v;
-            }
-            function fbm(x, y) {
-                var s = 0, amp = .5, f = 1;
-                for (var i = 0; i < 4; i++) { s += amp * vn(x * f, y * f); f *= 2.03; amp *= .5; }
-                return s;
-            }
-
-            var step = 13, cols = Math.ceil(w / step) + 1, rows = Math.ceil(h / step) + 1;
-            var field = new Float32Array(cols * rows);
-            var i, j, x, y;
-            for (j = 0; j < rows; j++) {
-                for (i = 0; i < cols; i++) field[j * cols + i] = fbm(i * step * .0026, j * step * .0026);
-            }
-
-            // ctx 与线段工具提到循环外：写在双重循环里的话，每个格子都要新建一个闭包
-            function seg(p, q) { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); }
-
-            ctx.strokeStyle = 'rgba(17,17,17,0.035)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            for (var L = 0; L < 9; L++) {
-                var iso = .26 + L * .052;    // 9 条等值线，从低到高等距排开
-                for (j = 0; j < rows - 1; j++) {
-                    for (i = 0; i < cols - 1; i++) {
-                        var tl = field[j * cols + i], tr = field[j * cols + i + 1];
-                        var bl = field[(j + 1) * cols + i], br = field[(j + 1) * cols + i + 1];
-                        // 四个角落在等值线的哪一侧，编码成一个 0..15 的格子类型
-                        var idx = 0;
-                        if (tl > iso) idx |= 8;
-                        if (tr > iso) idx |= 4;
-                        if (br > iso) idx |= 2;
-                        if (bl > iso) idx |= 1;
-                        // 0 与 15 是四角同侧，这一格没有线段穿过。其余 14 种在下面的
-                        // switch 里逐一列出，不留 default —— 漏了哪种一眼能看出来
-                        if (idx === 0 || idx === 15) continue;
-                        x = i * step; y = j * step;
-                        // 四条边与等值线的交点，按两端高度线性插值
-                        var top = [x + step * ((iso - tl) / (tr - tl)), y];
-                        var right = [x + step, y + step * ((iso - tr) / (br - tr))];
-                        var bottom = [x + step * ((iso - bl) / (br - bl)), y + step];
-                        var left = [x, y + step * ((iso - tl) / (bl - tl))];
-                        switch (idx) {
-                            case 1: case 14: seg(left, bottom); break;
-                            case 2: case 13: seg(bottom, right); break;
-                            case 3: case 12: seg(left, right); break;
-                            case 4: case 11: seg(top, right); break;
-                            case 5: seg(left, top); seg(bottom, right); break;
-                            case 6: case 9: seg(top, bottom); break;
-                            case 7: case 8: seg(left, top); break;
-                            case 10: seg(top, right); seg(left, bottom); break;
-                        }
-                    }
-                }
-            }
-            ctx.stroke();
-        }
-
-        // 减少动效时不上 three.js：省掉 600KB 下载和一个常驻的 WebGL 上下文。
-        // 直接走静态的 2D 等高线 —— 地形还在，只是不动
-        if (window.THREE && !reduce) {
-            hasGL = initGL();
-        }
         if (hasGL) {
-            if (glCanvas) glCanvas.style.display = 'block';
+            glCanvas.style.display = 'block';
         } else {
             if (glCanvas) glCanvas.style.display = 'none';
-            drawFlat();
+            CzTerrain.drawFlat(flatCanvas, hero);
         }
+
+        // 保留这两个名字：下面的 resize 防抖与降级分支还在用
+        function resizeGL() { if (gl) gl.resize(); }
+        function drawFlat() { CzTerrain.drawFlat(flatCanvas, hero); }
 
         /* ==================================================================
            2. 唯一的 rAF 循环

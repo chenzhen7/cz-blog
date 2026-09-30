@@ -25,19 +25,24 @@
     <!--/* model 来自 ArchivesController：memoryList（BlogService.getArchiveList()，
            已发布的全部文章、按 create_time 倒序、描述在 service 层截到 100 字以内）、author。
            改版前这里是一条 45vh 的背景图带，新版的 .page-head 是纯排版的，
-           而且 archives.jpg 已经派生出首页 hero 的第三张图，不算丢。 */-->
-    <header class="page-head">
+           而且 archives.jpg 已经派生出首页 hero 的第三张图，不算丢。
+           has-terrain：页头背后铺一层「时间地层」—— 与首页 hero 同一片等高线地形
+           （/js/terrain.js），但不跟指针、只随时间漂移，语义是沉积而不是感应。
+           两块画布默认藏着，由页尾脚本决定显示哪块（WebGL / 2D 兜底）。 */-->
+    <header class="page-head has-terrain">
+        <canvas class="head-terrain" id="arcGl" aria-hidden="true"></canvas>
+        <canvas class="head-terrain" id="arcFlat" aria-hidden="true"></canvas>
         <div class="wrap">
-            <div class="eyebrow">
+            <div class="eyebrow wipe-in">
                 <span class="bar"></span>
                 <span class="mono">Archive / 流年记</span>
             </div>
-            <h1 class="page-title">归档</h1>
+            <h1 class="page-title wipe-in">归档</h1>
             <!--/* 原文是「Welcome to my website ——by 陈震 （Chen Zhen）」。
                    规范禁用破折号，这里换成与全站一致的正斜杠分隔；
                    括号也从全角改成半角，与导航、页脚的写法统一。 */-->
-            <p class="page-lead">Welcome to my website / by 陈震 (Chen Zhen)</p>
-            <p class="mono-sm" style="color: var(--ink-2); margin-top: 16px;">
+            <p class="page-lead rise">Welcome to my website / by 陈震 (Chen Zhen)</p>
+            <p class="mono-sm rise" style="color: var(--ink-2); margin-top: 16px;">
                 共 <span th:text="${#lists.size(memoryList)}">0</span> 篇，按写作时间从新到旧
             </p>
         </div>
@@ -45,20 +50,27 @@
 
     <section class="section">
         <div class="wrap">
+            <!--/* 滚动时间轴：左缘墨轨是 .arc::before，.arc-progress 是上面那段信号黄，
+                   页内脚本按滚动进度把它从 0 长到 1（scaleY）。 */-->
             <div class="arc">
+                <div class="arc-progress" aria-hidden="true"></div>
 
                 <!--/* 年份分组。getBlogList() 已按 create_time 倒序，所以在模板里比一句
                        「上一条的年份不等于这一条」就等价于「该起一个新分组」，
                        不需要再为分组去动 Controller / Service（本次范围不改既有接口）。
 
                        注意 st.first 必须写在 or 的左边：SpEL 的 or 会短路，
-                       首条时右边根本不求值，因此 st.index - 1 不会算成 -1 去索引列表尾。 */-->
+                       首条时右边根本不求值，因此 st.index - 1 不会算成 -1 去索引列表尾。
+
+                       is-current：首年先标上（打开页面时它就在视口），
+                       之后由页内脚本的滚动间谍按「谁压着视口中线」改写。 */-->
                 <th:block th:each="memory, st : ${memoryList}">
                     <h2 class="arc-year"
+                        th:classappend="${st.first} ? 'is-current' : ''"
                         th:if="${st.first or #temporals.format(memoryList[st.index - 1].createTime, 'yyyy') != #temporals.format(memory.createTime, 'yyyy')}"
                         th:text="${#temporals.format(memory.createTime, 'yyyy')}">2024</h2>
 
-                    <a class="post-row row-fill"
+                    <a class="post-row row-fill rise"
                        th:classappend="${#strings.isEmpty(memory.firstPicture)} ? '' : 'has-thumb'"
                        th:href="@{/blog/{id}(id=${memory.id})}">
                         <span class="post-date mono" th:text="${#temporals.format(memory.createTime, 'MM-dd')}">01-01</span>
@@ -92,6 +104,110 @@
 <th:block th:replace="~{fragments/chrome :: searchDialog}"/>
 <th:block th:replace="~{fragments/chrome :: scripts}"/>
 <th:block th:replace="~{fragments/chrome :: motion}"/>
+
+<!--/* 归档页招牌：时间地层 + 滚动时间轴 + 年份刻度。
+     three.js 与 terrain.js 是这页（和首页）专属的 600KB，不进公共片段。 */-->
+<script th:src="@{/lib/three/three.min.js}"></script>
+<script th:src="@{/js/terrain.js}"></script>
+<script th:inline="none">
+    (function () {
+        'use strict';
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        /* ---- 时间地层：页头背后的等高线地形 ----
+           与首页 hero 同一片地形的另一个标本：首页跟指针（重力感应 = 当下），
+           这里不跟指针、只随时间漂移（沉积 = 过往）。整段是增强不是内容，
+           但库文件缺失仍然是部署事故，要抛出来让人看见，不静默吞掉。 */
+        (function () {
+            if (!window.CzTerrain) throw new Error('CzTerrain 未加载：/js/terrain.js 缺失或被拦截');
+            var head = document.querySelector('.page-head.has-terrain');
+            if (!head) return;
+            var glCanvas = document.getElementById('arcGl');
+            var flatCanvas = document.getElementById('arcFlat');
+            /* 浓度 0.09，远低于首页的 0.22：它是页头背景装置，压不住标题就是失败。
+               更浅的浓度也让「地层」读起来比 hero 那张更远、更旧。 */
+            var OPACITY = 0.09;
+
+            // 减少动效时不上 WebGL：直接走静态 2D 等高线，地层还在，只是不动
+            var gl = (window.THREE && !reduce) ? CzTerrain.initGL(glCanvas, head) : null;
+            if (!gl) {
+                if (glCanvas) glCanvas.style.display = 'none';
+                CzTerrain.drawFlat(flatCanvas, head);
+                return;
+            }
+            glCanvas.style.display = 'block';
+            gl.terrain.material.uniforms.uOpacity.value = OPACITY;
+            // 比首页（-1.16 / y-150 / z-300）放得更平、压得更低：
+            // 页头是一条横带，只露出层叠的线，不追求首页那种俯视纵深
+            gl.terrain.rotation.x = -0.9;
+            gl.terrain.position.set(0, -210, -420);
+
+            // 漂移循环只推 uTime。页头滚出视野或标签页隐藏时停（规范 §5.2）：
+            // 页头只有几百像素高，滚过它之后这个循环就该彻底休息
+            var clock = 0, running = false, rafId = null, headVisible = true;
+            function tick() {
+                if (!running) return;
+                rafId = requestAnimationFrame(tick);
+                clock += 0.016;
+                gl.terrain.material.uniforms.uTime.value = clock;
+                gl.renderer.render(gl.scene, gl.camera);
+            }
+            function sync() {
+                var should = headVisible && !document.hidden;
+                if (should && !running) { running = true; rafId = requestAnimationFrame(tick); }
+                if (!should && running) { running = false; if (rafId) { cancelAnimationFrame(rafId); rafId = null; } }
+            }
+            if ('IntersectionObserver' in window) {
+                new IntersectionObserver(function (entries) {
+                    entries.forEach(function (e) { headVisible = e.isIntersecting; });
+                    sync();
+                }, { threshold: 0 }).observe(head);
+            }
+            document.addEventListener('visibilitychange', sync);
+            sync();
+
+            var rw;
+            window.addEventListener('resize', function () {
+                clearTimeout(rw);
+                rw = setTimeout(function () { gl.resize(); gl.renderer.render(gl.scene, gl.camera); }, 200);
+            });
+        })();
+
+        /* ---- 滚动时间轴：信号黄进度段随滚动在墨轨上生长 ----
+           GSAP 没到位就不建：进度段停在 scaleY(0) 贴着墨轨，看不见但不留坏状态。 */
+        if (window.gsap && window.ScrollTrigger && !reduce) {
+            gsap.to('.arc-progress', {
+                scaleY: 1, ease: 'none',
+                scrollTrigger: { trigger: '.arc', start: 'top 60%', end: 'bottom 70%', scrub: true }
+            });
+        }
+
+        /* ---- 年份刻度：哪个年份压着视口中线，哪个刻度转信号黄 ----
+           「当前年份」按几何关系重算，而不是靠「谁进出过中线」的边沿事件：
+           年份头是 sticky 吸顶的，快进（End 键、锚点跳转）会跳过中间所有交叉，
+           边沿语义下最后一年永远点不亮。每次回调都把全部年份重新量一遍 ——
+           取「顶部已经越过中线」的最后一年，跳变再猛也不会算错。
+           IO 只负责「该重算了」这个信号，所以观察整个视口（rootMargin 0），
+           任一年份进出视口都触发一次。 */
+        var years = document.querySelectorAll('.arc-year');
+        if (years.length && 'IntersectionObserver' in window) {
+            var updateCurrent = function () {
+                var line = window.innerHeight * 0.42;
+                var current = null;
+                years.forEach(function (y) {
+                    if (y.getBoundingClientRect().top <= line) current = y;
+                });
+                // 还没进入时间轴（最新一年仍在中线以下）时，点亮最新一年：
+                // 人站在轨道的起点，起点就该是亮的
+                if (!current) current = years[0];
+                years.forEach(function (y) { y.classList.toggle('is-current', y === current); });
+            };
+            var spy = new IntersectionObserver(updateCurrent);
+            years.forEach(function (y) { spy.observe(y); });
+            updateCurrent();   // IO 首帧回调之前的初始状态
+        }
+    })();
+</script>
 
 </body>
 </html>
