@@ -27,12 +27,14 @@
            skills（字符串数组）、author。 */-->
     <header class="page-head">
         <div class="wrap">
-            <div class="eyebrow">
+            <div class="eyebrow wipe-in">
                 <span class="bar"></span>
                 <span class="mono">Hello / 关于我</span>
             </div>
+            <!--/* page-title 不挂 wipe-in：它的入场是逐字 3D 飞入（下面脚本拆字，
+                   首页 thunder 的小号版），两个揭示系统不叠在同一个元素上。 */-->
             <h1 class="page-title" th:text="${author}">ChenZhen</h1>
-            <p class="page-lead" th:text="${intro}">我是陈震，欢迎来到我的博客！</p>
+            <p class="page-lead rise" th:text="${intro}">我是陈震，欢迎来到我的博客！</p>
         </div>
     </header>
 
@@ -47,7 +49,7 @@
                     <img class="cut-tr" th:src="@{/images/me.jpg}" alt="陈震的照片" width="750" height="750" decoding="async">
                     <span class="plate" th:text="'CZ / ' + ${author}">CZ / ChenZhen</span>
                 </div>
-                <div class="about-body">
+                <div class="about-body rise">
                     <div class="eyebrow">
                         <span class="bar"></span>
                         <span class="mono">About this blog / 关于这个博客</span>
@@ -84,6 +86,47 @@
 <!--/* 前台七页统一引 motion：揭示范围含 .page-head / .post-head / .section / .footer，
      细节见片段头注释。 */-->
 <th:block th:replace="~{fragments/chrome :: motion}"/>
+
+<!--/* 人物档案的两个招牌动作：
+     1) page-title 逐字 3D 入场 —— 首页 thunder 的小号版：逐字从纵深 rotationX 飞入回正，
+        字号沿用 page-title 不放大。只在真要动画时才拆字：拆了不动的收益是零。
+     2) .skills li 级联 pop。
+     GSAP 没到位就安静跳过：不拆字、不建补间，标题与技能本就完整可见
+     （skills 的隐藏初态挂在 .anim 上，motion 会把 .anim 摘掉）。 */-->
+<script th:inline="none">
+    (function () {
+        'use strict';
+        if (!window.gsap) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        var title = document.querySelector('.page-head .page-title');
+        if (title) {
+            var text = title.textContent;
+            title.textContent = '';
+            // perspective 只在拆了字之后才开：不拆字的页面不需要这层 3D 上下文
+            title.classList.add('chars-on');
+            var chars = [];
+            text.split('').forEach(function (c) {
+                var span = document.createElement('span');
+                span.className = 'ch';
+                span.textContent = c;
+                title.appendChild(span);
+                chars.push(span);
+            });
+            // 比首页收一点：纵深 620（首页 820）、角度 -72°（首页 -78°）、时长 1.0（首页 1.25）
+            gsap.fromTo(chars,
+                { z: -620, rotationX: -72, opacity: 0 },
+                { z: 0, rotationX: 0, opacity: 1, duration: 1.0, stagger: 0.06, ease: 'power4.out' });
+        }
+
+        if (!window.ScrollTrigger) return;
+        gsap.fromTo('.skills li', { opacity: 0, y: 14 }, {
+            opacity: 1, y: 0, duration: .45, ease: 'power3.out',
+            stagger: 0.04, clearProps: 'transform',
+            scrollTrigger: { trigger: '.skills', start: 'top 88%' }
+        });
+    })();
+</script>
 
 </body>
 </html>

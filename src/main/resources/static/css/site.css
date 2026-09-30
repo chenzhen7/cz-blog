@@ -830,6 +830,13 @@ button { font: inherit; }
    （改版前是写在 style 里的，现在收进样式表）。 */
 .page-lead { color: var(--ink-2); margin: 22px 0 0; max-width: 58ch; white-space: pre-line; }
 
+/* about 页 page-title 的逐字 3D 入场（首页 .thunder 的小号版）。
+   perspective 只在 .chars-on 上开 —— 那是脚本拆字之后才加的类，
+   不拆字的页面（reduce / GSAP 没到位）不需要这层 3D 上下文。
+   配方与 .thunder .ch 同源，行内块 + preserve-3d 是逐字旋转能成立的前提。 */
+.page-title.chars-on { perspective: 1000px; transform-style: preserve-3d; }
+.page-title .ch { display: inline-block; transform-style: preserve-3d; will-change: transform, opacity; }
+
 /* 清单式罗列（技能等）。
    改版前每项下面画一根等宽进度条 —— 所有项宽度都一样，因为那条 bar 的宽度
    不来自任何数据，等于没有信息量。这里换成等价清单：只呈现「会哪些」，
@@ -840,6 +847,9 @@ button { font: inherit; }
   transition: background .3s, color .3s, border-color .3s;
 }
 .skills li:hover { background: var(--signal-fill); color: var(--ink-on-signal); border-color: var(--signal-edge); }
+/* 级联入场的初始态（.anim 门控）：透明度归 0，等页面脚本的 stagger 播入。
+   只藏 opacity 不写 transform —— y 位移由 GSAP 的 fromTo 自己设初值。 */
+.anim .skills li { opacity: 0; }
 
 /* ==========================================================================
    17. 归档（流年记）
