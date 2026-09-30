@@ -349,6 +349,99 @@
         });
         if (mq.addEventListener) mq.addEventListener('change', layout);
         else if (mq.addListener) mq.addListener(layout);   // 老 Edge / 老 Safari
+
+        /* ---------- 指针停到据点上：它抬起、连线浮出、详情条报出它的全部信息 ---------- */
+
+        var links = document.getElementById('frLinks');
+        var detail = document.getElementById('frDetail');
+        var hintHTML = detail ? detail.innerHTML : '';
+        var current = null;          // 当前选中的据点，避免重复读写
+
+        /* 状态文字从节点自己的 ::after 读，不在 JS 里再抄一份 ——
+           标签的单一事实来源始终是 site.css 里那条 data-net 规则。 */
+        function netLabel(el) {
+            var netEl = el.querySelector('.fr-node-net');
+            if (!netEl) return '';
+            var raw = getComputedStyle(netEl, '::after').content;
+            return (raw || '').replace(/^"|"$/g, '');
+        }
+        function textOf(el, cls) {
+            var n = el.querySelector('.' + cls);
+            return n ? n.textContent.trim() : '';
+        }
+
+        function show(el) {
+            if (current === el) return;
+            hide();
+            current = el;
+            el.classList.add('near');
+
+            // 连线：SVG 用 viewBox 0 0 100 100 + preserveAspectRatio=none，
+            // 所以节点的 left/top 百分比可以直接当 SVG 坐标用，不用换算像素
+            if (links) {
+                var l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                l.setAttribute('x1', 50); l.setAttribute('y1', 50);
+                l.setAttribute('x2', parseFloat(el.style.left));
+                l.setAttribute('y2', parseFloat(el.style.top));
+                // 舞台被拉伸过，描边要按屏幕像素走，不然线会跟着变形
+                l.setAttribute('vector-effect', 'non-scaling-stroke');
+                links.appendChild(l);
+            }
+
+            if (!detail) return;
+            // 用 DOM API 拼而不是 innerHTML：站名与描述都来自数据库，不拼字符串
+            while (detail.firstChild) detail.removeChild(detail.firstChild);
+            var nm = document.createElement('span');
+            nm.className = 'd-name';
+            nm.textContent = textOf(el, 'fr-node-name');
+            detail.appendChild(nm);
+
+            var desc = textOf(el, 'fr-node-desc');
+            if (desc) {
+                var d = document.createElement('span');
+                d.textContent = desc;
+                detail.appendChild(d);
+            }
+
+            var net = document.createElement('span');
+            net.className = 'd-net';
+            net.setAttribute('data-net', el.getAttribute('data-net'));
+            net.textContent = netLabel(el);
+            detail.appendChild(net);
+
+            // 加入时间与最近巡检：t_friend 上的两个真字段，都可空
+            var joined = textOf(el, 'fr-node-joined');
+            var check = textOf(el, 'fr-node-check');
+            var bits = [];
+            if (joined) bits.push('加入 ' + joined);
+            if (check) bits.push('巡检 ' + check);
+            if (bits.length) {
+                var m = document.createElement('span');
+                m.className = 'd-meta';
+                m.textContent = bits.join(' · ');
+                detail.appendChild(m);
+            }
+        }
+
+        function hide() {
+            if (current) current.classList.remove('near');
+            current = null;
+            if (links) links.innerHTML = '';
+            if (detail) detail.innerHTML = hintHTML;
+        }
+
+        var fine = window.matchMedia('(pointer: fine)').matches;
+        if (fine) {
+            nodes.forEach(function (el) {
+                el.addEventListener('mouseenter', function () { show(el); });
+                el.addEventListener('mouseleave', hide);
+            });
+        } else if (detail) {
+            // 触屏没有悬停，详情条在这台设备上永远不会被填 —— 与其摆一句用不上的提示，
+            // 不如直接说明该怎么用（据点本身就是链接，点一下就去对方的站）
+            detail.innerHTML = '<span class="fr-detail-hint">点任意据点，打开对方的站点。</span>';
+            hintHTML = detail.innerHTML;
+        }
     })();
 </script>
 

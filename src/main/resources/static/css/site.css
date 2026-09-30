@@ -1169,11 +1169,25 @@ button { font: inherit; }
   color: var(--ink-on-signal);
 }
 /* 据点。left/top 由脚本按向日葵盘算好写成百分比。
-   translate(-50%,-50%) 让百分比落在节点中心；悬停态的 transform 必须带上它。 */
+   translate(-50%,-50%) 让百分比落在节点中心；悬停态的 transform 必须**带上它**，
+   漏了据点会一边放大一边往右下角跑（缩放是绕元素中心的，位移是另一回事）。 */
 .fr-board.is-map .fr-node {
   position: absolute; width: 116px; z-index: 2;
   transform: translate(-50%, -50%);
   transition: transform .3s cubic-bezier(.16, 1, .3, 1);
+}
+/* 指针停到哪个据点，哪个抬起来 —— 「地图上的点被指到」的样子。
+   .near 由脚本挂（不是 :hover），这样头像墙模式不受影响，也方便触屏以外的
+   输入方式复用同一个状态。 */
+.fr-board.is-map .fr-node.near {
+  transform: translate(-50%, -50%) scale(1.45);
+  z-index: 5;
+}
+.fr-board.is-map .fr-node.near .fr-node-ava { filter: none; border-color: var(--signal-edge); }
+/* 站名抬起时给个白底 + 信号描边：它会压到邻近的据点上，没有底就糊成一团 */
+.fr-board.is-map .fr-node.near .fr-node-name {
+  color: var(--ink); background: var(--bg);
+  padding: 1px 5px; border: 1px solid var(--signal-edge);
 }
 /* 星图上站名与状态都让位给图形：站名按条数分档决定要不要显示（脚本挂 .no-label），
    状态只留方块，位置挪到头像右上角。文字含义由详情条与节点自身的 title 承载。 */
