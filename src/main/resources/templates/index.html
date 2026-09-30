@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="zh-CN" xmlns:th="http://www.w3.org/1999/xhtml" data-selfwipe>
 <head>
     <!--/* SEO 契约：title / description / keywords / baidu 校验 / favicon 一律逐字保留，
            改版只动结构与 class。这个改版最大的风险是 SEO 迁移，不是视觉。
@@ -31,6 +31,7 @@
 <!--/* 载入擦除与纸张纤维。擦屏只放首页：它表达的是「开幕」，逐页都放会变成每跳一次闪一块黄 */-->
 <th:block th:replace="~{fragments/chrome :: wipe}"/>
 <th:block th:replace="~{fragments/chrome :: grain}"/>
+<th:block th:replace="~{fragments/chrome :: pageWipe}"/>
 
 <div class="layer">
 

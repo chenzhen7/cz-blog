@@ -133,6 +133,31 @@ button { font: inherit; }
 }
 #wipe .wipe-code { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .24em; color: var(--ink-on-signal); }
 
+/* 翻页擦除板：站内跳转的过渡（chrome :: scripts 点击拦截 + animGate 标记驱动）。
+   静止态裁没、躲右屏外 —— 与 #wipe 同一条安全红线：
+   动画没跑起来（JS 禁用 / GSAP 无关这里，纯 CSS 但也靠类触发）页面也不该被盖住。
+   两段动画共用一条运动方向（从右向左）：离开时扫入盖住，到达时继续向左抽走，
+   感受上是同一块板横扫过整个跳转。 */
+#pagewipe {
+  position: fixed; inset: 0; z-index: 101;
+  background: var(--signal-fill);
+  pointer-events: none;
+  clip-path: inset(0 0 0 100%);
+}
+/* 到达半程在前：离开与到达两个类同时存在时（本页既是落点又要离开），
+   靠后的离开规则赢 —— 正要跳走的页面不该再播到达动画 */
+.anim.nav-in #pagewipe { animation: pagewipe-out .5s cubic-bezier(.16, 1, .3, 1) both; }
+@keyframes pagewipe-out {
+  0%   { clip-path: inset(0 0 0 0); }        /* 盖满（上一页盖过来的那块板） */
+  22%  { clip-path: inset(0 0 0 0); }        /* 停一拍，让「翻页」被感知 */
+  100% { clip-path: inset(0 100% 0 0); }     /* 向左抽走 */
+}
+.anim.nav-out #pagewipe { animation: pagewipe-in .34s cubic-bezier(.16, 1, .3, 1) both; }
+@keyframes pagewipe-in {
+  from { clip-path: inset(0 0 0 100%); }     /* 躲右屏外 */
+  to   { clip-path: inset(0 0 0 0); }        /* 扫入盖满 */
+}
+
 /* ==========================================================================
    3. 顶栏
    桌面端导航必须单行。字号变大后断点从 900px 上移到 1080px，低于此收进汉堡抽屉。
