@@ -180,6 +180,22 @@
                               th:text="${#temporals.format(friendlink.updateTime, 'MM-dd')}">10-01</span>
                     </span>
                 </a>
+
+                <!--/* 不可达区域：网络状态「异常 / 超时」的友链从星图里摘出来，收到舞台底部这条带。
+                       动机：状态差说的是**这个站现在连不上**，跟「这个站是谁」是两件事。
+                       混在盘里，读者分不清哪个点还是活着的朋友、哪个点已经挂掉了 ——
+                       实测 22 条里有 11 条是挂的，一半的图在说谎。
+                       标签与区域都是页面正文（不是 ::before 里的 content），屏读能读到
+                       「这 11 条属于不可达区域」这层结构；数量由脚本填。
+                       区域里的节点由脚本搬进来（appendChild），无 JS 时它们就是普通节点、
+                       按原顺序排着头像墙，标签也不显示 —— 没分组就不声称分过组。 */-->
+                <div class="fr-zone" id="frZone">
+                    <span class="fr-zone-tag">
+                        <span class="fr-zone-rule" aria-hidden="true"></span>
+                        <span class="mono-sm">Unreachable / 不可达区域</span>
+                        <b class="fr-zone-count"></b>
+                    </span>
+                </div>
             </div>
 
             <!--/* 详情条：星图的据点承载不了描述，指针停到哪个据点上就在这里报出它的全部信息。
@@ -326,7 +342,17 @@
         // 盘半径的下限由 .fr-board.is-map 的 min-height 520px 兜着（ry ≥ 520×0.44 = 229），
         // 远大于这个值，所以 (rx - HUB_CLEAR) 不会变成负数。
         var HUB_CLEAR = 92;
+        // 区域的尺寸（像素）。列宽与星图上的据点同宽，两组视觉上是一套刻度。
+        var ZONE_COL_W = 116;      // 一行放几个由舞台宽度除它得出
+        var ZONE_ROW_H = 84;       // 头像 42 + 间距 7 + 站名两行 34
+        var ZONE_HEAD = 44;        // 虚线下沿 → 标签 22 → 第一行据点，中间留白
+        var ZONE_PAD_B = 14;
+        // 据点内容的半高（同上 83px 的一半，向上取整）。盘要按它留出上下余量，
+        // 否则最外圈的站名会压到区域的虚线上
+        var NODE_HALF = 46;
         var mq = window.matchMedia('(min-width: ' + MAP_MIN + 'px)');
+        // 圆心在舞台里的百分比位置。区域占掉底部之后圆心会往上挪，连线要从新的位置出发
+        var hubPct = { x: 50, y: 50 };
 
         /* 据点尺寸按条数分档退让：先缩小头像，再丢掉站名。
            超过约 90 条时站名之间已经压到一起，只能靠悬停认人 ——
@@ -338,45 +364,109 @@
             return { ava: 18, label: false };
         }
 
+        /* ---------- 不可达区域：把「现在连不上」的友链从星图里摘出来 ----------
+           枚举逐值显式列出，不用 else 兜底 —— 后端契约一变必须看得见（项目规范）：
+             0 良好 / 1 一般  → 可达，进星图
+             2 异常 / 3 超时  → 不可达，进区域
+             unknown          → 留在星图。它表示「没有数据」，不是「连不上」；
+                                把未知当成不可达，是在替数据下结论。
+           模板保证 data-net 只可能是这五个值（越界的一律落成 'unknown'），
+           真走到最后一行说明模板契约变了，直接抛，不装作没看见。 */
+        function isUnreachable(el) {
+            var net = el.getAttribute('data-net');
+            if (net === '0' || net === '1' || net === 'unknown') return false;
+            if (net === '2' || net === '3') return true;
+            throw new Error('未知的 data-net 取值：' + net);
+        }
+
+        var live = [], dead = [];
+        nodes.forEach(function (el) { (isUnreachable(el) ? dead : live).push(el); });
+
+        var zone = document.getElementById('frZone');
+        if (dead.length && zone) {
+            // 搬进区域。屏读顺序跟着变成「可达的一批 → 不可达的一批」，与视觉一致；
+            // 头像墙模式下 .fr-zone 是 display:contents，这些节点直接成为网格项，
+            // 区域标签占满一整行把它们和上面那批分开。
+            dead.forEach(function (el) { zone.appendChild(el); });
+            board.classList.add('has-zone');
+            var cnt = zone.querySelector('.fr-zone-count');
+            if (cnt) cnt.textContent = dead.length + ' / ' + nodes.length;
+        }
+
         function layout() {
             if (!mq.matches) {
                 board.classList.remove('is-map', 'no-label');
                 board.style.removeProperty('--ava');
+                board.style.removeProperty('--zone-h');
                 // 头像墙没有「离圆心多远」这回事，按格子的阅读顺序错开
                 nodes.forEach(function (el, i) { el.style.animationDelay = (i * 26) + 'ms'; });
                 return;
             }
             board.classList.add('is-map');
-            var t = tier(nodes.length);
+            var t = tier(live.length);
             board.style.setProperty('--ava', t.ava + 'px');
             board.classList.toggle('no-label', !t.label);
 
             // 先挂类再量尺寸：.is-map 会给舞台一个确定高度，量早了拿到的是头像墙的高度
             var w = board.clientWidth, h = board.clientHeight;
             if (!w || !h) return;
-            var rxMax = w * RX_RATIO, ryMax = h * RY_RATIO;
+
+            /* 区域先算：它占掉多少高度，剩下的才是星图的舞台。
+               一行放几个由宽度定（1440px 下 11 列，当前 11 条正好一行）。 */
+            var zoneRows = 0, zoneCols = 1, zoneH = 0;
+            if (dead.length) {
+                zoneCols = Math.max(1, Math.floor(w / ZONE_COL_W));
+                zoneRows = Math.ceil(dead.length / zoneCols);
+                zoneH = ZONE_HEAD + zoneRows * ZONE_ROW_H + ZONE_PAD_B;
+                board.style.setProperty('--zone-h', zoneH + 'px');
+            } else {
+                board.style.removeProperty('--zone-h');
+            }
+
+            // 盘画在「舞台减掉区域」的那块里。区域是图外的东西，圆心不能因为它往上升
+            var mapH = h - zoneH;
+            var cy = mapH / 2;
+            // 竖向要额外留出据点半高，否则最外圈的站名会压到区域的虚线上。
+            // 横向不用：RX_RATIO 的 0.45 天然留了 5%（1440px 下 65px），已大于半宽 58px
+            var rxMax = w * RX_RATIO;
+            var ryMax = Math.min(mapH * RY_RATIO, (mapH - 2 * NODE_HALF) / 2);
             // 半径随 √N 增长（面积与 N 成正比 = 间距不变），撞到盘上限后才真的开始变挤
-            var k = SPACING * Math.sqrt(nodes.length) * 0.72;
+            var k = SPACING * Math.sqrt(live.length) * 0.72;
             var rx = Math.min(rxMax, k), ry = Math.min(ryMax, k);
 
-            // 向日葵盘的 fRaw = √((i+0.5)/N) 最小只到 √(0.5/N)，永远取不到 0 ——
-            // 不归一化的话，重映射出来的「内圈」其实悬在半空，盘心白多让一圈。
-            var fMinRaw = Math.sqrt(0.5 / nodes.length);
+            if (live.length) {
+                // 向日葵盘的 fRaw = √((i+0.5)/N) 最小只到 √(0.5/N)，永远取不到 0 ——
+                // 不归一化的话，重映射出来的「内圈」其实悬在半空，盘心白多让一圈。
+                var fMinRaw = Math.sqrt(0.5 / live.length);
+                live.forEach(function (el, i) {
+                    var fRaw = Math.sqrt((i + 0.5) / live.length);
+                    // 归一化：最内圈恰好 0，最外圈恰好 1
+                    var f = (fRaw - fMinRaw) / (1 - fMinRaw);
+                    var a = i * GOLDEN;
+                    // 盘半径按 HUB_CLEAR 内缩再乘 f：内圈落在 (HUB_CLEAR, HUB_CLEAR) 这个圆上，
+                    // 外圈仍是完整椭圆。内缩量固定，所以盘多大净空都正好那么多。
+                    var rhoX = HUB_CLEAR + f * (rx - HUB_CLEAR);
+                    var rhoY = HUB_CLEAR + f * (ry - HUB_CLEAR);
+                    // 圆心 + 椭圆半径 × 单位方向，换算成百分比写进 left/top
+                    el.style.left = (50 + Math.cos(a) * rhoX / w * 100).toFixed(3) + '%';
+                    el.style.top  = ((cy + Math.sin(a) * rhoY) / h * 100).toFixed(3) + '%';
+                    // 入场错开：f 就是「第几圈」，内圈 0ms 先亮 —— 从本站向外长出一圈朋友
+                    el.style.animationDelay = Math.round(f * 900) + 'ms';
+                });
+            }
+            // live 为空是合法状态（所有友链都连不上），不是错误：跳过摆盘，只留圆心与区域
+            hubPct.x = 50;
+            hubPct.y = cy / h * 100;
 
-            nodes.forEach(function (el, i) {
-                var fRaw = Math.sqrt((i + 0.5) / nodes.length);
-                // 归一化：最内圈恰好 0，最外圈恰好 1
-                var f = (fRaw - fMinRaw) / (1 - fMinRaw);
-                var a = i * GOLDEN;
-                // 盘半径按 HUB_CLEAR 内缩再乘 f：内圈落在 (HUB_CLEAR, HUB_CLEAR) 这个圆上，
-                // 外圈仍是完整椭圆。内缩量固定，所以盘多大净空都正好那么多。
-                var rhoX = HUB_CLEAR + f * (rx - HUB_CLEAR);
-                var rhoY = HUB_CLEAR + f * (ry - HUB_CLEAR);
-                // center + 椭圆半径 × 单位方向，换算成百分比写进 left/top
-                el.style.left = (50 + Math.cos(a) * rhoX / w * 100).toFixed(3) + '%';
-                el.style.top  = (50 + Math.sin(a) * rhoY / h * 100).toFixed(3) + '%';
-                // 入场错开：f 就是「第几圈」，内圈 0ms 先亮 —— 从本站向外长出一圈朋友
-                el.style.animationDelay = Math.round(f * 900) + 'ms';
+            dead.forEach(function (el, i) {
+                var row = Math.floor(i / zoneCols), col = i % zoneCols;
+                var inRow = Math.min(zoneCols, dead.length - row * zoneCols);
+                // 每行各自居中：末行不满时左对齐看着像掉了队
+                var offX = (w - inRow * ZONE_COL_W) / 2;
+                el.style.left = ((offX + col * ZONE_COL_W + ZONE_COL_W / 2) / w * 100).toFixed(3) + '%';
+                el.style.top  = ((mapH + ZONE_HEAD + row * ZONE_ROW_H + ZONE_ROW_H / 2) / h * 100).toFixed(3) + '%';
+                // 入场排在星图之后：盘先长满，够不着的那些再落到区域里
+                el.style.animationDelay = Math.round(1000 + i * 45) + 'ms';
             });
         }
 
@@ -434,10 +524,11 @@
             el.classList.add('near');
 
             // 连线：SVG 用 viewBox 0 0 100 100 + preserveAspectRatio=none，
-            // 所以节点的 left/top 百分比可以直接当 SVG 坐标用，不用换算像素
+            // 所以节点的 left/top 百分比可以直接当 SVG 坐标用，不用换算像素。
+            // 起点是 hubPct 而不是写死的 (50,50)：有不可达区域时圆心会上移
             if (links) {
                 var l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                l.setAttribute('x1', 50); l.setAttribute('y1', 50);
+                l.setAttribute('x1', hubPct.x); l.setAttribute('y1', hubPct.y);
                 l.setAttribute('x2', parseFloat(el.style.left));
                 l.setAttribute('y2', parseFloat(el.style.top));
                 // 舞台被拉伸过，描边要按屏幕像素走，不然线会跟着变形

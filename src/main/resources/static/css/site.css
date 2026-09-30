@@ -1162,9 +1162,12 @@ button { font: inherit; }
    内圈退开的净空由脚本按像素留出（friends.html 的 HUB_CLEAR），两边配合才成立。
    改大小时两边要同步：净空 = 头像半径 + 2px 描边 + 据点半宽。 */
 /* 圆心不随指针抬起 —— 据点抬起是「被指到的点」，圆心是参照系，它动了整张图就散了。
-   反馈改走环的颜色（见下）。 */
+   反馈改走环的颜色（见下）。
+   top 减去 --zone-h 再取半：有不可达区域时，圆心是**星图那块**的中心，
+   不是整个舞台的中心 —— 区域是图外的东西，不该把圆心顶上去。 */
 .fr-board.is-map .fr-hub {
-  display: block; position: absolute; left: 50%; top: 50%; z-index: 6;
+  display: block; position: absolute; left: 50%;
+  top: calc((100% - var(--zone-h, 0px)) / 2); z-index: 6;
   transform: translate(-50%, -50%);
 }
 /* 信号黄的环是「本站」这个身份：没有它，圆心那块就只是又一个头像，
@@ -1208,6 +1211,57 @@ button { font: inherit; }
    （scale 不改计算值仍是 13px，但视觉上是 13×1.45 ≈ 19px）与底部的详情条，
    那块白底来回闪比糊一点更吵。 */
 .fr-board.is-map .fr-node.near .fr-node-name { color: var(--ink); }
+/* ---------- 不可达区域 ----------
+   网络状态「异常 / 超时」的友链从星图里摘出来，收到舞台底部一条带。
+   动机：状态差说的是「这个站现在连不上」，跟「这个站是谁」是两件事。混在盘里，
+   读者分不清哪个点还是活着的朋友、哪个点已经挂掉 —— 实测 22 条里 11 条是挂的。
+   虚线是「这里是边界之外」的工程图语言：实线做版面分隔，虚线做范围标注。
+   默认（头像墙 / 无 JS）下 .fr-zone 只是透明的分组容器，标签不显示 ——
+   脚本没把节点搬进来，就不声称分过组。 */
+.fr-zone { display: contents; }
+.fr-zone-tag { display: none; }
+.fr-board.has-zone .fr-zone-tag {
+  display: flex; align-items: center; gap: 10px;
+  /* 窄屏放不下时整块换行，而不是把「Unreachable / 不可达区域」拦腰断开 ——
+     CJK 默认随处可断，不 nowrap 的话 360px 下会断成「不可达区 / 域」 */
+  flex-wrap: wrap;
+  grid-column: 1 / -1;              /* 头像墙：占满整行，把两组分开 */
+  margin-top: 8px; padding-top: 16px;
+  border-top: 1px dashed var(--line-strong);
+}
+.fr-zone-tag > * { white-space: nowrap; }
+.fr-zone-rule { width: 40px; height: 1px; background: var(--signal-edge); flex-shrink: 0; }
+.fr-zone-count {
+  font-family: var(--font-mono); font-size: var(--fs-label); font-style: normal;
+  color: var(--ink);
+}
+/* 区域里的据点淡一档：还能点、能悬停，视觉上退到「备用」那一层。
+   只压头像不压站名 —— 「这是谁」的信息要保持可读。 */
+.fr-zone .fr-node-ava { opacity: .62; transition: opacity .25s; }
+.fr-zone .fr-node:hover .fr-node-ava,
+.fr-zone .fr-node.near .fr-node-ava { opacity: 1; }
+
+/* 星图模式下区域是**铺满整个舞台的一层**，不是底部那个盒子 ——
+   这样里面的据点与星图据点共用一套百分比坐标，两边算位置不用换算。
+   这一层刻意不设 z-index：设了就自成层叠上下文，区域里的据点再也抬不到
+   星图据点之上（.near 的 z-index 5 会被关在层里）。 */
+.fr-board.is-map .fr-zone {
+  display: block; position: absolute; inset: 0;
+  pointer-events: none;              /* 层本身不可点，只有里面的据点是链接 */
+}
+.fr-board.is-map .fr-zone::before {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+  height: var(--zone-h, 0px);
+  background: var(--bg-sunken);
+  border-top: 1px dashed var(--line-strong);
+}
+.fr-board.is-map .fr-zone .fr-node { pointer-events: auto; }
+/* 标签钉在带的上沿。头像墙那套边距在这里全部作废，改由脚本按 --zone-h 定位 */
+.fr-board.is-map .fr-zone-tag {
+  position: absolute; left: 0; top: calc(100% - var(--zone-h, 0px) + 12px);
+  margin: 0; padding: 0; height: 22px; border-top: 0;
+}
+
 /* 星图上站名与状态都让位给图形：站名按条数分档决定要不要显示（脚本挂 .no-label），
    状态只留方块，位置挪到头像右上角。文字含义由详情条与节点自身的 title 承载。 */
 .fr-board.is-map .fr-node-net {
