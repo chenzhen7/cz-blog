@@ -1163,11 +1163,11 @@ button { font: inherit; }
    改大小时两边要同步：净空 = 头像半径 + 2px 描边 + 据点半宽。 */
 /* 圆心不随指针抬起 —— 据点抬起是「被指到的点」，圆心是参照系，它动了整张图就散了。
    反馈改走环的颜色（见下）。
-   top 减去 --zone-h 再取半：有不可达区域时，圆心是**星图那块**的中心，
-   不是整个舞台的中心 —— 区域是图外的东西，不该把圆心顶上去。 */
+   横向位置由脚本给（--hub-x）：右下角区域大到挡住盘时，盘会退到面板左边、
+   圆心跟着左移，连线的起点也走同一个值，不在这里写死 50%。 */
 .fr-board.is-map .fr-hub {
-  display: block; position: absolute; left: 50%;
-  top: calc((100% - var(--zone-h, 0px)) / 2); z-index: 6;
+  display: block; position: absolute;
+  left: var(--hub-x, 50%); top: 50%; z-index: 6;
   transform: translate(-50%, -50%);
 }
 /* 信号黄的环是「本站」这个身份：没有它，圆心那块就只是又一个头像，
@@ -1241,25 +1241,29 @@ button { font: inherit; }
 .fr-zone .fr-node:hover .fr-node-ava,
 .fr-zone .fr-node.near .fr-node-ava { opacity: 1; }
 
-/* 星图模式下区域是**铺满整个舞台的一层**，不是底部那个盒子 ——
-   这样里面的据点与星图据点共用一套百分比坐标，两边算位置不用换算。
-   这一层刻意不设 z-index：设了就自成层叠上下文，区域里的据点再也抬不到
-   星图据点之上（.near 的 z-index 5 会被关在层里）。 */
+/* 星图模式下区域是**右下角的一块面板**（位置与尺寸由脚本按 --zone-* 给），
+   不占盘的地方、也不把圆心顶走 —— 它读起来像地图边上的图例。
+   刻意不设 z-index：设了就自成层叠上下文，面板里的据点再也抬不到星图据点之上
+   （.near 的 z-index 5 会被关在面板这一层里）。 */
 .fr-board.is-map .fr-zone {
-  display: block; position: absolute; inset: 0;
-  pointer-events: none;              /* 层本身不可点，只有里面的据点是链接 */
-}
-.fr-board.is-map .fr-zone::before {
-  content: ""; position: absolute; left: 0; right: 0; bottom: 0;
-  height: var(--zone-h, 0px);
+  display: block; position: absolute;
+  left: var(--zone-x, 0px); top: var(--zone-y, 0px);
+  width: var(--zone-w, 0px); height: var(--zone-h, 0px);
   background: var(--bg-sunken);
-  border-top: 1px dashed var(--line-strong);
+  border: 1px dashed var(--line-strong);
+  pointer-events: none;              /* 面板本身不可点，只有里面的据点是链接 */
+  /* 面板里的据点整体缩小一档：头像 42 → 26。头像尺寸与状态方块的位置都从
+     --ava 派生（见上面的 .fr-node-ava 与 .fr-node-net），改这一个就够。
+     数值由脚本给（ZONE_AVA），不在这里写第二遍。 */
+  --ava: var(--zone-ava, 26px);
 }
-.fr-board.is-map .fr-zone .fr-node { pointer-events: auto; }
-/* 标签钉在带的上沿。头像墙那套边距在这里全部作废，改由脚本按 --zone-h 定位 */
+/* 列宽也要跟着窄下来，否则 84px 的列距配上 116px 的据点盒子会互相叠 */
+.fr-board.is-map .fr-zone .fr-node { width: var(--zone-col, 84px); pointer-events: auto; }
+/* 标签钉在面板左上。头像墙那套边距（跨整行、上边框）在这里全部作废 */
 .fr-board.is-map .fr-zone-tag {
-  position: absolute; left: 0; top: calc(100% - var(--zone-h, 0px) + 12px);
-  margin: 0; padding: 0; height: 22px; border-top: 0;
+  position: absolute; left: 0; top: 0;
+  height: 36px; padding: 0 0 0 14px;
+  margin: 0; border-top: 0;
 }
 
 /* 星图上站名与状态都让位给图形：站名按条数分档决定要不要显示（脚本挂 .no-label），
