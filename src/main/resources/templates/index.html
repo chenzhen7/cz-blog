@@ -79,8 +79,10 @@
                         </p>
 
                         <div class="hero-actions rise" data-reveal>
-                            <a class="btn-primary" th:href="@{/archives}">进入归档 <span aria-hidden="true">→</span></a>
-                            <a class="btn-outline" th:href="@{/about}">关于我</a>
+                            <!--/* .magnet 由下面 rAF 循环里的磁性段接管：光标靠近时按钮被吸过去，
+                                   离开时弹回。类名与原型一致，效果逻辑在 tick() 里。 */-->
+                            <a class="btn-primary magnet" th:href="@{/archives}">进入归档 <span aria-hidden="true">→</span></a>
+                            <a class="btn-outline magnet" th:href="@{/about}">关于我</a>
                         </div>
                     </div>
 
@@ -149,7 +151,12 @@
                 </div>
 
                 <div class="index">
+                    <!--/* 行结构：序号 / 正文 / 封面。模板只给「有封面」的行加 .has-thumb，
+                           没有封面的行整条封面列会被 CSS 收掉，不留一条空竖槽 ——
+                           已发布的 46 篇里只有 33 篇填了封面。
+                           元数据从原先独立的右侧一列挪进正文列，与标签页的行结构一致。 */-->
                     <a class="idx-row row-fill rise" data-reveal th:each="b : ${page.list}"
+                       th:classappend="${#strings.isEmpty(b.firstPicture)} ? '' : 'has-thumb'"
                        th:href="@{/blog/{id}(id=${b.id})}">
                         <span class="idx-num" th:text="${b.id}">1</span>
                         <span>
@@ -158,14 +165,22 @@
                             <span class="row-tags mono-sm" th:if="${not #lists.isEmpty(b.tagList)}">
                                 <span th:each="t : ${b.tagList}" th:text="${'#' + t.name}">#标签</span>
                             </span>
+                            <!--/* 元数据挪到正文列底部后，阅读/评论数短的链接不再被甩到行尾，
+                                   与摘要左边缘对齐，扫起来是一列 */-->
+                            <span class="row-meta mono">
+                                <span th:text="${#temporals.format(b.updateTime,'yyyy-MM-dd')}">2026-09-21</span>
+                                <span class="cat" th:if="${b.copyright == 1}">原创</span>
+                                <span class="cat" th:if="${b.copyright == 0}">转载</span>
+                                <span th:text="${b.views} + ' 阅读'">0 阅读</span>
+                                <span th:text="${b.commentCount} + ' 评论'">0 评论</span>
+                            </span>
                         </span>
-                        <span class="row-meta mono">
-                            <span th:text="${#temporals.format(b.updateTime,'yyyy-MM-dd')}">2026-09-21</span>
-                            <span class="cat" th:if="${b.copyright == 1}">原创</span>
-                            <span class="cat" th:if="${b.copyright == 0}">转载</span>
-                            <span th:text="${b.views} + ' 阅读'">0 阅读</span>
-                            <span th:text="${b.commentCount} + ' 评论'">0 评论</span>
-                        </span>
+                        <!--/* 封面是库里的 firstPicture，实际都指向有道笔记 / CSDN 的外链，
+                               平均 1MB 一张、最大的 4MB，lazy 必须留着 ——
+                               不留神就是一屏十几个跨域请求，且每个都可能上兆。 */-->
+                        <img class="idx-thumb" th:if="${not #strings.isEmpty(b.firstPicture)}"
+                             th:src="${b.firstPicture}" alt="" width="216" height="122"
+                             loading="lazy" decoding="async">
                     </a>
 
                     <!--/* 空库时给一句人话。改版最怕「改完不知道对不对」，
@@ -551,6 +566,20 @@
         var clock = 0, running = false, rafId = null;
         var fieldRot = { x: 0, y: 0 };
 
+        /* 磁性按钮：tx/ty 是目标位移（mousemove 时按光标偏离按钮中心的距离算出），
+           x/y 是每帧向目标收敛的当前位移。离开按钮时目标清零，按钮被 lerp 拉回原点。
+           系数与原型一致：横向吸 0.28、纵向吸 0.42，跟随速度 0.14。 */
+        var magnets = Array.prototype.slice.call(document.querySelectorAll('.magnet'));
+        var magState = magnets.map(function () { return { tx: 0, ty: 0, x: 0, y: 0 }; });
+        magnets.forEach(function (el, i) {
+            el.addEventListener('mousemove', function (e) {
+                var r = el.getBoundingClientRect();
+                magState[i].tx = (e.clientX - r.left - r.width / 2) * 0.28;
+                magState[i].ty = (e.clientY - r.top - r.height / 2) * 0.42;
+            });
+            el.addEventListener('mouseleave', function () { magState[i].tx = 0; magState[i].ty = 0; });
+        });
+
         /* uOpacity 的取值算式有两个输入，都不是 uniform 本身：
              reveal.p   —— 入场进度，由下面的 GSAP 时间轴写
              scrollFade —— 滚动淡出，由 ScrollTrigger 写
@@ -590,6 +619,15 @@
                 fieldRot.x += (-ptr.y * 5.5 - fieldRot.x) * 0.06;
                 fieldRot.y += (ptr.x * 7.5 - fieldRot.y) * 0.06;
                 field.style.transform = 'rotateX(' + fieldRot.x.toFixed(2) + 'deg) rotateY(' + fieldRot.y.toFixed(2) + 'deg)';
+            }
+
+            // 磁性按钮。每帧都写 transform（静止时写的是 0,0），与原型一致：
+            // 只碰 transform 不触发重排，省去「是否已在原点」的判断分支
+            for (var mi = 0; mi < magnets.length; mi++) {
+                var s = magState[mi];
+                s.x += (s.tx - s.x) * 0.14;
+                s.y += (s.ty - s.y) * 0.14;
+                magnets[mi].style.transform = 'translate3d(' + s.x.toFixed(2) + 'px,' + s.y.toFixed(2) + 'px,0)';
             }
         }
 

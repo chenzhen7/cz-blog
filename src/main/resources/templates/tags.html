@@ -66,6 +66,7 @@
                        这里比归档多一条 .row-meta：原创转载、阅读、评论。
                        日期用 updateTime，与改版前一致（归档页用的是 createTime）。 */-->
                 <a class="post-row row-fill" th:each="blog : ${page.list}"
+                   th:classappend="${#strings.isEmpty(blog.firstPicture)} ? '' : 'has-thumb'"
                    th:href="@{/blog/{id}(id=${blog.id})}">
                     <span class="post-date mono" th:text="${#temporals.format(blog.updateTime,'yyyy-MM-dd')}">2024-07-14</span>
                     <span>
@@ -83,7 +84,7 @@
                         </span>
                     </span>
                     <img class="post-thumb" th:if="${not #strings.isEmpty(blog.firstPicture)}"
-                         th:src="${blog.firstPicture}" alt="" width="148" height="84"
+                         th:src="${blog.firstPicture}" alt="" width="216" height="122"
                          loading="lazy" decoding="async">
                 </a>
 

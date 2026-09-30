@@ -418,10 +418,32 @@ button { font: inherit; }
   display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px;
   padding: 26px 20px 26px 0; cursor: pointer;
 }
-/* 三栏要 104 + 340 + 两块 32 的间距才够，768-1023px 之间放不下，
+/* 有封面的行（模板按 firstPicture 是否为空加 .has-thumb）在窄屏排成两栏：
+   封面占左，序号与正文走右。
+   这里只给封面写显式落位，序号和正文交给网格的自动排布绕开它 ——
+   多写两条 .idx-num / 正文的规则，桌面端还得再撤销一遍。
+   没有封面的行不加这个类：88px 的轨道会一直占着，而最新的 12 篇里有 10 篇没封面。 */
+.idx-row.has-thumb { grid-template-columns: 96px minmax(0, 1fr); gap: 6px 16px; }
+.idx-row.has-thumb .idx-thumb { grid-column: 1; grid-row: 1 / span 2; }
+/* 封面。宽屏尺寸与归档页 / 标签页的 .post-thumb 一致（216×122），
+   区别只在窄屏：那边整张 display:none，这边给一个小缩略图。
+   **不加灰度滤镜**：站内只有 Hero 的图像场走「印刷灰 → 悬停恢复彩色」，
+   列表封面一律原色。灰度是给装饰性大图当版面装置用的，
+   列表封面是内容的一部分，读者要靠它认出文章讲什么，不该被压成灰。
+   两档宽高比都是 1.77，HTML 上的 width/height 给的就是这个比值，
+   图片到达前用这个比例占位，不会跳版。
+   这条基础规则必须排在下面 @media 里那条之前：两条特异性同为 (0,1,0)，
+   媒体查询不加特异性，胜负纯看源序 —— 放到后面会把宽屏尺寸压回窄屏的（实测踩过）。 */
+.idx-thumb { width: 96px; height: 54px; object-fit: cover; }
+
+/* 三栏要 104 + 148 + 两块 32 的间距才够，768-1023px 之间放不下，
    硬套会把标题挤成一条竖线，所以这个断点放在 1024px，之下退回单栏堆叠。 */
 @media (min-width: 1024px) {
-  .idx-row { grid-template-columns: 104px minmax(0, 1fr) 340px; gap: 32px; align-items: baseline; padding: 30px 24px 30px 0; }
+  .idx-row { grid-template-columns: 104px minmax(0, 1fr); gap: 32px; align-items: baseline; padding: 30px 24px 30px 0; }
+  .idx-row.has-thumb { grid-template-columns: 104px minmax(0, 1fr) 216px; }
+  /* 桌面端封面回到最右列，窄屏那套显式落位必须撤销，否则会一直钉在第一列 */
+  .idx-row.has-thumb .idx-thumb { grid-column: auto; grid-row: auto; align-self: center; }
+  .idx-thumb { width: 216px; height: 122px; }
 }
 /* 列表行共用的悬停填充：一整块信号黄从左侧展开盖住整行。
    首页文章索引、归档、标签页都用这一套动作。分成三份写的话，
@@ -464,8 +486,9 @@ button { font: inherit; }
 .row-tags { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; color: var(--ink-2); transition: color .35s; }
 .row-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; color: var(--ink-2); transition: color .35s; }
 .row-meta .cat { border: 1px solid var(--line-strong); padding: 3px 9px; transition: border-color .35s; }
-/* 只有首页把元数据甩到行的最右边（它在第三列）；标签页的元数据跟在摘要下面，左对齐 */
-@media (min-width: 1024px) { .idx-row .row-meta { justify-content: flex-end; } }
+/* 首页与标签页的元数据都跟在摘要下面、左对齐。不要再给 .idx-row .row-meta 补一条
+   justify-content: flex-end —— 那是封面进来之前、右列空着时的写法；现在最右列是封面，
+   甩过去会压到图上。 */
 
 /* 空列表：三张表全空时也给一句人话，而不是一片留白 */
 .idx-empty { padding: 64px 0; color: var(--ink-2); border-bottom: 1px solid var(--line); }
@@ -829,7 +852,10 @@ button { font: inherit; }
 /* 第一列 120px：归档页只放 MM-dd，标签页要放完整的 yyyy-MM-dd。
    15px 等宽体 + .14em 字距下，10 个字符约 111px，96px 会把日期挤断行。 */
 @media (min-width: 1024px) {
-  .post-row { grid-template-columns: 120px minmax(0, 1fr) 148px; gap: 32px; align-items: baseline; padding: 24px 20px 24px 0; }
+  .post-row { grid-template-columns: 120px minmax(0, 1fr); gap: 32px; align-items: baseline; padding: 24px 20px 24px 0; }
+  /* 与首页同一个机制：封面列只在有封面时才是第三栏。
+     46 篇里有 13 篇没填 firstPicture，固定三栏会让那些行右边空出一条 216px 的槽 */
+  .post-row.has-thumb { grid-template-columns: 120px minmax(0, 1fr) 216px; }
   .post-thumb { align-self: center; }
 }
 
@@ -840,15 +866,13 @@ button { font: inherit; }
   color: var(--ink-2); font-size: 17px; transition: color .35s;
 }
 
-/* 封面。库里存的是 CSDN 的外链，33 条里 33 条都在别人域名上，
-   所以必须 loading="lazy"：不留神就是进页面并发 33 个跨域请求。
-   与 .tile img 用同一套印刷滤镜，保证站内所有图片是一张脸。 */
+/* 封面。库里存的是有道笔记 / CSDN 的外链，全部在别人域名上，
+   所以必须 loading="lazy"：不留神就是进页面并发几十个跨域请求。
+   尺寸与首页的 .idx-thumb 对齐（宽屏 216×122），三页的行节奏才是同一个。
+   窄屏整张不显示：归档页一次要列 40+ 行，手机上不值得为它拉几十个跨域请求。 */
 .post-thumb { display: none; }
 @media (min-width: 1024px) {
-  .post-thumb {
-    display: block; width: 148px; height: 84px; object-fit: cover;
-    filter: grayscale(1) contrast(.96) brightness(1.2);
-  }
+  .post-thumb { display: block; width: 216px; height: 122px; object-fit: cover; }
 }
 
 .post-row:hover .post-date,

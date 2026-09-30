@@ -246,7 +246,7 @@ body { font-size: 17px; line-height: 1.75; }
 | 索引行悬停 | `::before` 用 `clip-path` 从左填满 `--signal-fill`，文字翻转为墨色 | 反馈：终末地官网的标志交互 |
 | 图像场分层 | 三块停在不同 `translateZ`，容器随指针 `rotateX/rotateY` | 层级：产生真实视差分层，不是整体平移 |
 | 呼吸状态块 | 6px 方块 3.2s 透明度呼吸，全站仅一处 | 反馈：活着的系统状态 |
-| 磁性按钮 | `translate3d` + lerp 插值跟随光标 | 反馈：物理手感 |
+| 磁性按钮 | `.magnet` 类 + `translate3d` + lerp 插值跟随光标（首页 rAF 循环内，横向 0.28 / 纵向 0.42 / 跟随 0.14） | 反馈：物理手感 |
 | 3D 等高线地形 | Three.js，见 `references/terrain-3d.md` | 层级 + 叙事：还原游戏主界面的重力感应地形 |
 | 章节浮出 | 标题/图片从 `translateZ(-260px)` 浮出 | 层级：页面有前后关系 |
 
@@ -288,10 +288,25 @@ body { font-size: 17px; line-height: 1.75; }
 `::after` 1px `--signal-edge`，`transform: scaleX(0)` → `scaleX(1)`，`transform-origin` 从 `right` 切到 `left`，`.4s`。**不要用 opacity 淡入**。
 
 ### 文章索引行
-不用卡片。`border-bottom: 1px --line` 的行式布局，栅格 `104px / 1fr / 250px`（行号 / 标题+摘要 / 元信息）。
+不用卡片。`border-bottom: 1px --line` 的行式布局，栅格 `104px / 1fr`（行号 / 标题+摘要+元信息）。
+
+封面（`t_blog.first_picture`）有的话占**最右**一列 216px，栅格变成 `104px / 1fr / 216px`。
+但它**不是固定第三栏**：已发布的 46 篇里有 13 篇没填封面，写死三栏就会在那些行右边留一条
+216px 的空槽（最新的 12 篇里 10 篇是空的）。所以由模板给有封面的行加 `.has-thumb`，
+栅格跟着切换。窄屏（<1024px）封面缩到 96×54 挪到**最左**列，行变两栏。
+
+元信息（`.row-meta`）跟在摘要下面、左对齐，**没有** `justify-content: flex-end` ——
+那是封面进来之前、右列空着时的写法，现在最右列是封面，甩过去会压到图上。
 
 ```css
 .idx-row { position: relative; isolation: isolate; }
+.idx-row.has-thumb { grid-template-columns: 96px minmax(0, 1fr); }   /* 窄屏两栏 */
+.idx-row.has-thumb .idx-thumb { grid-column: 1; grid-row: 1 / span 2; }
+@media (min-width: 1024px) {
+  .idx-row { grid-template-columns: 104px minmax(0, 1fr); }
+  .idx-row.has-thumb { grid-template-columns: 104px minmax(0, 1fr) 216px; }
+  .idx-row.has-thumb .idx-thumb { grid-column: auto; grid-row: auto; align-self: center; }
+}
 .idx-row::before {
   content: ""; position: absolute; inset: 0; z-index: -1;
   background: var(--signal-fill);
@@ -300,16 +315,29 @@ body { font-size: 17px; line-height: 1.75; }
 }
 .idx-row:hover::before { clip-path: inset(0 0 0 0); }
 .idx-row:hover .idx-title, .idx-row:hover .idx-desc,
-.idx-row:hover .idx-num, .idx-row:hover .idx-meta { color: var(--ink-on-signal); }
+.idx-row:hover .idx-num, .idx-row:hover .row-meta { color: var(--ink-on-signal); }
 ```
 
 `isolation: isolate` 是必需的，让 `z-index: -1` 的填充层不跑到页面背景后面。
+封面轨道的 `.idx-thumb` 基础尺寸规则必须排在 `@media` 里那条**之前**：两条特异性同为
+`(0,1,0)`，媒体查询不加特异性，胜负纯看源序，放反了 216×122 会被压回 96×54。
+
+封面是外链（有道笔记 / CSDN），平均 1MB 一张、最大 4MB，`loading="lazy"` 不能省。
+归档页与标签页的 `.post-thumb` 是同一个组件、同一尺寸，宽屏 216×122，窄屏整张不显示。
 
 ### 按钮
 方形，无圆角。主按钮 `--signal-fill` 底 + `--signal-edge` 描边 + 墨色字；次按钮透明 + `--line-strong` 描边，悬停时描边与文字转 `--signal`。字号 **17px**，字距 `.06em`。`:active` 用 `translateY(1px)` 模拟物理按压。
 
 ### 图片
-`filter: grayscale(1) contrast(.94) brightness(1.24)`，让照片变成高调平灰的印刷品。**悬停才恢复彩色**（`grayscale(0)`）。照片上不叠标签贴片，角标放在角落作为"标签页"。
+**分两类，不要一刀切。**
+
+- **版面装置**（Hero 的三块 3D 图像场、关于页站长照）：`filter: grayscale(1) contrast(.94) brightness(1.24)`，
+  高调平灰的印刷品，**悬停恢复彩色**（`grayscale(0)`）。
+- **列表封面**（首页索引的 `.idx-thumb`，归档与标签页的 `.post-thumb`，宽屏 216×122）：
+  **不加任何滤镜，一律原色**。灰度是给装饰性大图当版面装置用的；列表封面是内容的一部分，
+  读者要靠它认出这篇讲什么，压成灰就白放了。
+
+照片上不叠标签贴片，角标放在角落作为「标签页」。
 
 ### 幽灵数字
 章节背景里的超大数字，`font-variation-settings: 'wdth' 125, 'wght' 800`，颜色 `rgba(17,17,17,.045)`。**这是版面装置，不是眉标签**，不要退化成 `001 ·` 这种小号编号形式。
