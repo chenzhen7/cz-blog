@@ -65,7 +65,7 @@ body {
 }
 
 /* 本来就圆的形状保留圆形。用 !important 是防止任何第三方组件带进圆角 */
-.avatar, .dot, .spinner { border-radius: 50% !important; }
+.avatar, .dot, .spinner, .fr-hub-ava { border-radius: 50% !important; }
 
 ::selection { background: var(--signal-fill); color: var(--ink-on-signal); }
 :focus-visible { outline: 2px solid var(--signal); outline-offset: 1px; }
@@ -1156,21 +1156,29 @@ button { font: inherit; }
   width: 100%; height: 100%; pointer-events: none; overflow: visible;
 }
 .fr-board.is-map .fr-links line { stroke: var(--signal-edge); stroke-width: 2; }
-/* 中心：本站。全图唯一的实心黄，按 §2.2 必须带 --signal-edge 描边 */
+/* 圆心：本站。占位从「装得下任意长度昵称的实心黄方块」收成站长头像 ——
+   方块越宽盖得越多，而圆心正是内圈据点的地方（旧版 "ChenZhen" 撑到 120px 宽，
+   把左右两个据点整个盖住）。58px 是「还认得出来 + 不压据点」的平衡，
+   空档由脚本在盘心留出（friends.html 的 HUB_GAP），两边配合才成立。 */
+/* 圆心不随指针抬起 —— 据点抬起是「被指到的点」，圆心是参照系，它动了整张图就散了。
+   反馈改走环的颜色（见下）。 */
 .fr-board.is-map .fr-hub {
   display: block; position: absolute; left: 50%; top: 50%; z-index: 6;
-  transform: translate(-50%, -50%); pointer-events: none;
+  transform: translate(-50%, -50%);
 }
-/* 宽度自适应而不是写死：中心块里的字是 ${author}（站点昵称），长度不定，
-   写死宽度会被 "ChenZhen" 这种长昵称撑破。nowrap 保证它永远单行不折。
-   min-width 兜住极短昵称，让它至少是个方块。 */
-.fr-hub-core {
-  display: flex; align-items: center; justify-content: center;
-  min-width: 62px; height: 62px; padding: 0 14px; white-space: nowrap;
-  background: var(--signal-fill); border: 1px solid var(--signal-edge);
-  font-family: var(--font-disp); font-weight: 800; font-size: 20px;
-  color: var(--ink-on-signal);
+/* 信号黄的环是「本站」这个身份：没有它，圆心那块就只是又一个头像，
+   读不出「这是整张地图的原点」。头像是圆的（§4.1 保留圆形的一类）。 */
+.fr-hub-ava {
+  display: block; width: 58px; height: 58px; object-fit: cover;
+  background: var(--bg);
+  border: 2px solid var(--signal-edge);
+  /* 悬停时环转成可读档的深金。--signal-edge 对白底只有 1.63:1（装饰带），
+     2px 的环停在这个浓度是「看得见」而不是「读得到」，作为常驻态没问题；
+     但它同时是链接的反馈，所以 hover/focus 要跳到真正读得清的 --signal。 */
+  transition: border-color .25s;
 }
+.fr-hub:hover .fr-hub-ava,
+.fr-hub:focus-visible .fr-hub-ava { border-color: var(--signal); }
 /* 据点。left/top 由脚本按向日葵盘算好写成百分比。
    translate(-50%,-50%) 让百分比落在节点中心；悬停态的 transform 必须**带上它**，
    漏了据点会一边放大一边往右下角跑（缩放是绕元素中心的，位移是另一回事）。 */

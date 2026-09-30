@@ -131,14 +131,26 @@
             <div class="fr-board" id="frBoard">
 
                 <!--/* 星图专属的三层，头像墙模式下整块不渲染：
-                       等高线底图（GL + 2D 兜底两块画布）、中心到据点的连线层、中心的本站块。 */-->
+                       等高线底图（GL + 2D 兜底两块画布）、中心到据点的连线层、中心的本站标记。 */-->
                 <canvas class="fr-terrain" id="frGl" aria-hidden="true"></canvas>
                 <canvas class="fr-terrain" id="frFlat" aria-hidden="true"></canvas>
                 <svg class="fr-links" id="frLinks" viewBox="0 0 100 100"
                      preserveAspectRatio="none" aria-hidden="true"></svg>
-                <div class="fr-hub" aria-hidden="true">
-                    <span class="fr-hub-core" th:text="${author}">CZ</span>
-                </div>
+
+                <!--/* 圆心：本站。原先这里是一个写着站点昵称的黄色实心块，昵称越长方块越宽
+                       （"ChenZhen" 撑到 120px），而圆心正是内圈据点的地方，方块把左右两个
+                       友链的头像整个盖住了。
+                       改成站长头像 + 回首页的链接：占位从「装得下任意长度昵称的方块」收成
+                       58px 的圆，同时它现在是和其他据点一样的、能点的链接，不再是一块贴纸。
+                       昵称没有丢，落在 alt / title 里（视觉不占位，读屏与悬停都还在）。
+                       盘心还留了一圈空档，见页尾脚本的 HUB_GAP —— 只缩小头像不够，
+                       据点本身有 116px 宽，得让内圈退到空档外面去。 */-->
+                <a class="fr-hub" th:href="@{/}"
+                   th:attr="title=${author}, aria-label=${author} + ' · 返回首页'">
+                    <img class="fr-hub-ava" th:src="@{/images/me.jpg}"
+                         th:alt="${author} + ' 的博客头像'"
+                         width="58" height="58" decoding="async">
+                </a>
 
                 <a class="fr-node" th:each="friendlink : ${friendlinks}"
                    target="_blank" rel="noopener" th:href="@{${friendlink.blogAddress}}"
@@ -306,6 +318,11 @@
         // 条数再多盘就到底了，之后靠缩小头像与丢站名继续撑（见 B2 原型的实测）
         var SPACING = 89;
         var RX_RATIO = 0.45, RY_RATIO = 0.44;        // 椭圆盘半径占舞台宽/高的比例
+        // 盘心空档：圆心那块是本站头像，据点不能压上去。比例按「盘半径的几成」，不是绝对值 ——
+        // 舞台高度决定盘半径（见下），写死像素会在窄一点的窗口上把空档撑成整个盘。
+        // 0.32 对应 300px 半径时约 96px 的空心：装得下 58px 的头像，再加半个据点宽
+        // （116px / 2 = 58px，站名比头像宽），内圈无论是横着还是竖着排都盖不到圆心。
+        var HUB_GAP = 0.32;
         var mq = window.matchMedia('(min-width: ' + MAP_MIN + 'px)');
 
         /* 据点尺寸按条数分档退让：先缩小头像，再丢掉站名。
@@ -340,13 +357,19 @@
             var rx = Math.min(rxMax, k), ry = Math.min(ryMax, k);
 
             nodes.forEach(function (el, i) {
-                var f = Math.sqrt((i + 0.5) / nodes.length);
+                // fRaw 是「在盘里的相对位置」（0 内圈 → 1 外圈）。向日葵盘的面积均匀性靠它。
+                var fRaw = Math.sqrt((i + 0.5) / nodes.length);
+                // 再把 [0,1] 重映射到 [HUB_GAP,1]：整体外推，圆心让出空档。
+                // 挤掉的是盘心那一圈没有据点的面积，环上的密度只上升约 11%
+                // （1/(1-0.32²)），实测最近邻间距仍在 90px 以上，远大于头像直径。
+                var f = HUB_GAP + (1 - HUB_GAP) * fRaw;
                 var a = i * GOLDEN;
                 // center + 椭圆半径 × 单位方向，换算成百分比写进 left/top
                 el.style.left = (50 + Math.cos(a) * f * rx / w * 100).toFixed(3) + '%';
                 el.style.top  = (50 + Math.sin(a) * f * ry / h * 100).toFixed(3) + '%';
-                // 入场错开：f 就是「离圆心多远」，内圈先亮 —— 从本站向外长出一圈朋友
-                el.style.animationDelay = Math.round(f * 900) + 'ms';
+                // 入场错开：用 fRaw 而不是 f —— 错开的依据是「第几圈」，
+                // 换成 f 的话内圈会白等 288ms 才开始亮，「从本站向外长出来」就断了
+                el.style.animationDelay = Math.round(fRaw * 900) + 'ms';
             });
         }
 
