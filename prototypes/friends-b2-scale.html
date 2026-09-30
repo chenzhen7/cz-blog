@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>友链原型 B2 · 星图的规模压力测试</title>
+<link rel="stylesheet" href="../src/main/resources/static/fonts/fonts.css">
+<link rel="stylesheet" href="../src/main/resources/static/css/site.css">
+<style>
+/* ==========================================================================
+   友链原型 B2 · 据点星图的规模压力测试
+   专门回答一个问题：友链变多以后，B 还好看吗？
+
+   与 B 的差别有两处，都是为规模做的：
+   1. 排布方式从「固定三环」换成向日葵盘（phyllotaxis）：r = R·√(i/N)，
+      θ = i × 137.5°。这是「把 N 个点均匀铺进一个圆盘」的标准解，
+      N 是多少都成立，不用手工调环数。固定环数在 N>33 时就会开始重叠。
+   2. 默认不画连线，只在指针悬停时画那一条。22 条线还能看，
+      250 条线穿过圆心就是一坨毛球 —— 连线是这套版面最先崩的东西。
+
+   半径随 N 增长：R = min(盘上限, 间距 × √N)。所以 N 小的时候盘是松的，
+   N 大到盘上限之后密度才会真的上涨 —— 崩掉的位置由下面的实测数字给出。
+   ========================================================================== */
+
+.fr-head { padding: 110px 0 24px; }
+
+.ctrl {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 16px 0 20px; border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-2);
+}
+.ctrl b { color: var(--ink); margin-right: 10px; font-weight: 700; }
+.ctrl button {
+  font: inherit; font-size: var(--fs-label); padding: 6px 14px; cursor: pointer;
+  background: var(--bg); color: var(--ink-2);
+  border: 1px solid var(--line-strong); transition: all .2s;
+}
+.ctrl button:hover { border-color: var(--signal); color: var(--ink); }
+.ctrl button.on {
+  background: var(--signal-fill); border-color: var(--signal-edge); color: var(--ink-on-signal);
+}
+
+/* 实测面板：把「好不好看」变成可读的数 */
+.meter {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px; background: var(--line); border: 1px solid var(--line);
+  margin: 20px 0 26px;
+}
+.meter div { background: var(--bg); padding: 14px 16px; }
+.meter .k {
+  font-family: var(--font-mono); font-size: var(--fs-label);
+  letter-spacing: .1em; color: var(--ink-2);
+}
+.meter .v { font-family: var(--font-disp); font-weight: 800; font-size: 28px; line-height: 1.2; margin-top: 4px; }
+.meter .v.bad { color: #8a2b1f; }
+.meter .v.warn { color: var(--signal); }
+.meter .u { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-2); margin-left: 6px; }
+
+.stage { position: relative; height: clamp(520px, 72vh, 820px); }
+#contour { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#links { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+#links line { stroke: var(--signal-edge); stroke-width: 2; }
+
+.node {
+  position: absolute; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  text-align: center;
+  transition: transform .3s cubic-bezier(.16, 1, .3, 1);
+}
+.node .ava {
+  object-fit: cover; background: var(--bg-sunken); border: 1px solid var(--line);
+  color: transparent;
+  filter: grayscale(1) contrast(.96) brightness(1.15);
+  transition: filter .3s, border-color .3s;
+}
+.node .nm {
+  font-size: 12px; line-height: 1.25; color: var(--ink-2);
+  max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.node.near { transform: translate(-50%, -50%) scale(1.5); z-index: 20; }
+.node.near .ava { filter: none; border-color: var(--signal-edge); }
+.node.near .nm {
+  color: var(--ink); background: var(--bg); padding: 1px 5px;
+  border: 1px solid var(--signal-edge);
+}
+
+.hub {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  z-index: 30; text-align: center; pointer-events: none;
+}
+.hub .core {
+  width: 62px; height: 62px; margin: 0 auto;
+  background: var(--signal-fill); border: 1px solid var(--signal-edge);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-disp); font-weight: 800; font-size: 20px; color: var(--ink-on-signal);
+}
+
+.verdict {
+  margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line);
+  font-size: 17px; color: var(--ink-2); min-height: 56px;
+}
+.verdict strong { color: var(--ink); }
+
+@media (max-width: 900px) { .stage { height: 520px; } }
+
+.proto-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+  display: flex; align-items: center; gap: 4px;
+  height: 46px; padding: 0 20px;
+  background: var(--ink); color: var(--bg);
+  font-family: var(--font-mono); font-size: 13px; letter-spacing: .06em;
+}
+.proto-nav b { color: var(--signal-fill); margin-right: 14px; font-weight: 700; }
+.proto-nav a { color: var(--bg); opacity: .55; padding: 4px 10px; transition: opacity .2s, background .2s; }
+.proto-nav a:hover { opacity: 1; }
+.proto-nav a.on { opacity: 1; background: var(--signal-fill); color: var(--ink-on-signal); }
+</style>
+</head>
+<body>
+
+<nav class="proto-nav">
+  <b>友链版面原型</b>
+  <a class="on" href="friends-b-network.html">B 据点星图</a>
+  <a href="friends-b2-scale.html">B2 规模压测</a>
+  <a href="friends-d-avatarwall.html">D 头像墙</a>
+</nav>
+
+<main>
+  <header class="fr-head">
+    <div class="wrap">
+      <div class="eyebrow"><span class="bar"></span><span class="mono">Friends / 规模压测</span></div>
+      <h1 class="page-title">友链变多以后</h1>
+      <p class="page-lead">切换下面的条数，看 B 这套版面在什么位置开始崩。数字是页面上量出来的，不是我说的。</p>
+    </div>
+  </header>
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <div class="ctrl">
+        <b>友链条数</b>
+        <button data-n="22" class="on">22 条（现状）</button>
+        <button data-n="48">48 条</button>
+        <button data-n="96">96 条</button>
+        <button data-n="180">180 条</button>
+        <button data-n="300">300 条</button>
+      </div>
+
+      <div class="meter">
+        <div><div class="k">盘半径</div><div class="v" id="m-r">—</div></div>
+        <div><div class="k">最近邻间距·中位</div><div class="v" id="m-gap">—</div></div>
+        <div><div class="k">头像直径</div><div class="v" id="m-ava">—</div></div>
+        <div><div class="k">站名标签</div><div class="v" id="m-label">—</div></div>
+      </div>
+
+      <div class="stage" id="stage">
+        <canvas id="contour"></canvas>
+        <svg id="links" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+        <div class="hub"><span class="core">CZ</span></div>
+      </div>
+
+      <div class="verdict" id="verdict"></div>
+    </div>
+  </section>
+</main>
+
+<script src="../src/main/resources/static/js/terrain.js"></script>
+<script>
+var NAMES = ['chenzhen的博客','coderZ编码世界','Echo\'s blog','YuYang','Abin\'s blog','豆豆 / Amos',
+  'Ariasaki的小窝','小角落','八尺妖剑','XXY的博客','赵赵卷','Queem','知录','Alx962的自留地','JavaGPT',
+  'ガヴのサイト','东君博客','纤云弄巧','沐雨橙风','拾壹博客','南山烟雨','旧时光','阿杰的博客','小林同学',
+  '半山腰','CodeLife','清风徐来','木子李','一只程序猿','云舒','听风','旧巷子','南方以南','晚风','白露',
+  '故人叹','山有木兮','临江仙','九月','长安','断章','拾光','浮生','未名','青柠','默然','归途','远方',
+  '柚子茶','搁浅','北岛','哑舍','微光','渡口','南瓜','青衫','拂晓','孤舟','长夜','尘埃','拾荒者','老猫',
+  '行舟','陌上','南山','子规','白鹭','寒山','秋水','春分','夏至','冬至','惊蛰','霜降','谷雨','小满'];
+var PICS = ['hero-1.jpg', 'hero-2.jpg', 'hero-3.jpg', 'me.jpg', 'firstPicture.jpg']
+    .map(function (n) { return '../src/main/resources/static/images/' + n; });
+
+var stage = document.getElementById('stage');
+var links = document.getElementById('links');
+var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+if (window.CzTerrain) CzTerrain.drawFlat(document.getElementById('contour'), stage);
+
+var GOLDEN = Math.PI * (3 - Math.sqrt(5));   // 137.5°，向日葵盘排布的黄金角
+var SPACING = 74;                            // 相邻节点的目标中心距（px）
+/* 盘做成**椭圆**而不是正圆：舞台是横长的（1300×720），正圆只能用到短边，
+   横向那一大片就白白空着。地图本来也不是罗盘，椭圆完全成立，
+   而且面积大得多 —— 同样挤不挤，能多装两三倍的据点。 */
+var RX_RATIO = 0.45, RY_RATIO = 0.44;
+
+function build(n) {
+    // 清场
+    Array.prototype.slice.call(stage.querySelectorAll('.node')).forEach(function (e) { e.remove(); });
+    links.innerHTML = '';
+
+    var rect = stage.getBoundingClientRect();
+    var rxMax = rect.width * RX_RATIO, ryMax = rect.height * RY_RATIO;
+    // 半径随 √N 增长（面积与 N 成正比 = 密度不变），撞到上限后才真的开始变挤
+    var k = SPACING * Math.sqrt(n) * 0.72;
+    var rx = Math.min(rxMax, k), ry = Math.min(ryMax, k);
+
+    // 节点尺寸随 N 退让：先缩小，再丢标签
+    var ava = n <= 40 ? 42 : n <= 90 ? 32 : n <= 180 ? 24 : 18;
+    var showLabel = n <= 90;
+
+    var nodes = [];
+    for (var i = 0; i < n; i++) {
+        // 向日葵盘：半径按 √i 铺开，角度每步转黄金角 —— N 是多少都均匀
+        var t = Math.sqrt((i + 0.5) / n);
+        var a = i * GOLDEN;
+        var x = 50 + Math.cos(a) * t * rx / rect.width * 100;
+        var y = 50 + Math.sin(a) * t * ry / rect.height * 100;
+        var name = NAMES[i % NAMES.length] + (i >= NAMES.length ? '·' + Math.floor(i / NAMES.length + 1) : '');
+
+        var el = document.createElement('div');
+        el.className = 'node';
+        el.style.left = x + '%';
+        el.style.top = y + '%';
+        el.dataset.x = x; el.dataset.y = y;
+        el.innerHTML =
+            '<img class="ava" src="' + PICS[i % PICS.length] + '" alt="" ' +
+                'width="' + ava + '" height="' + ava + '" style="width:' + ava + 'px;height:' + ava + 'px">' +
+            (showLabel ? '<span class="nm">' + name + '</span>' : '');
+        el.addEventListener('mouseenter', function () {
+            // 只画悬停这一条线：250 条线同时穿过圆心就是一坨毛球，这是最先崩的东西
+            links.innerHTML = '';
+            var l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            l.setAttribute('x1', 50); l.setAttribute('y1', 50);
+            l.setAttribute('x2', this.dataset.x); l.setAttribute('y2', this.dataset.y);
+            l.setAttribute('vector-effect', 'non-scaling-stroke');
+            links.appendChild(l);
+            this.classList.add('near');
+        });
+        el.addEventListener('mouseleave', function () {
+            links.innerHTML = '';
+            this.classList.remove('near');
+        });
+        stage.appendChild(el);
+        nodes.push({ x: x / 100 * rect.width, y: y / 100 * rect.height });
+    }
+
+    // 实测：最近邻中心距的中位数（px）。这是判「有没有糊在一起」的硬指标
+    var gaps = [];
+    for (var j = 0; j < nodes.length; j++) {
+        var best = Infinity;
+        for (var k = 0; k < nodes.length; k++) {
+            if (j === k) continue;
+            var dx = nodes[j].x - nodes[k].x, dy = nodes[j].y - nodes[k].y;
+            var d = Math.sqrt(dx * dx + dy * dy);
+            if (d < best) best = d;
+        }
+        if (best !== Infinity) gaps.push(best);
+    }
+    gaps.sort(function (a, b) { return a - b; });
+    var med = gaps.length ? gaps[Math.floor(gaps.length / 2)] : 0;
+
+    // 写面板
+    document.getElementById('m-r').innerHTML = Math.round(rx) + '×' + Math.round(ry) + '<span class="u">px</span>';
+    var g = document.getElementById('m-gap');
+    g.innerHTML = Math.round(med) + '<span class="u">px</span>';
+    g.className = 'v' + (med < ava * 0.9 ? ' bad' : med < ava * 1.3 ? ' warn' : '');
+    document.getElementById('m-ava').innerHTML = ava + '<span class="u">px</span>';
+    document.getElementById('m-label').textContent = showLabel ? '显示' : '隐藏';
+
+    // 判词：间距小于头像直径 = 图已经叠上了
+    var v = document.getElementById('verdict');
+    var txt, cls = '';
+    if (med >= ava * 1.6) {
+        txt = '还能读。节点之间留得住空，连线也不会打架。';
+    } else if (med >= ava * 1.3) {
+        txt = '开始挤了。头像之间只剩一条缝，站名标签已经开始互相压。';
+        cls = 'warn';
+    } else if (med >= ava * 0.9) {
+        txt = '挤在一起了。头像边缘相接，必须丢掉站名标签才勉强成立。';
+        cls = 'warn';
+    } else {
+        txt = '糊了。头像互相重叠，这一版实际上已经不能看 —— 继续加只能靠缩短间距，不会变好。';
+        cls = 'bad';
+    }
+    v.innerHTML = '<strong>最近邻间距 ' + Math.round(med) + 'px ／ 头像直径 ' + ava +
+        'px（比值 ' + (med / ava).toFixed(2) + '）</strong><br>' + txt;
+}
+
+document.querySelectorAll('.ctrl button').forEach(function (b) {
+    b.addEventListener('click', function () {
+        document.querySelectorAll('.ctrl button').forEach(function (o) { o.classList.remove('on'); });
+        this.classList.add('on');
+        build(parseInt(this.dataset.n, 10));
+    });
+});
+
+build(22);
+if (!reduce) {
+    var t = null;
+    window.addEventListener('resize', function () {
+        clearTimeout(t);
+        t = setTimeout(function () {
+            build(parseInt(document.querySelector('.ctrl button.on').dataset.n, 10));
+        }, 200);
+    });
+}
+</script>
+
+</body>
+</html>
