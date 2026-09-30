@@ -249,27 +249,23 @@
     })();
 </script>
 
-<!--/* 名片墙入场：发牌式 —— 卡片以底边为轴从桌沿翻上来，逐张落位。
-     用纯 CSS keyframes（fl-deal）而不是 GSAP：名片的 transform/opacity 各有下一任
-     主人（transform 归指针物理循环 data-tilt、opacity 归悬停聚光），keyframes 播完
-     自动归还所有权，不需要 clearProps 这种手动交接（规范 §5.2）。
-     IO 看到名片墙进视口时给每张卡写内联 delay 再挂 .dealt —— delay 必须写在
-     动画开始之前，挂类与写 delay 同一帧完成，浏览器不会先播一轮无 delay 的。 */-->
+<!--/* 名片墙入场「发牌」：卡片以底边为轴从桌面逐张翻起（rotationX -72° → 0），
+     透视场开在 .fl-grid 上（site.css §19）。与申请脚本分开，因为它是纯增强。
+     clearProps 播完交出 transform 所有权 —— 之后倾斜归 chrome 的
+     指针物理循环（data-tilt）管，两个系统不抢同一个属性（规范 §5.2）。
+     GSAP 没到位就安静跳过：.anim 已被 motion 摘掉，卡片本来就全显示。 */-->
 <script th:inline="none">
     (function () {
         'use strict';
+        if (!window.gsap || !window.ScrollTrigger) return;
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        var grid = document.querySelector('.fl-grid');
-        if (!grid) return;
-        var io = new IntersectionObserver(function (entries) {
-            if (!entries[0].isIntersecting) return;
-            io.disconnect();
-            Array.prototype.forEach.call(grid.children, function (card, i) {
-                card.style.animationDelay = (i * 0.05).toFixed(2) + 's';
+        gsap.fromTo('.fl-card',
+            { opacity: 0, rotationX: -72, z: -160, transformOrigin: '50% 100%' },
+            {
+                opacity: 1, rotationX: 0, z: 0, duration: .8, ease: 'power4.out',
+                stagger: 0.05, clearProps: 'transform',
+                scrollTrigger: { trigger: '.fl-grid', start: 'top 88%' }
             });
-            grid.classList.add('dealt');
-        }, { rootMargin: '0px 0px -12% 0px' });
-        io.observe(grid);
     })();
 </script>
 

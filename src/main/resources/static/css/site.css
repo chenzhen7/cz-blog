@@ -1082,38 +1082,50 @@ button { font: inherit; }
 .fl-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   border-top: 1px solid var(--line); border-left: 1px solid var(--line);
+  counter-reset: fl;                 /* 流水号计数器，.fl-card::after 逐个取号 */
+  perspective: 1200px;               /* 入场「发牌」的透视场：卡片从桌面逐张翻起 */
 }
 .fl-card {
   position: relative; display: flex; align-items: flex-start; gap: 14px;
-  padding: 22px 24px; background: var(--bg); transition: background .3s, opacity .35s;
+  padding: 22px 24px; background: var(--bg);
+  transition: background .3s, box-shadow .3s;
   border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
-  /* 名片内部分层：preserve-3d 让子级的 translateZ 在卡片倾斜时看得出纵深。
-     卡片自己的 transform 归指针物理循环写，这里的 3D 上下文只是舞台 */
+  /* 悬停「拿起名片」的 3D 上下文：卡片自身的倾斜由指针物理循环写 inline transform
+     （它含 perspective(700px)），这里两个属性是给子层用的 —— preserve-3d 让子层的
+     translateZ 在卡片平面里成立，perspective: 400px 给子层自己的近大远小。
+     卡片的 transform 只有指针循环一个主人，hover 的「拿起」感全部交给子层和投影。 */
   transform-style: preserve-3d;
+  perspective: 400px;
 }
-.fl-card:hover { background: var(--panel); }
-/* 悬停聚光：指针选中一张名片时，其余名片退后半透明，视线被压到当前这张上。
-   只动 opacity，且 transition 已在上面声明；reduce 下 transition 归零，直接切换 */
-.fl-grid:hover .fl-card:not(:hover) { opacity: .45; }
-/* 底缘信号条：悬停时从左擦入，与索引行悬停、tag 选中态同一套语言。
-   亮黄块按 §2.2 带 --signal-edge 描边，否则 3px 的亮黄在白底上定不出形状 */
+/* 硬投影是工业语言里的「拿起」：直角、实心、不模糊。z-index 抬一层，
+   免得投影被右边/下边的卡片裁掉 */
+.fl-card:hover { background: var(--panel); box-shadow: 10px 10px 0 rgba(17, 17, 17, .10); z-index: 2; }
+/* 流水号：CSS 计数器生成，不动模板。平时是纸面上一道浅墨，悬停转信号黄并浮起 */
 .fl-card::after {
-  content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px;
-  background: var(--signal-fill); outline: 1px solid var(--signal-edge);
-  transform: scaleX(0); transform-origin: left;
-  transition: transform .4s cubic-bezier(.16, 1, .3, 1);
+  counter-increment: fl;
+  content: counter(fl, decimal-leading-zero);
+  position: absolute; right: 14px; bottom: 10px;
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em;
+  color: rgba(17, 17, 17, .16); transition: color .3s, transform .3s;
 }
-.fl-card:hover::after { transform: scaleX(1); }
+.fl-card:hover::after { color: var(--signal); transform: translateZ(24px) translateY(-2px); }
+/* 描述第二行可能流进右下角的流水号区，留出让位 */
+.fl-desc { padding-right: 30px; }
+/* 名片墙入场的初始态（.anim 门控）：透明度归 0，等页面脚本的 stagger 播入。
+   只藏 opacity 不写 transform —— transform 归指针物理循环（data-tilt）管，
+   两个系统不能抢同一个属性（规范 §5.2）。reduce 下没有 .anim，卡片直接可见。 */
+.anim .fl-grid .fl-card { opacity: 0; }
 .fl-avatar {
   flex-shrink: 0; width: 44px; height: 44px; object-fit: cover;
   filter: grayscale(1) contrast(.96) brightness(1.15);
-  /* 名片分层：头像浮在最浅一层，悬停时恢复彩色的同时再抬一点 */
-  transform: translateZ(28px);
-  transition: filter .3s, transform .35s;
+  transition: filter .3s, transform .3s;
 }
-.fl-card:hover .fl-avatar { filter: none; transform: translateZ(28px) scale(1.08); }
-/* 文字层停在中间纵深 */
-.fl-body { min-width: 0; transform: translateZ(16px); }
+/* 悬停「拿起」的三层浮起：头像离纸面最远，正文次之，流水号/状态块再各错一层。
+   同一动作分三个纵深，产生的视差就是「名片被拿起来」的感觉（hero 图像场的微观版）。
+   transform 落在子层上：卡片自身的 transform 归指针物理循环管，互不抢属性（§5.2） */
+.fl-card:hover .fl-avatar { filter: none; transform: translateZ(34px) scale(1.06); }
+.fl-body { min-width: 0; transition: transform .3s; }
+.fl-card:hover .fl-body { transform: translateZ(18px); }
 .fl-name { display: block; font-weight: 700; font-size: 17px; color: var(--ink); overflow-wrap: break-word; }
 .fl-desc {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
@@ -1126,28 +1138,10 @@ button { font: inherit; }
 .fl-status {
   position: absolute; top: 14px; right: 14px;
   width: 10px; height: 10px; border: 1px solid var(--line-strong);
-  /* 名片分层：状态块浮得最高，悬停时转成菱形 —— 检查标记被「点亮」的工业语言 */
-  transform: translateZ(36px);
   transition: transform .3s;
 }
-.fl-card:hover .fl-status { transform: translateZ(36px) rotate(45deg) scale(1.15); }
-
-/* 发牌式入场：卡片以底边为轴从桌沿翻上来，逐张落位。
-   用纯 CSS keyframes 而不是 GSAP —— 名片的 transform/opacity 各有下一任主人
-   （transform 归指针物理循环、opacity 归悬停聚光），keyframes 播完自动归还所有权，
-   不需要 clearProps 这种手动交接。delay 由页内脚本逐张写内联，
-   省掉二十几条 nth-child 规则。 */
-@keyframes fl-deal {
-  from { opacity: 0; transform: perspective(650px) rotateX(-38deg) translateY(26px); }
-  to   { opacity: 1; transform: none; }
-}
-.fl-grid.dealt .fl-card {
-  transform-origin: 50% 100%;
-  animation: fl-deal .7s cubic-bezier(.16, 1, .3, 1) backwards;
-}
-/* 入场前的藏着只到挂牌（.dealt）为止：挂牌后 opacity 交还样式表，
-   悬停聚光的变暗规则才压得住（规范 §5.2：一个属性一个主人） */
-.anim .fl-grid:not(.dealt) .fl-card { opacity: 0; }
+/* 状态块浮得最高：它是这张名片上「正在呼吸」的那枚铆钉 */
+.fl-card:hover .fl-status { transform: translateZ(46px); }
 .fl-status[data-net="0"] { background: #2f6b3a; border-color: #2f6b3a; }   /* 网络状态良好 */
 .fl-status[data-net="1"] { background: var(--signal-edge); border-color: var(--signal-edge); }  /* 状态一般 */
 .fl-status[data-net="2"] { background: #8a2b1f; border-color: #8a2b1f; }   /* 网络异常 */
