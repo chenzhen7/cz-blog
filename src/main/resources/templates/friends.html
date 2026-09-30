@@ -25,18 +25,18 @@
     <!--/* model 来自 FriendLinkController：friendlinks（status=PASS 的友链）、author。 */-->
     <header class="page-head">
         <div class="wrap">
-            <div class="eyebrow">
+            <div class="eyebrow wipe-in">
                 <span class="bar"></span>
                 <span class="mono">Friends / 友人帐</span>
             </div>
-            <h1 class="page-title">让我们，交个朋友</h1>
-            <p class="page-lead">不妨 , 留下你的痕迹🎞</p>
+            <h1 class="page-title wipe-in">让我们，交个朋友</h1>
+            <p class="page-lead rise">不妨 , 留下你的痕迹🎞</p>
         </div>
     </header>
 
     <section class="section">
         <div class="wrap">
-            <div class="fr-apply">
+            <div class="fr-apply rise">
 
                 <!--/* 左栏：申请要求 + 申请格式。文案与改版前逐字一致。 */-->
                 <div class="fr-rules">
@@ -123,8 +123,11 @@
                 </span>
             </div>
 
+            <!--/* 名片墙：每张卡片挂 data-tilt，由 chrome 的全局指针物理循环驱动
+                   （指针追踪 rotateX/rotateY ±4°）。transform 只能有那一个主人在写，
+                   所以卡片不能挂 .rise，入场走下面脚本的 stagger 并在播完 clearProps。 */-->
             <div class="fl-grid">
-                <a class="fl-card" th:each="friendlink : ${friendlinks}"
+                <a class="fl-card" data-tilt th:each="friendlink : ${friendlinks}"
                    target="_blank" rel="noopener" th:href="@{${friendlink.blogAddress}}">
                     <img class="fl-avatar" th:src="@{${friendlink.pictureAddress}}"
                          th:alt="${friendlink.blogName} + ' 的头像'" width="44" height="44"
@@ -241,6 +244,23 @@
                     // 这里把状态码或异常信息带出来，排障时才有线索。
                     alert('申请失败：' + err.message);
                 });
+        });
+    })();
+</script>
+
+<!--/* 名片墙入场：卡片按序浮出。与申请脚本分开，因为它是纯增强。
+     clearProps 播完交出 transform 所有权 —— 之后倾斜归 chrome 的
+     指针物理循环（data-tilt）管，两个系统不抢同一个属性（规范 §5.2）。
+     GSAP 没到位就安静跳过：.anim 已被 motion 摘掉，卡片本来就全显示。 */-->
+<script th:inline="none">
+    (function () {
+        'use strict';
+        if (!window.gsap || !window.ScrollTrigger) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        gsap.fromTo('.fl-card', { opacity: 0, y: 18 }, {
+            opacity: 1, y: 0, duration: .55, ease: 'power3.out',
+            stagger: 0.045, clearProps: 'transform',
+            scrollTrigger: { trigger: '.fl-grid', start: 'top 88%' }
         });
     })();
 </script>

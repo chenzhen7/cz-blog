@@ -1039,6 +1039,10 @@ button { font: inherit; }
   border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
 }
 .fl-card:hover { background: var(--panel); }
+/* 名片墙入场的初始态（.anim 门控）：透明度归 0，等页面脚本的 stagger 播入。
+   只藏 opacity 不写 transform —— transform 归指针物理循环（data-tilt）管，
+   两个系统不能抢同一个属性（规范 §5.2）。reduce 下没有 .anim，卡片直接可见。 */
+.anim .fl-grid .fl-card { opacity: 0; }
 .fl-avatar {
   flex-shrink: 0; width: 44px; height: 44px; object-fit: cover;
   filter: grayscale(1) contrast(.96) brightness(1.15); transition: filter .3s;
