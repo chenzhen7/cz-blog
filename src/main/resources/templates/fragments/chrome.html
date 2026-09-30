@@ -466,29 +466,28 @@
         });
     })();
 
-    // ---------- 指针物理：磁性吸附 + 追踪倾斜 ----------
-    /* 全站共享的一个小循环，驱动两类元素：
-         .magnet     —— 按钮 / 标签被光标「吸」过去，离开弹回（位移）
-         [data-tilt] —— 卡片随光标倾斜（rotateX / rotateY）
+    // ---------- 指针物理：磁性吸附 ----------
+    /* 全站共享的一个小循环，驱动 .magnet（按钮 / 标签被光标「吸」过去，离开弹回）。
        设计要点：
        - 按需启停：有指针活动才开 rAF，全部收敛（距目标小于阈值）后自停，不做常驻循环，
          所以不受「离屏停渲染」那条约束 —— 它本来就只在用户正操作时存在。
        - 只写 transform，不碰布局属性。
-       - 同一个元素的 transform 只能由这里写：.magnet / [data-tilt] 不要再挂 .rise 之类的
+       - 同一个元素的 transform 只能由这里写：.magnet 不要再挂 .rise 之类的
          GSAP 揭示类，两个系统抢一个属性会抖动（规范 §5.2）。
-       - 位移系数沿用首页原型：横向 0.28、纵向 0.42、跟随 0.14。 */
+       - 位移系数沿用首页原型：横向 0.28、纵向 0.42、跟随 0.14。
+       这里原先还驱动 [data-tilt]（卡片 / 整墙随光标倾斜，含 data-tilt-outer 的
+       父级透视分支）。友链页改成据点星图时撤掉了卡片上的 data-tilt，全站再没有
+       元素挂它，那半截连同每帧读一次 getBoundingClientRect 的开销一起删掉。 */
     (function () {
         // 触摸设备没有悬停，这套机制不存在目标；减少动效时整段不初始化
         if (!window.matchMedia('(pointer: fine)').matches) return;
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
         var magnets = Array.prototype.slice.call(document.querySelectorAll('.magnet'));
-        var tilts = Array.prototype.slice.call(document.querySelectorAll('[data-tilt]'));
-        if (!magnets.length && !tilts.length) return;
+        if (!magnets.length) return;
 
-        // tx/ty 与 trx/try 是目标值（事件里算），x/y 与 rx/ry 每帧向目标收敛（循环里插值）
+        // tx/ty 是目标值（事件里算），x/y 每帧向目标收敛（循环里插值）
         var magState = magnets.map(function () { return { tx: 0, ty: 0, x: 0, y: 0 }; });
-        var tiltState = tilts.map(function () { return { trx: 0, try: 0, rx: 0, ry: 0 }; });
 
         var rafId = null;
         function kick() { if (rafId === null) rafId = requestAnimationFrame(tick); }
@@ -503,23 +502,6 @@
             el.addEventListener('mouseleave', function () { magState[i].tx = 0; magState[i].ty = 0; kick(); });
         });
 
-        // tilts 不按元素绑 mousemove/mouseleave，而是全局追踪指针、每帧按矩形判定。
-        // 原因：嵌套倾斜（友链页整墙 + 墙上单卡）里，墙的转动会把卡片从静止的光标下
-        // 推走，mouseleave 把卡片目标清零，光标再不动卡片就再也抬不起来 ——
-        // 改成每帧重算「指针在不在我里面」，元素滑动、悬停震荡都不影响判定。
-        var tiltCfg = tilts.map(function (el) {
-            // data-tilt 的值是最大倾角（缺省 4°）；带 data-tilt-outer 表示透视由父级
-            // 提供（整墙倾斜，perspective 在父容器上），此时只写 rotate 不写 perspective()
-            var maxDeg = parseFloat(el.getAttribute('data-tilt'), 10);
-            if (isNaN(maxDeg) || maxDeg <= 0) maxDeg = 4;
-            return { maxDeg: maxDeg, outer: el.hasAttribute('data-tilt-outer') };
-        });
-        var pointerX = 0, pointerY = 0;
-        document.addEventListener('mousemove', function (e) {
-            pointerX = e.clientX; pointerY = e.clientY;
-            kick();
-        });
-
         function tick() {
             var settled = true, i, s;
             for (i = 0; i < magnets.length; i++) {
@@ -530,27 +512,6 @@
                 if (Math.abs(s.tx - s.x) < 0.1 && Math.abs(s.ty - s.y) < 0.1) { s.x = s.tx; s.y = s.ty; }
                 else { settled = false; }
                 magnets[i].style.transform = 'translate3d(' + s.x.toFixed(2) + 'px,' + s.y.toFixed(2) + 'px,0)';
-            }
-            for (i = 0; i < tilts.length; i++) {
-                s = tiltState[i];
-                // 每帧按当前矩形重算目标：光标在元素内则按其相对位置给倾角
-                // （纵向取反号：光标在上半，元素上缘迎上来），在元素外归零
-                var r = tilts[i].getBoundingClientRect();
-                var inside = pointerX >= r.left && pointerX <= r.right && pointerY >= r.top && pointerY <= r.bottom;
-                if (inside) {
-                    s.try = ((pointerX - r.left) / r.width - 0.5) * 2 * tiltCfg[i].maxDeg;
-                    s.trx = -((pointerY - r.top) / r.height - 0.5) * 2 * tiltCfg[i].maxDeg;
-                } else {
-                    s.trx = 0; s.try = 0;
-                }
-                s.rx += (s.trx - s.rx) * 0.12;
-                s.ry += (s.try - s.ry) * 0.12;
-                if (Math.abs(s.trx - s.rx) < 0.02 && Math.abs(s.try - s.ry) < 0.02) { s.rx = s.trx; s.ry = s.try; }
-                else { settled = false; }
-                // 单卡各自独立成透视场（perspective 写在自己的变换里）；
-                // 整墙倾斜（data-tilt-outer）的透视在父容器上，这里只写 rotate
-                var rot = 'rotateX(' + s.rx.toFixed(2) + 'deg) rotateY(' + s.ry.toFixed(2) + 'deg)';
-                tilts[i].style.transform = s.outer ? rot : 'perspective(700px) ' + rot;
             }
             // 全部收敛就停：下一次指针活动由 kick() 重新拉起
             if (settled) { rafId = null; return; }

@@ -247,7 +247,7 @@ body { font-size: 17px; line-height: 1.75; }
 | 索引行悬停 | `::before` 用 `clip-path` 从左填满 `--signal-fill`，文字翻转为墨色 | 反馈：终末地官网的标志交互 |
 | 图像场分层 | 三块停在不同 `translateZ`，容器随指针 `rotateX/rotateY` | 层级：产生真实视差分层，不是整体平移 |
 | 呼吸状态块 | 6px 方块 3.2s 透明度呼吸，全站仅一处 | 反馈：活着的系统状态 |
-| 指针物理（磁吸 + 倾斜） | `chrome :: scripts` 的共享 rAF 循环，按需启停：`.magnet` 位移吸附（横向 0.28 / 纵向 0.42 / 跟随 0.14），`[data-tilt]` 指针追踪 `perspective(700px) rotateX/rotateY` ±4° | 反馈：物理手感 |
+| 指针物理（磁吸） | `chrome :: scripts` 的共享 rAF 循环，按需启停：`.magnet` 位移吸附（横向 0.28 / 纵向 0.42 / 跟随 0.14）。原先还驱动 `[data-tilt]` 倾斜，友链页改星图后全站无元素挂它，已删 | 反馈：物理手感 |
 | 3D 等高线地形 | Three.js，见 `references/terrain-3d.md`；工厂在 `/js/terrain.js`（`CzTerrain.initGL` / `drawFlat`）。三处标本：首页 hero 重力感应（0.22）、归档页头低速漂移（0.09，只露一条横带）、友链星图底图（0.10，铺满整面舞台，据点是画在它上面的标注） | 层级 + 叙事：还原游戏主界面的重力感应地形；归档喻「时间的沉积地层」，友链是「网络的地貌图」 |
 | 章节浮出 | 标题/图片从 `translateZ(-260px)` 浮出 | 层级：页面有前后关系 |
 | 滚动时间轴（归档） | `.arc` 左缘墨轨 + `.arc-progress` 信号黄段 `scaleY` 随滚动 scrub 生长；年份刻度方块随视口当前年转黄（几何重算，不用边缘 IO） | 叙事：归档是一条时间轴 |
