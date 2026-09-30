@@ -1143,11 +1143,12 @@ button { font: inherit; }
   display: block; position: relative;
   height: clamp(520px, 72vh, 820px);
 }
+/* 两块画布（WebGL 与 2D 兜底）在这一层都先显示，由脚本隐藏用不上的那块 ——
+   显隐的决策只在一个地方（脚本），CSS 不替它猜。 */
 .fr-board.is-map .fr-terrain {
   display: block; position: absolute; inset: 0; z-index: 0;
   width: 100%; height: 100%; pointer-events: none;
 }
-.fr-board.is-map #frFlat { display: none; }   /* 显 GL 还是显 2D 由脚本决定 */
 .fr-board.is-map .fr-links {
   display: block; position: absolute; inset: 0; z-index: 1;
   width: 100%; height: 100%; pointer-events: none; overflow: visible;

@@ -186,6 +186,13 @@
 <th:block th:replace="~{fragments/chrome :: scripts}"/>
 <th:block th:replace="~{fragments/chrome :: motion}"/>
 
+<!--/* 地形底座：three.js（自托管 r128）+ 等高线工厂。
+     与首页、归档页一样静态引入，不做按需注入 —— 动态注入会把初始化变成异步，
+     多出一条「脚本到位了没有」的失败路径，而 uOpacity 从 0 起，晚一点出现也不会闪。
+     代价是 reduce 用户也会下载这 600KB，这是与另外两页保持一致的取舍。 */-->
+<script th:src="@{/lib/three/three.min.js}"></script>
+<script th:src="@{/js/terrain.js}"></script>
+
 <!--/* 页面自己的脚本：复制申请格式、提交友链申请。
      改版前这两段依赖 jQuery（$.ajax、$("input[name=...]").val()），现在换成原生 fetch，
      所以整个前台不再需要 jQuery。 */-->
@@ -291,6 +298,7 @@
         var nodes = Array.prototype.slice.call(board.querySelectorAll('.fr-node'));
         if (!nodes.length) return;
 
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         var MAP_MIN = 900;                  // 够宽才摆得下星图，窄了退回头像墙
         var GOLDEN = Math.PI * (3 - Math.sqrt(5));   // 137.5°，向日葵盘的黄金角
         // 相邻据点的目标中心距。这个值决定「多少条时才把舞台填满」：
@@ -442,6 +450,88 @@
             detail.innerHTML = '<span class="fr-detail-hint">点任意据点，打开对方的站点。</span>';
             hintHTML = detail.innerHTML;
         }
+
+        /* ---------- 地形底座：整张星图铺在一片等高线上 ---------- */
+
+        var glCanvas = document.getElementById('frGl');
+        var flatCanvas = document.getElementById('frFlat');
+        var TERRAIN_OPACITY = 0.10;   // 比归档页头（0.09）略高一点：它是整张图的底
+        var terrainCtx = null;        // null = 走 2D 兜底；否则是 WebGL 那套
+        var terrainDone = false;      // 只建一次：terrain.js 没有 dispose，
+                                      // 反复初始化会一路新建 WebGL 上下文直到浏览器拒给
+
+        function ensureTerrain() {
+            if (terrainDone) return;
+            terrainDone = true;
+            if (!window.CzTerrain) return;   // 工厂没到位就什么都不做，画布本来也不该显示
+
+            // 减少动效时**不建 WebGL 上下文**：静态等高线一样是「地貌图」，只是不漂移
+            var gl = (window.THREE && !reduce) ? CzTerrain.initGL(glCanvas, board) : null;
+            if (!gl) {
+                // 拿不到 WebGL（无 GPU / 被策略禁用 / 上下文分配失败）→ 2D 静态等高线。
+                // 这是设计内的第二条路径，不是降级掩盖错误：地形照样在，只是没有纵深
+                if (glCanvas) glCanvas.style.display = 'none';
+                CzTerrain.drawFlat(flatCanvas, board);
+                return;
+            }
+            if (flatCanvas) flatCanvas.style.display = 'none';
+            gl.terrain.material.uniforms.uOpacity.value = TERRAIN_OPACITY;
+            // 比首页（-1.16 / y-150 / z-300）放平、压低：这是一整面舞台，不是首屏那道竖起的坡
+            gl.terrain.rotation.x = -1.0;
+            gl.terrain.position.set(0, -120, -400);
+            terrainCtx = gl;
+            gl.renderer.render(gl.scene, gl.camera);
+            syncTerrain();
+        }
+
+        // 漂移循环：只推 uTime。舞台滚出视野或标签页隐藏时停（规范 §5.2）——
+        // 这块画布覆盖整面舞台，一直跑着白烧 GPU
+        var clock = 0, running = false, rafId = null, boardVisible = false;
+        function terrainTick() {
+            if (!running || !terrainCtx) return;
+            rafId = requestAnimationFrame(terrainTick);
+            clock += 0.016;
+            terrainCtx.terrain.material.uniforms.uTime.value = clock;
+            terrainCtx.renderer.render(terrainCtx.scene, terrainCtx.camera);
+        }
+        function syncTerrain() {
+            var should = terrainCtx && boardVisible &&
+                         board.classList.contains('is-map') && !document.hidden;
+            if (should && !running) { running = true; rafId = requestAnimationFrame(terrainTick); }
+            if (!should && running) { running = false; if (rafId) { cancelAnimationFrame(rafId); rafId = null; } }
+        }
+        if ('IntersectionObserver' in window) {
+            new IntersectionObserver(function (entries) {
+                boardVisible = entries[0].isIntersecting;
+                syncTerrain();
+            }, { threshold: 0 }).observe(board);
+        } else {
+            boardVisible = true;
+        }
+        document.addEventListener('visibilitychange', syncTerrain);
+
+        /* 舞台高度是内容撑出来的（据点按盘半径摆，条数一变高度就跟着变），
+           而 terrain.js 的 resize 只按容器当下的 clientWidth/Height 设位图尺寸 ——
+           尺寸过期不会报错，只会让地形被 CSS 拉伸成糊的。所以这里得盯着尺寸。
+           ResizeObserver 全站第一次用，兜底到 window.resize 是有意义的：
+           老浏览器没有 RO，那就退成窗口尺寸变化时重算。 */
+        var roTimer = null;
+        function resizeTerrain() {
+            clearTimeout(roTimer);
+            roTimer = setTimeout(function () {
+                if (!terrainCtx) return;
+                terrainCtx.resize();
+                terrainCtx.renderer.render(terrainCtx.scene, terrainCtx.camera);
+            }, 200);
+        }
+        if (window.ResizeObserver) new ResizeObserver(resizeTerrain).observe(board);
+        else window.addEventListener('resize', resizeTerrain);
+
+        // 进到星图模式才需要地形；头像墙模式整块不显示，不建上下文
+        if (mq.matches) ensureTerrain();
+        var onModeChange = function () { if (mq.matches) ensureTerrain(); syncTerrain(); };
+        if (mq.addEventListener) mq.addEventListener('change', onModeChange);
+        else if (mq.addListener) mq.addListener(onModeChange);
     })();
 </script>
 
