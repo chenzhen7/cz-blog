@@ -248,13 +248,15 @@ body { font-size: 17px; line-height: 1.75; }
 | 图像场分层 | 三块停在不同 `translateZ`，容器随指针 `rotateX/rotateY` | 层级：产生真实视差分层，不是整体平移 |
 | 呼吸状态块 | 6px 方块 3.2s 透明度呼吸，全站仅一处 | 反馈：活着的系统状态 |
 | 指针物理（磁吸 + 倾斜） | `chrome :: scripts` 的共享 rAF 循环，按需启停：`.magnet` 位移吸附（横向 0.28 / 纵向 0.42 / 跟随 0.14），`[data-tilt]` 指针追踪 `perspective(700px) rotateX/rotateY` ±4° | 反馈：物理手感 |
-| 3D 等高线地形 | Three.js，见 `references/terrain-3d.md`；工厂在 `/js/terrain.js`（`CzTerrain.initGL` / `drawFlat`），首页重力感应、归档页头低速漂移标本（浓度 0.09，无指针响应） | 层级 + 叙事：还原游戏主界面的重力感应地形；归档用其标本喻「时间的沉积地层」 |
+| 3D 等高线地形 | Three.js，见 `references/terrain-3d.md`；工厂在 `/js/terrain.js`（`CzTerrain.initGL` / `drawFlat`）。三处标本：首页 hero 重力感应（0.22）、归档页头低速漂移（0.09，只露一条横带）、友链星图底图（0.10，铺满整面舞台，据点是画在它上面的标注） | 层级 + 叙事：还原游戏主界面的重力感应地形；归档喻「时间的沉积地层」，友链是「网络的地貌图」 |
 | 章节浮出 | 标题/图片从 `translateZ(-260px)` 浮出 | 层级：页面有前后关系 |
 | 滚动时间轴（归档） | `.arc` 左缘墨轨 + `.arc-progress` 信号黄段 `scaleY` 随滚动 scrub 生长；年份刻度方块随视口当前年转黄（几何重算，不用边缘 IO） | 叙事：归档是一条时间轴 |
 | 阅读进度（文章） | 视口顶 3px 信号条 `scaleX` = 文章滚动进度（ScrollTrigger scrub） | 状态转换：读到哪里了 |
 | 正文标题揭示（文章） | `.md-body h2` 用 IntersectionObserver + CSS `clip-path` transition 逐节擦入；不建 ScrollTrigger 实例（文章几十个节点，防实例爆炸） | 叙事：章节依次送出 |
 | 磁吸标签云（标签） | `.tag-chip` 挂 `.magnet`；选中态是 `--signal-fill` 的 `clip-path` 定向擦入，提交延迟 280ms 让擦入播完 | 反馈：标签是可被吸引的物件 |
-| 悬浮名片墙（友链） | 三层 3D：透视容器 → 整墙 `data-tilt="1.4"` 随指针迎向光标 → 单卡 ±4° 独立透视场；悬停时卡内内容 `translateZ(30px)` 浮出、头像再抬 16px、信号描边框 + 名字高亮笔 + 斜切扫光；入场从纵深逐格飞入（grid 阵列 stagger）；墙后压幽灵字 LINKS | 层级 + 反馈：名片是一面可被指尖拨动的墙 |
+| 据点星图（友链，≥900px） | 本站为心的放射状网络：向日葵盘排布（`r=R·√(i/N)`，`θ=i×137.5°`）+ 椭圆盘；指针停到据点则它抬起 1.45 倍、信号黄细线连回中心、底部详情条报出站名/状态/加入/巡检。**连线只画悬停那一条** —— 22 条尚可，300 条穿过圆心就是一坨毛球 | 结构：友链本来就是一张以本站为心的网，直接画出来 |
+| 头像墙（友链，<900px） | 同一批 DOM 节点换成方格密排，站名与状态常驻（触屏没有悬停可依靠）。两套不渲染两份 —— 否则 JS 一挂什么都不剩，22 条链接还会在同页重复两遍 | 反馈：名额有限，一格一个人 |
+| 由内向外亮起（友链） | `.fr-node` 纯 CSS keyframes，`animation-delay` 按离圆心的距离算（内圈先亮）；IO 触发，进视口才播 | 叙事：从本站长出一圈朋友 |
 | 对话生长（留言板） | `.cm` 纯 CSS keyframes（translateY+opacity，前 10 条 nth-child 错开 delay）；AJAX 整块替换列表后新节点自动重播，零 JS 介入 | 叙事：留言一条条长出来 |
 | 逐字入场小号版（关于） | page-title 逐字 `z:-620, rotationX:-72°` 飞入（thunder 的收缩参数）；脚本拆字后才给标题开 `perspective`（`.chars-on`），reduce / 无 GSAP 时不拆字 | 叙事：人物档案的签名 |
 
