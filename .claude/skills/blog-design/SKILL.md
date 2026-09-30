@@ -254,7 +254,7 @@ body { font-size: 17px; line-height: 1.75; }
 | 阅读进度（文章） | 视口顶 3px 信号条 `scaleX` = 文章滚动进度（ScrollTrigger scrub） | 状态转换：读到哪里了 |
 | 正文标题揭示（文章） | `.md-body h2` 用 IntersectionObserver + CSS `clip-path` transition 逐节擦入；不建 ScrollTrigger 实例（文章几十个节点，防实例爆炸） | 叙事：章节依次送出 |
 | 磁吸标签云（标签） | `.tag-chip` 挂 `.magnet`；选中态是 `--signal-fill` 的 `clip-path` 定向擦入，提交延迟 280ms 让擦入播完 | 反馈：标签是可被吸引的物件 |
-| 名片墙（友链） | 入场「发牌」：卡片以底边为轴 rotationX -72° 逐张翻起（grid 开 1200px 透视场）；悬停「拿起」：卡片倾斜（`data-tilt`）+ 头像/正文/状态块/流水号分四层 `translateZ` 浮出纸面（卡片 `preserve-3d` + `perspective: 400px` 给子层用）+ 直角硬投影 + hover 头像灰度转彩色；流水号由 CSS 计数器生成，不动模板 | 反馈：名片被指尖捻起；叙事：一面墙的名片被逐张发下 |
+| 悬浮名片墙（友链） | 三层 3D：透视容器 → 整墙 `data-tilt="1.4"` 随指针迎向光标 → 单卡 ±4° 独立透视场；悬停时卡内内容 `translateZ(30px)` 浮出、头像再抬 16px、信号描边框 + 名字高亮笔 + 斜切扫光；入场从纵深逐格飞入（grid 阵列 stagger）；墙后压幽灵字 LINKS | 层级 + 反馈：名片是一面可被指尖拨动的墙 |
 | 对话生长（留言板） | `.cm` 纯 CSS keyframes（translateY+opacity，前 10 条 nth-child 错开 delay）；AJAX 整块替换列表后新节点自动重播，零 JS 介入 | 叙事：留言一条条长出来 |
 | 逐字入场小号版（关于） | page-title 逐字 `z:-620, rotationX:-72°` 飞入（thunder 的收缩参数）；脚本拆字后才给标题开 `perspective`（`.chars-on`），reduce / 无 GSAP 时不拆字 | 叙事：人物档案的签名 |
 
