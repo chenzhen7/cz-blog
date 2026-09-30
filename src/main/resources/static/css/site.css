@@ -1195,12 +1195,19 @@ button { font: inherit; }
   transform: translate(-50%, -50%) scale(1.45);
   z-index: 5;
 }
-.fr-board.is-map .fr-node.near .fr-node-ava { filter: none; border-color: var(--signal-edge); }
-/* 站名抬起时给个白底 + 信号描边：它会压到邻近的据点上，没有底就糊成一团 */
-.fr-board.is-map .fr-node.near .fr-node-name {
-  color: var(--ink); background: var(--bg);
-  padding: 1px 5px; border: 1px solid var(--signal-edge);
+/* 抬起时的反馈只有「抬起来 + 头像恢复彩色」两样。
+   黄框和白底不再加 —— 这块地方已经有信号黄的连线、状态方块和圆心环，
+   抬一个据点就再多两处黄色，指针划过去整张图跟着闪，反而盖住了「抬起来」本身。
+   边框**显式写回基础线色**：不写的话会被上面那条 .fr-node:hover 的信号黄接走
+   （那条是头像墙的悬停反馈，星图靠 .near 同名的这条压住它）。 */
+.fr-board.is-map .fr-node.near .fr-node-ava {
+  filter: none;
+  border-color: var(--line);
 }
+/* 站名抬起只提亮，不垫底。压到邻近据点上时的可读性交给随节点一起放大的字号
+   （scale 不改计算值仍是 13px，但视觉上是 13×1.45 ≈ 19px）与底部的详情条，
+   那块白底来回闪比糊一点更吵。 */
+.fr-board.is-map .fr-node.near .fr-node-name { color: var(--ink); }
 /* 星图上站名与状态都让位给图形：站名按条数分档决定要不要显示（脚本挂 .no-label），
    状态只留方块，位置挪到头像右上角。文字含义由详情条与节点自身的 title 承载。 */
 .fr-board.is-map .fr-node-net {
