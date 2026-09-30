@@ -318,11 +318,14 @@
         // 条数再多盘就到底了，之后靠缩小头像与丢站名继续撑（见 B2 原型的实测）
         var SPACING = 89;
         var RX_RATIO = 0.45, RY_RATIO = 0.44;        // 椭圆盘半径占舞台宽/高的比例
-        // 盘心空档：圆心那块是本站头像，据点不能压上去。比例按「盘半径的几成」，不是绝对值 ——
-        // 舞台高度决定盘半径（见下），写死像素会在窄一点的窗口上把空档撑成整个盘。
-        // 0.32 对应 300px 半径时约 96px 的空心：装得下 58px 的头像，再加半个据点宽
-        // （116px / 2 = 58px，站名比头像宽），内圈无论是横着还是竖着排都盖不到圆心。
-        var HUB_GAP = 0.32;
+        // 盘心净空：圆心那块是本站头像，内圈据点不能压上去。
+        // 这里必须是**像素**而不是盘半径的几成 —— 圆心半径（58/2 + 2 = 31px）和据点盒子
+        // 的半宽（116/2 = 58px）都是固定值，净空需求随之是个常量，与盘多大无关。
+        // 早先按比例算（0.32×半径），结果是盘小的时候不够、盘大的时候白空一大圈。
+        // 92 = 31 + 58 + 3px 余量：内圈据点无论横着排还是竖着排都刚好让开。
+        // 盘半径的下限由 .fr-board.is-map 的 min-height 520px 兜着（ry ≥ 520×0.44 = 229），
+        // 远大于这个值，所以 (rx - HUB_CLEAR) 不会变成负数。
+        var HUB_CLEAR = 92;
         var mq = window.matchMedia('(min-width: ' + MAP_MIN + 'px)');
 
         /* 据点尺寸按条数分档退让：先缩小头像，再丢掉站名。
@@ -356,20 +359,24 @@
             var k = SPACING * Math.sqrt(nodes.length) * 0.72;
             var rx = Math.min(rxMax, k), ry = Math.min(ryMax, k);
 
+            // 向日葵盘的 fRaw = √((i+0.5)/N) 最小只到 √(0.5/N)，永远取不到 0 ——
+            // 不归一化的话，重映射出来的「内圈」其实悬在半空，盘心白多让一圈。
+            var fMinRaw = Math.sqrt(0.5 / nodes.length);
+
             nodes.forEach(function (el, i) {
-                // fRaw 是「在盘里的相对位置」（0 内圈 → 1 外圈）。向日葵盘的面积均匀性靠它。
                 var fRaw = Math.sqrt((i + 0.5) / nodes.length);
-                // 再把 [0,1] 重映射到 [HUB_GAP,1]：整体外推，圆心让出空档。
-                // 挤掉的是盘心那一圈没有据点的面积，环上的密度只上升约 11%
-                // （1/(1-0.32²)），实测最近邻间距仍在 90px 以上，远大于头像直径。
-                var f = HUB_GAP + (1 - HUB_GAP) * fRaw;
+                // 归一化：最内圈恰好 0，最外圈恰好 1
+                var f = (fRaw - fMinRaw) / (1 - fMinRaw);
                 var a = i * GOLDEN;
+                // 盘半径按 HUB_CLEAR 内缩再乘 f：内圈落在 (HUB_CLEAR, HUB_CLEAR) 这个圆上，
+                // 外圈仍是完整椭圆。内缩量固定，所以盘多大净空都正好那么多。
+                var rhoX = HUB_CLEAR + f * (rx - HUB_CLEAR);
+                var rhoY = HUB_CLEAR + f * (ry - HUB_CLEAR);
                 // center + 椭圆半径 × 单位方向，换算成百分比写进 left/top
-                el.style.left = (50 + Math.cos(a) * f * rx / w * 100).toFixed(3) + '%';
-                el.style.top  = (50 + Math.sin(a) * f * ry / h * 100).toFixed(3) + '%';
-                // 入场错开：用 fRaw 而不是 f —— 错开的依据是「第几圈」，
-                // 换成 f 的话内圈会白等 288ms 才开始亮，「从本站向外长出来」就断了
-                el.style.animationDelay = Math.round(fRaw * 900) + 'ms';
+                el.style.left = (50 + Math.cos(a) * rhoX / w * 100).toFixed(3) + '%';
+                el.style.top  = (50 + Math.sin(a) * rhoY / h * 100).toFixed(3) + '%';
+                // 入场错开：f 就是「第几圈」，内圈 0ms 先亮 —— 从本站向外长出一圈朋友
+                el.style.animationDelay = Math.round(f * 900) + 'ms';
             });
         }
 
