@@ -689,8 +689,10 @@ button { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .ticker-track, .status .dot, #wipe { animation: none; }
-  /* 留言「对话生长」是纯 CSS keyframes，不在上面那行通用停动画的范围里，单独停 */
+  /* 留言「对话生长」与友链星图的据点入场都是纯 CSS keyframes，
+     不在上面那行通用停动画的范围里，单独停 */
   .anim .cm-list .cm { animation: none; }
+  .anim .fr-board .fr-node { animation: none; }
   /* 静止态本来就是躲开的，停掉动画即等于不出现，不需要额外的 display: none */
   .anim .section .wipe-in,  .anim .footer .wipe-in,
   .anim .page-head .wipe-in,  .anim .post-head .wipe-in  { clip-path: none; }
@@ -1197,6 +1199,15 @@ button { font: inherit; }
 }
 .fr-board.is-map .fr-node-net::after { display: none; }
 .fr-board.is-map.no-label .fr-node-name { display: none; }
+
+/* 入场：据点由内向外依次亮起（从本站长出一圈朋友）。
+   用纯 CSS keyframes + 每节点一个 animation-delay（delays 由脚本按盘半径算，
+   内圈靠前），与留言板「对话生长」同源 —— 节点被重排后动画会自己重播，不需要 JS 介入。
+   与全站同一条安全线：.anim 门控 + 延迟由 .in 触发。
+   JS 没跑起来或 reduce 时没有 .anim，节点直接可见，绝不会因为动效没播而看不见内容。 */
+@keyframes fr-node-in { from { opacity: 0; } to { opacity: 1; } }
+.anim .fr-board .fr-node { opacity: 0; }
+.anim .fr-board.in .fr-node { animation: fr-node-in .55s cubic-bezier(.16, 1, .3, 1) both; }
 
 /* 详情条：星图的据点承载不了描述，指针停到哪个据点上就在这里报出它的全部信息。
    只在星图模式下出现 —— 头像墙模式跑在触屏上，没有悬停可依靠，

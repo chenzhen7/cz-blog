@@ -322,6 +322,8 @@
             if (!mq.matches) {
                 board.classList.remove('is-map', 'no-label');
                 board.style.removeProperty('--ava');
+                // 头像墙没有「离圆心多远」这回事，按格子的阅读顺序错开
+                nodes.forEach(function (el, i) { el.style.animationDelay = (i * 26) + 'ms'; });
                 return;
             }
             board.classList.add('is-map');
@@ -343,10 +345,27 @@
                 // center + 椭圆半径 × 单位方向，换算成百分比写进 left/top
                 el.style.left = (50 + Math.cos(a) * f * rx / w * 100).toFixed(3) + '%';
                 el.style.top  = (50 + Math.sin(a) * f * ry / h * 100).toFixed(3) + '%';
+                // 入场错开：f 就是「离圆心多远」，内圈先亮 —— 从本站向外长出一圈朋友
+                el.style.animationDelay = Math.round(f * 900) + 'ms';
             });
         }
 
         layout();
+
+        /* 入场的触发。这块在页面下半部分，等它真的进视口再播 ——
+           一进页面就播的话，用户滚下来时动画早跑完了，只看到一片静止的图，
+           「从本站长出一圈朋友」这个叙事就白做了。一次性，播过就断开。 */
+        if ('IntersectionObserver' in window) {
+            var boardIO = new IntersectionObserver(function (entries) {
+                if (!entries[0].isIntersecting) return;
+                board.classList.add('in');
+                boardIO.disconnect();
+            }, { rootMargin: '0px 0px -10% 0px' });
+            boardIO.observe(board);
+        } else {
+            // 没有 IO 就立刻亮出来 —— 不能让它一直藏在 .anim 的初始态里
+            board.classList.add('in');
+        }
 
         // 断点跨越要整体换版面；同断点内的尺寸变化只需要重算盘半径。
         // resize 防抖 200ms —— 与首页/归档页的做法一致，拖窗口时不要每帧重排
