@@ -1072,98 +1072,142 @@ button { font: inherit; }
 .form-input:focus, .form-textarea:focus { border-color: var(--signal); outline: none; }
 .form-textarea { min-height: 108px; resize: vertical; }
 
-/* 友链名片阵。
-   版面从「连续网格 + 细边框」改成了**分离的独立名片**（12px 间距）。
-   理由是这一版要上 3D：卡片会随观察者抬升、错开，而连续网格的线一旦断开就不再是网格，
-   只剩一堆错位的线头。反过来，独立卡片摊在一片等高线底图上、各自浮起来，
-   正好是「名片摆在图桌上」的画面。SKILL.md §4.3 说卡片只在高程真的表达层级时用
-   —— 这里高程就是在表达层级，所以用卡片是有理由的。
-   卡片等高由 grid 默认的 stretch 保证，页脚行靠 .fl-meta 的 margin-top:auto 沉底对齐。 */
-.fl-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 12px;
-}
-.fl-card {
-  position: relative; display: flex; flex-direction: column;
-  padding: 20px 22px 16px; background: var(--bg);
-  border: 1px solid var(--line);
-  transition: background .3s, border-color .3s;
-}
-.fl-card:hover { background: var(--panel); border-color: var(--signal-edge); }
-/* 左上角刻度：卡片在图桌上的定位标记。用边线档的黄（装饰带，不承载文字），
-   这类小刻度不适用「亮黄实心块必须带 --signal-edge 描边」那条 —— 它本身就是边线色。 */
-.fl-card::before {
-  content: ""; position: absolute; top: 0; left: 0;
-  width: 22px; height: 3px; background: var(--line-strong);
-  transition: background .3s;
-}
-.fl-card:hover::before { background: var(--signal-edge); }
-/* 名片阵入场的初始态（.anim 门控）：透明度归 0，等页面脚本的发牌时间轴播入。
-   只藏 opacity、不写 transform —— transform 归景深循环与发牌补间管，
-   这里再写一次就会两边打架（规范 §5.2）。reduce 下没有 .anim，卡片直接可见。 */
-.anim .fl-grid .fl-card { opacity: 0; }
+/* 友链网络。一套 DOM、两种版面：
+   默认（也是 JS 没跑起来时的落点）= 头像墙，方格密排，站名与状态常驻；
+   JS 判定视口够宽时给 .fr-board 加 .is-map，同一批节点被重新定位成「据点星图」。
+   两套共用 .fr-node 这一批节点，不渲染两份 —— 否则 22 条链接会在同页重复两遍，
+   而且 JS 一挂页面就什么都不剩。 */
 
-/* 头像是外链，而这一页有一半友链已经挂掉（net_status=3），它们的图同样打不开。
-   这不是渲染故障，是真实数据 —— 所以不藏。给槽位一个底板 + 边框，
-   图挂了就是「一张空档案照片格」，配右上角红色的「超时」状态，语义完整。
-   color:transparent 只是不让浏览器把 alt 文本铺在槽位上（读屏仍读得到 alt），
-   空槽本身照旧可见，问题没有被掩盖。 */
-.fl-avatar {
-  width: 56px; height: 56px; object-fit: cover;
+/* ---------- 头像墙（默认 / 窄屏 / 无 JS） ---------- */
+.fr-board {
+  --ava: 72px;                       /* 头像边长；星图模式下由脚本按条数分档覆盖 */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 14px;
+}
+.fr-node {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 7px; text-align: center; min-width: 0;
+}
+.fr-node-ava {
+  width: var(--ava); height: var(--ava); object-fit: cover;
   background: var(--bg-sunken); border: 1px solid var(--line);
+  /* 头像是外链，而这一页有一半友链已经挂掉，它们的图同样打不开 —— 那是真实数据，不藏。
+     color:transparent 只是不让浏览器把 alt 文本铺在槽位上（读屏仍读得到 alt），
+     空槽本身照旧可见，配右上角的红色状态，语义是完整的。 */
   color: transparent;
   filter: grayscale(1) contrast(.96) brightness(1.15); transition: filter .3s;
 }
-.fl-card:hover .fl-avatar { filter: none; }
-/* 站点名进「标题」字阶（20px），不再和正文同级 */
-.fl-name {
-  display: block; margin-top: 16px;
-  font-family: var(--font-cjk); font-weight: 700; font-size: 20px;
-  line-height: 1.35; color: var(--ink); overflow-wrap: break-word;
-}
-/* 描述两行截断。旧版是 16px，低于正文 17px 的硬底 —— 这里归位。
-   t_blog 那批 description 掺 markdown 的毛病友链没有，但仍限两行保证卡片等高。 */
-.fl-desc {
+.fr-node:hover .fr-node-ava { filter: none; border-color: var(--signal-edge); }
+.fr-node-name {
+  font-size: 13px; line-height: 1.3; color: var(--ink-2);
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  overflow: hidden; margin-top: 6px; color: var(--ink-2); font-size: 17px;
+  overflow: hidden; overflow-wrap: break-word;
+  /* 固定两行高：站名有长有短，不留的话同一行里状态方块会高低不齐，
+     看起来像排版坏了。留白比参差好。 */
+  min-height: 34px;
 }
+.fr-node:hover .fr-node-name { color: var(--ink); }
 
-/* 页脚行：加入时间与最近巡检。两个都是真数据（t_friend 的 create_time / update_time），
-   不是流水号 —— 无信息量的编号是规范 §7 点名的反面教材，而这两个时间戳正好把
-   这一页「状态扫描」那条动效的语义坐实（扫的就是这条巡检记录）。
-   margin-top:auto 把页脚压到卡片底缘，等高卡片下整行页脚对齐。 */
-.fl-meta {
-  margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line);
-  display: flex; flex-wrap: wrap; gap: 2px 12px;
-  font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-2);
+/* 状态。方块的四值配色不新增色相 —— 绿与红直接取正文代码块里已经用过的两个 token 色
+   （Prism 的字符串绿与关键字红），黄用信号色边线档。
+   文字标签由 CSS 从节点的 data-net 派生：单一事实来源，模板里不再写一遍三元。
+   四值 + 枚举之外的坏值**逐一显式列出**，不用 else/default 兜 —— 契约变更必须看得见。 */
+.fr-node-net {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono); font-size: 12px; color: var(--ink-2);
 }
-
-/* 网络状态条：方块 + 可见文字标签。
-   四值枚举（0 良好 / 1 一般 / 2 异常 / 3 超时）必须可辨，一个颜色套不了。
-   这里不新增色相 —— 绿与红直接取正文代码块里已经用过的两个 token 色
-   （Prism 的字符串绿与关键字红），黄直接用信号色边线档。
-   **文字标签由 CSS 从 data-net 派生，不在模板里再写一遍三元**
-   ——单一事实来源仍是 data-net，也和下面「未知值」的写法同构。 */
-.fl-status {
-  position: absolute; top: 18px; right: 20px;
-  display: inline-flex; align-items: center; gap: 6px;
-  font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-2);
+.fr-node-net::before {
+  content: ""; width: 7px; height: 7px; flex-shrink: 0;
+  border: 1px solid var(--line-strong);
 }
-.fl-status::before { content: ""; width: 8px; height: 8px; border: 1px solid var(--line-strong); }
-/* 四值 + 未知值显式逐一列出，不用 else/default 兜 —— 契约变更必须看得见。
-   枚举之外的值（含 null）画空心方块 + 「未知」：原模板对这些值什么都不画，
-   于是一个坏值在页面上完全看不出来，那是静默回退。 */
-.fl-status[data-net="0"]::before { background: #2f6b3a; border-color: #2f6b3a; }
-.fl-status[data-net="0"]::after  { content: "良好"; }
-.fl-status[data-net="1"]::before { background: var(--signal-edge); border-color: var(--signal-edge); }
-.fl-status[data-net="1"]::after  { content: "一般"; }
-.fl-status[data-net="2"]::before { background: #8a2b1f; border-color: #8a2b1f; }
-.fl-status[data-net="2"]::after  { content: "异常"; }
+.fr-node[data-net="0"] .fr-node-net::before { background: #2f6b3a; border-color: #2f6b3a; }
+.fr-node[data-net="0"] .fr-node-net::after  { content: "良好"; }
+.fr-node[data-net="1"] .fr-node-net::before { background: var(--signal-edge); border-color: var(--signal-edge); }
+.fr-node[data-net="1"] .fr-node-net::after  { content: "一般"; }
+.fr-node[data-net="2"] .fr-node-net::before { background: #8a2b1f; border-color: #8a2b1f; }
+.fr-node[data-net="2"] .fr-node-net::after  { content: "异常"; }
 /* 3 与 2 同色但留一道墨描边：同属故障，可区分于「异常」 */
-.fl-status[data-net="3"]::before { background: #8a2b1f; border-color: var(--ink-on-signal); }
-.fl-status[data-net="3"]::after  { content: "超时"; }
-.fl-status[data-net="unknown"]::before { background: none; border-color: var(--line-strong); }
-.fl-status[data-net="unknown"]::after  { content: "未知"; }
+.fr-node[data-net="3"] .fr-node-net::before { background: #8a2b1f; border-color: var(--ink-on-signal); }
+.fr-node[data-net="3"] .fr-node-net::after  { content: "超时"; }
+/* 枚举之外的值（含 null）画空心方块 + 「未知」。原模板对这些值什么都不画，
+   于是一个坏值在页面上完全看不出来，那是静默回退。 */
+.fr-node[data-net="unknown"] .fr-node-net::before { background: none; border-color: var(--line-strong); }
+.fr-node[data-net="unknown"] .fr-node-net::after  { content: "未知"; }
+
+/* ---------- 星图专属的三层：头像墙模式下不渲染 ---------- */
+.fr-terrain, .fr-links, .fr-hub { display: none; }
+
+/* ---------- 据点星图（.is-map，脚本在够宽的视口上挂） ---------- */
+.fr-board.is-map {
+  display: block; position: relative;
+  height: clamp(520px, 72vh, 820px);
+}
+.fr-board.is-map .fr-terrain {
+  display: block; position: absolute; inset: 0; z-index: 0;
+  width: 100%; height: 100%; pointer-events: none;
+}
+.fr-board.is-map #frFlat { display: none; }   /* 显 GL 还是显 2D 由脚本决定 */
+.fr-board.is-map .fr-links {
+  display: block; position: absolute; inset: 0; z-index: 1;
+  width: 100%; height: 100%; pointer-events: none; overflow: visible;
+}
+.fr-board.is-map .fr-links line { stroke: var(--signal-edge); stroke-width: 2; }
+/* 中心：本站。全图唯一的实心黄，按 §2.2 必须带 --signal-edge 描边 */
+.fr-board.is-map .fr-hub {
+  display: block; position: absolute; left: 50%; top: 50%; z-index: 6;
+  transform: translate(-50%, -50%); pointer-events: none;
+}
+/* 宽度自适应而不是写死：中心块里的字是 ${author}（站点昵称），长度不定，
+   写死宽度会被 "ChenZhen" 这种长昵称撑破。nowrap 保证它永远单行不折。
+   min-width 兜住极短昵称，让它至少是个方块。 */
+.fr-hub-core {
+  display: flex; align-items: center; justify-content: center;
+  min-width: 62px; height: 62px; padding: 0 14px; white-space: nowrap;
+  background: var(--signal-fill); border: 1px solid var(--signal-edge);
+  font-family: var(--font-disp); font-weight: 800; font-size: 20px;
+  color: var(--ink-on-signal);
+}
+/* 据点。left/top 由脚本按向日葵盘算好写成百分比。
+   translate(-50%,-50%) 让百分比落在节点中心；悬停态的 transform 必须带上它。 */
+.fr-board.is-map .fr-node {
+  position: absolute; width: 116px; z-index: 2;
+  transform: translate(-50%, -50%);
+  transition: transform .3s cubic-bezier(.16, 1, .3, 1);
+}
+/* 星图上站名与状态都让位给图形：站名按条数分档决定要不要显示（脚本挂 .no-label），
+   状态只留方块，位置挪到头像右上角。文字含义由详情条与节点自身的 title 承载。 */
+.fr-board.is-map .fr-node-net {
+  position: absolute; top: 0; left: calc(50% + var(--ava) / 2 - 5px);
+}
+.fr-board.is-map .fr-node-net::after { display: none; }
+.fr-board.is-map.no-label .fr-node-name { display: none; }
+
+/* 详情条：星图的据点承载不了描述，指针停到哪个据点上就在这里报出它的全部信息。
+   只在星图模式下出现 —— 头像墙模式跑在触屏上，没有悬停可依靠，
+   而站名与状态已经常驻在格子里了。 */
+.fr-detail { display: none; }
+.fr-board.is-map + .fr-detail {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 20px;
+  margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line);
+  min-height: 64px; font-size: 17px; color: var(--ink-2);
+}
+.fr-detail-hint { font-family: var(--font-mono); font-size: var(--fs-label); }
+.fr-detail .d-name { font-family: var(--font-cjk); font-weight: 700; font-size: 20px; color: var(--ink); }
+.fr-detail .d-net {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: var(--fs-label);
+}
+.fr-detail .d-net::before { content: ""; width: 8px; height: 8px; border: 1px solid var(--line-strong); }
+.fr-detail .d-net[data-net="0"]::before { background: #2f6b3a; border-color: #2f6b3a; }
+.fr-detail .d-net[data-net="1"]::before { background: var(--signal-edge); border-color: var(--signal-edge); }
+.fr-detail .d-net[data-net="2"]::before { background: #8a2b1f; border-color: #8a2b1f; }
+.fr-detail .d-net[data-net="3"]::before { background: #8a2b1f; border-color: var(--ink-on-signal); }
+.fr-detail .d-net[data-net="unknown"]::before { background: none; border-color: var(--line-strong); }
+.fr-detail .d-meta {
+  margin-left: auto;
+  font-family: var(--font-mono); font-size: var(--fs-label);
+}
 
 /* ==========================================================================
    20. 留言板

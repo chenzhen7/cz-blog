@@ -111,10 +111,8 @@
         </div>
     </section>
 
-    <!--/* 友链墙。netStatus 是 Friend.NetStatus 的四值枚举：
-           0 良好 / 1 一般 / 2 超时 / 3 异常。
-           原模板对 3 之内的值画了色块，对枚举之外的值（含 null）什么都不画 —— 那是静默回退，
-           一个坏值在页面上完全看不出来。这里显式给未知值一个问号方块，让问题可见。 */-->
+    <!--/* 友链网络。netStatus 是 Friend.NetStatus 的四值枚举：0 良好 / 1 一般 / 2 异常 / 3 超时。
+           四值 + 枚举之外的坏值都必须在页面上可辨 —— 原模板对坏值什么都不画，那是静默回退。 */-->
     <section class="section flush" th:if="${not #lists.isEmpty(friendlinks)}">
         <div class="wrap">
             <div class="sec-head">
@@ -124,42 +122,58 @@
                 </span>
             </div>
 
-            <!--/* 名片阵。卡片不再挂 data-tilt：这一版的 3D 由页尾脚本的「景深阵」统一驱动，
-                   它给每张卡写 transform（translateZ + 朝向光标的倾角），
-                   而全站的指针物理循环也在写 [data-tilt] 的 transform —— 一个属性只能有一个
-                   写入方（规范 §5.2），所以那边的挂载撤掉了。共享循环本身不动，
-                   它继续管本页「申请友链」按钮的磁吸。 */-->
-            <div class="fl-grid">
-                <a class="fl-card" th:each="friendlink : ${friendlinks}"
-                   target="_blank" rel="noopener" th:href="@{${friendlink.blogAddress}}">
-                    <img class="fl-avatar cut-tr" th:src="@{${friendlink.pictureAddress}}"
-                         th:alt="${friendlink.blogName} + ' 的头像'" width="56" height="56"
+            <!--/* 一套数据、两种版面，由页尾脚本按断点决定用哪套：
+                   ≥900px 摆成「据点星图」—— 本站为心，据点绕成椭圆盘，悬停时细线连回中心；
+                   <900px 排成「头像墙」—— 方格密排，站名与状态常驻（触屏没有悬停可依靠）。
+                   两套用的是**同一批 DOM 节点**，脚本只重新定位它们，不渲染两份：
+                   否则 JS 一挂就什么都不剩，而且 22 条链接会在同页重复两遍。
+                   所以默认（也是 no-JS 的落点）就是头像墙，星图是 JS 到位后的增强。 */-->
+            <div class="fr-board" id="frBoard">
+
+                <!--/* 星图专属的三层，头像墙模式下整块不渲染：
+                       等高线底图（GL + 2D 兜底两块画布）、中心到据点的连线层、中心的本站块。 */-->
+                <canvas class="fr-terrain" id="frGl" aria-hidden="true"></canvas>
+                <canvas class="fr-terrain" id="frFlat" aria-hidden="true"></canvas>
+                <svg class="fr-links" id="frLinks" viewBox="0 0 100 100"
+                     preserveAspectRatio="none" aria-hidden="true"></svg>
+                <div class="fr-hub" aria-hidden="true">
+                    <span class="fr-hub-core" th:text="${author}">CZ</span>
+                </div>
+
+                <a class="fr-node" th:each="friendlink : ${friendlinks}"
+                   target="_blank" rel="noopener" th:href="@{${friendlink.blogAddress}}"
+                   th:attr="data-net=${friendlink.netStatus != null and friendlink.netStatus >= 0 and friendlink.netStatus <= 3} ? ${friendlink.netStatus} : 'unknown',
+                            title=${friendlink.netStatus == 0} ? '网络状态良好'
+                                : (${friendlink.netStatus == 1} ? '状态一般'
+                                : (${friendlink.netStatus == 2} ? '网络异常'
+                                : (${friendlink.netStatus == 3} ? '网络超时' : '状态未知')))">
+                    <img class="fr-node-ava" th:src="@{${friendlink.pictureAddress}}"
+                         th:alt="${friendlink.blogName} + ' 的头像'" width="42" height="42"
                          loading="lazy" decoding="async">
-                    <span class="fl-name" th:text="${friendlink.blogName}">友链名称</span>
-                    <span class="fl-desc" th:text="${friendlink.blogDescription}">友链描述</span>
-                    <!--/* 页脚：加入时间与最近巡检，都是 t_friend 上的真字段（Friend 继承 BaseEntity）。
-                           create_time 是申请通过建档的时刻；update_time 实际是每日 0 点
+                    <span class="fr-node-name" th:text="${friendlink.blogName}">友链名称</span>
+                    <!--/* 状态方块与文字都由 CSS 从节点的 data-net 派生（见 site.css 第 19 节），
+                           模板只负责把枚举值翻成 data-net —— 单一事实来源，不在模板里再写一遍三元。 */-->
+                    <span class="fr-node-net" aria-hidden="true"></span>
+                    <!--/* 星图的据点放不下描述文字，这些内容放「屏读可见、视觉隐藏」的位置：
+                           详情条从节点里读它们，同时它们仍是页面正文的一部分，SEO 与无 JS 场景都不丢。
+                           加入时间与最近巡检都是 t_friend 的真字段（Friend 继承 BaseEntity）：
+                           create_time 是建档时刻；update_time 实际是每日 0 点
                            FriendServiceImpl.friendNetworkMonitorTask 逐条写回 netStatus 的时刻，
-                           也就是最后一次网络巡检 —— 这一页的扫描动画扫的就是它。
-                           两个字段都可空，逐项按需渲染，不做假的兜底值。 */-->
-                    <span class="fl-meta">
-                        <span th:if="${friendlink.createTime != null}"
-                              th:text="'加入 ' + ${#temporals.format(friendlink.createTime, 'yyyy-MM-dd')}">加入 2022-09-17</span>
-                        <span th:if="${friendlink.updateTime != null}"
-                              th:text="'巡检 ' + ${#temporals.format(friendlink.updateTime, 'MM-dd')}">巡检 09-30</span>
+                           也就是最后一次网络巡检。两个字段都可空，逐项按需渲染，不造假值。 */-->
+                    <span class="visually-hidden">
+                        <span class="fr-node-desc" th:text="${friendlink.blogDescription}">友链描述</span>
+                        <span class="fr-node-joined" th:if="${friendlink.createTime != null}"
+                              th:text="${#temporals.format(friendlink.createTime, 'yyyy-MM-dd')}">2022-09-17</span>
+                        <span class="fr-node-check" th:if="${friendlink.updateTime != null}"
+                              th:text="${#temporals.format(friendlink.updateTime, 'MM-dd')}">10-01</span>
                     </span>
-                    <!--/* 状态条的方块与文字都由 CSS 从 data-net 派生（见 site.css 第 19 节），
-                           模板这边只负责把枚举值翻成 data-net —— 单一事实来源，避免文字再写一遍三元。
-                           title 是给人和读屏看的说明；原模板挂着 aria-labelledby="uptime-tooltip"，
-                           但页面上根本没有这个 id 的元素，等于没写。 */-->
-                    <span class="fl-status"
-                          th:attr="data-net=${friendlink.netStatus != null and friendlink.netStatus >= 0 and friendlink.netStatus <= 3} ? ${friendlink.netStatus} : 'unknown',
-                                   title=${friendlink.netStatus == 0} ? '网络状态良好'
-                                       : (${friendlink.netStatus == 1} ? '状态一般'
-                                       : (${friendlink.netStatus == 2} ? '网络异常'
-                                       : (${friendlink.netStatus == 3} ? '网络超时' : '状态未知')))"
-                          aria-hidden="true"></span>
                 </a>
+            </div>
+
+            <!--/* 详情条：星图的据点承载不了描述，指针停到哪个据点上就在这里报出它的全部信息。
+                   内容由页尾脚本填；没选中时显示一句提示，不留空白条。 */-->
+            <div class="fr-detail" id="frDetail">
+                <span class="fr-detail-hint">指针停到任意据点上，这里显示它的详情。</span>
             </div>
         </div>
     </section>
@@ -262,20 +276,79 @@
     })();
 </script>
 
-<!--/* 名片阵入场：卡片按序浮出。与申请脚本分开，因为它是纯增强。
-     clearProps 播完即交出 transform 所有权，交给下面那段景深循环 ——
-     同一属性只能有一个写入方（规范 §5.2）。
-     GSAP 没到位就安静跳过：.anim 已被 motion 摘掉，卡片本来就全显示。 */-->
+<!--/* 友链网络的版面调度。纯增强：脚本没跑起来时 .fr-board 保持默认的头像墙网格，
+     内容一条不少（这正是选「一套 DOM、两种版面」而不是渲染两份的原因）。
+
+     排版用的是向日葵盘（phyllotaxis）：r = R·√(i/N)，θ = i × 137.5°。
+     这是「把 N 个点均匀铺进一个盘」的标准解，N 是多少都成立，不用手工调环数。
+     盘做成椭圆而不是正圆 —— 舞台是横长的，正圆只能用到短边，横向一大片会白空着。
+     实测见 prototypes/friends-b2-scale.html。 */-->
 <script th:inline="none">
     (function () {
         'use strict';
-        if (!window.gsap || !window.ScrollTrigger) return;
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        gsap.fromTo('.fl-card', { opacity: 0, y: 18 }, {
-            opacity: 1, y: 0, duration: .55, ease: 'power3.out',
-            stagger: 0.045, clearProps: 'transform',
-            scrollTrigger: { trigger: '.fl-grid', start: 'top 88%' }
+        var board = document.getElementById('frBoard');
+        if (!board) return;
+        var nodes = Array.prototype.slice.call(board.querySelectorAll('.fr-node'));
+        if (!nodes.length) return;
+
+        var MAP_MIN = 900;                  // 够宽才摆得下星图，窄了退回头像墙
+        var GOLDEN = Math.PI * (3 - Math.sqrt(5));   // 137.5°，向日葵盘的黄金角
+        // 相邻据点的目标中心距。这个值决定「多少条时才把舞台填满」：
+        // 89 是让当前 22 条就铺满舞台高度、不留大片白空的取值；
+        // 条数再多盘就到底了，之后靠缩小头像与丢站名继续撑（见 B2 原型的实测）
+        var SPACING = 89;
+        var RX_RATIO = 0.45, RY_RATIO = 0.44;        // 椭圆盘半径占舞台宽/高的比例
+        var mq = window.matchMedia('(min-width: ' + MAP_MIN + 'px)');
+
+        /* 据点尺寸按条数分档退让：先缩小头像，再丢掉站名。
+           超过约 90 条时站名之间已经压到一起，只能靠悬停认人 ——
+           这不是取舍，是实测出来的（见 B2 原型）。 */
+        function tier(n) {
+            if (n <= 40)  return { ava: 42, label: true };
+            if (n <= 90)  return { ava: 32, label: true };
+            if (n <= 180) return { ava: 24, label: false };
+            return { ava: 18, label: false };
+        }
+
+        function layout() {
+            if (!mq.matches) {
+                board.classList.remove('is-map', 'no-label');
+                board.style.removeProperty('--ava');
+                return;
+            }
+            board.classList.add('is-map');
+            var t = tier(nodes.length);
+            board.style.setProperty('--ava', t.ava + 'px');
+            board.classList.toggle('no-label', !t.label);
+
+            // 先挂类再量尺寸：.is-map 会给舞台一个确定高度，量早了拿到的是头像墙的高度
+            var w = board.clientWidth, h = board.clientHeight;
+            if (!w || !h) return;
+            var rxMax = w * RX_RATIO, ryMax = h * RY_RATIO;
+            // 半径随 √N 增长（面积与 N 成正比 = 间距不变），撞到盘上限后才真的开始变挤
+            var k = SPACING * Math.sqrt(nodes.length) * 0.72;
+            var rx = Math.min(rxMax, k), ry = Math.min(ryMax, k);
+
+            nodes.forEach(function (el, i) {
+                var f = Math.sqrt((i + 0.5) / nodes.length);
+                var a = i * GOLDEN;
+                // center + 椭圆半径 × 单位方向，换算成百分比写进 left/top
+                el.style.left = (50 + Math.cos(a) * f * rx / w * 100).toFixed(3) + '%';
+                el.style.top  = (50 + Math.sin(a) * f * ry / h * 100).toFixed(3) + '%';
+            });
+        }
+
+        layout();
+
+        // 断点跨越要整体换版面；同断点内的尺寸变化只需要重算盘半径。
+        // resize 防抖 200ms —— 与首页/归档页的做法一致，拖窗口时不要每帧重排
+        var rzTimer = null;
+        window.addEventListener('resize', function () {
+            clearTimeout(rzTimer);
+            rzTimer = setTimeout(layout, 200);
         });
+        if (mq.addEventListener) mq.addEventListener('change', layout);
+        else if (mq.addListener) mq.addListener(layout);   // 老 Edge / 老 Safari
     })();
 </script>
 
