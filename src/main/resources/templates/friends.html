@@ -192,7 +192,10 @@
                 <div class="fr-zone" id="frZone">
                     <span class="fr-zone-tag">
                         <span class="fr-zone-rule" aria-hidden="true"></span>
-                        <span class="mono-sm">Unreachable / 不可达区域</span>
+                        <!--/* 英文只在头像墙那版出现：星图那版是缩在右下角的小牌子，
+                               放不下「Unreachable / 」这12个字符。中英并列是眉标签的写法，
+                               角落图例不需要。 */-->
+                        <span class="mono-sm"><span class="fr-zone-en">Unreachable / </span>不可达区域</span>
                         <b class="fr-zone-count"></b>
                     </span>
                 </div>
@@ -342,25 +345,19 @@
         // 盘半径的下限由 .fr-board.is-map 的 min-height 520px 兜着（ry ≥ 520×0.44 = 229），
         // 远大于这个值，所以 (rx - HUB_CLEAR) 不会变成负数。
         var HUB_CLEAR = 92;
-        // 不可达区域：钉在舞台右下角的一块面板，据点在这里缩小一档密排。
-        // 尺寸比星图那头小一圈（头像 42→26、列宽 116→84），它是「够不着的那些」，
-        // 视觉上就该退到次级；面板因此也压得住，不会跟盘抢地方。
-        var ZONE_AVA = 26;
-        // 列宽 110 而不是跟着头像缩到 84：站名不跟着头像缩（还是 13px），
-        // 列一窄「coderZ编码世界」就被拦腰断成两行。宁可面板长高，别把字切断。
-        var ZONE_COL_W = 110;
-        var ZONE_ROW_H = 74;       // 头像 26 + 间距 7 + 站名两行 34
-        var ZONE_PAD = 14;
-        var ZONE_TAG_H = 22;
-        var ZONE_INSET = 18;       // 面板离舞台右下角
-        var ZONE_MAX_RATIO = 0.55;   // 面板最多占舞台高度的几成，超了才加列
-        var ZONE_MAX_W_RATIO = 0.45; // 横向兜底上限，防止条数很多时面板吃掉小半个舞台
-        // 据点内容的半高 / 半宽（内容 83px 高、盒子 116px 宽）。盘按它们留出余量，
-        // 否则最外圈的站名会顶出舞台、或者伸进右下角的面板
-        var NODE_HALF_H = 46, NODE_HALF_W = 58;
+        /* 不可达区域的尺寸（像素）。它是贴在地图右下角的一小块图例，不是页面上另开的
+           一个区 —— 所以图标缩成 22px 的「点」、没有站名，占位极小，星图拿回整个舞台高度。 */
+        var ZONE_DOT = 22;         // 图标边长。星图据点是 42，这里刻意降到一半以下
+        var ZONE_GAP = 6;
+        var ZONE_PAD = 10;
+        var ZONE_LABEL_H = 20;
+        var ZONE_LABEL_GAP = 8;
+        var ZONE_MAX_COLS = 8;
+        // 据点内容的半宽 / 半高（116×83 的一半）。盘要按它留出余量：
+        // 竖向避免站名压到别的东西，横向是给「盘躲开角落那块牌子」的判定加余量
+        var NODE_W2 = 58, NODE_HALF = 46;
         var mq = window.matchMedia('(min-width: ' + MAP_MIN + 'px)');
-        // 圆心在舞台里的百分比位置。右下角有区域时圆心会左移（见 layout），
-        // 悬停连线的起点跟着它走
+        // 圆心在舞台里的百分比位置。区域占掉底部之后圆心会往上挪，连线要从新的位置出发
         var hubPct = { x: 50, y: 50 };
 
         /* 据点尺寸按条数分档退让：先缩小头像，再丢掉站名。
@@ -414,73 +411,52 @@
             board.classList.add('is-map');
             var t = tier(live.length);
             board.style.setProperty('--ava', t.ava + 'px');
+            board.style.setProperty('--zone-dot', ZONE_DOT + 'px');
             board.classList.toggle('no-label', !t.label);
 
             // 先挂类再量尺寸：.is-map 会给舞台一个确定高度，量早了拿到的是头像墙的高度
             var w = board.clientWidth, h = board.clientHeight;
             if (!w || !h) return;
 
-            /* 区域先算：它是右下角的一块浮层，位置决定盘要不要让路。
-               列数由「面板最多占多高」倒推 —— 条数一多就先加列、再长高，
-               不然面板会一路长到顶上去。 */
-            var zoneCols = 1, zoneRows = 0, panelX = w, panelY = h, panelW = 0, panelH = 0;
+            /* 角落面板的尺寸：由按点数决定，与星图无关 ——
+               星图拿回整个舞台高度，面板不参与它的排版。 */
+            var zoneCols = 1, zoneRows = 0, panelW = 0, panelH = 0;
             if (dead.length) {
-                // 上取整而不是下取整：少一列换来的行数是「面板高一截」，多一列换来的是
-                // 「面板宽一截、把盘挤到左半边」，后者代价大得多
-                var maxRows = Math.max(1, Math.ceil(
-                    (h * ZONE_MAX_RATIO - ZONE_TAG_H - 2 * ZONE_PAD) / ZONE_ROW_H));
-                zoneCols = Math.max(1, Math.ceil(dead.length / maxRows));
-                // 宽度上限兜底：条数很多时别让面板横向吃掉小半个舞台
-                zoneCols = Math.min(zoneCols, Math.max(1, Math.floor(
-                    (w * ZONE_MAX_W_RATIO - 2 * ZONE_PAD) / ZONE_COL_W)));
+                zoneCols = Math.min(ZONE_MAX_COLS, dead.length);
                 zoneRows = Math.ceil(dead.length / zoneCols);
-                panelW = zoneCols * ZONE_COL_W + 2 * ZONE_PAD;
-                panelH = ZONE_TAG_H + zoneRows * ZONE_ROW_H + 2 * ZONE_PAD;
-                panelX = w - panelW - ZONE_INSET;
-                panelY = h - panelH - ZONE_INSET;
-                board.style.setProperty('--zone-x', panelX + 'px');
-                board.style.setProperty('--zone-y', panelY + 'px');
+                panelW = ZONE_PAD * 2 + zoneCols * ZONE_DOT + (zoneCols - 1) * ZONE_GAP;
+                panelH = ZONE_PAD * 2 + ZONE_LABEL_H + ZONE_LABEL_GAP +
+                         zoneRows * ZONE_DOT + (zoneRows - 1) * ZONE_GAP;
                 board.style.setProperty('--zone-w', panelW + 'px');
                 board.style.setProperty('--zone-h', panelH + 'px');
-                // 缩小一档的两个尺寸也只在这里给：CSS 消费，不重写一遍
-                board.style.setProperty('--zone-ava', ZONE_AVA + 'px');
-                board.style.setProperty('--zone-col', ZONE_COL_W + 'px');
             } else {
-                ['--zone-x', '--zone-y', '--zone-w', '--zone-h',
-                 '--zone-ava', '--zone-col'].forEach(function (p) {
-                    board.style.removeProperty(p);
-                });
+                board.style.removeProperty('--zone-w');
+                board.style.removeProperty('--zone-h');
             }
 
+            var cy = h / 2;
+            // 竖向留出据点半高，横向靠 RX_RATIO 的 0.45（天然留 5%，1440px 下 65px > 58px）
+            var rxMax = w * RX_RATIO;
+            var ryMax = Math.min(h * RY_RATIO, (h - 2 * NODE_HALF) / 2);
             // 半径随 √N 增长（面积与 N 成正比 = 间距不变），撞到盘上限后才真的开始变挤
             var k = SPACING * Math.sqrt(live.length) * 0.72;
-            // 竖向额外留出据点半高，否则最外圈的站名会顶出舞台
-            var ryMax = Math.min(h * RY_RATIO, (h - 2 * NODE_HALF_H) / 2);
-            var ry = Math.min(ryMax, k);
-            var cy = h / 2;
+            var rx = Math.min(rxMax, k), ry = Math.min(ryMax, k);
 
-            /* 盘先按整个舞台算。区域是角落里的浮层，盘够小的时候两边本来就互不相干，
-               不要无缘无故把圆心挪偏。 */
-            var areaW = w, cx = w / 2;
-            var rxMax = Math.min(areaW * RX_RATIO, (areaW - 2 * NODE_HALF_W) / 2);
-            var rx = Math.min(rxMax, k);
-
-            /* 真的伸进面板了才让路。判交用「矩形到椭圆」而不是两个外接矩形 ——
-               椭圆是圆的，角落那块本来就是空的，按外接矩形判会把大半个盘白白赶走。
-               矩形先按据点半宽外扩，保证的是「据点内容不进去」，不只是盘的中心线。
-               让路的做法是**把盘的地盘缩到面板左边**，不是把盘压窄：内圈净空是
-               固定的 92px，rx 一旦被压到接近它，整个盘会塌成一条竖线。
-               缩完由构造保证 cx + rx + NODE_HALF_W ≤ panelX，盘一定在面板左边。 */
+            /* 盘躲开右下角那块牌子。判定就是椭圆的定义式：中心到面板左上角的
+               (dx/rx)² + (dy/ry)² ≥ 1 表示该点在椭圆外。rx/ry 等比缩到刚好满足 ——
+               等比缩放保持椭圆形状不变，只是整张图小一圈。加据点半宽半高，
+               因为据点盒子比椭圆本身还要往外伸。
+               条数少时盘本来就小，s ≥ 1，这一段不生效。 */
             if (dead.length) {
-                var dx = Math.max(panelX - NODE_HALF_W - cx, cx - (panelX + panelW + NODE_HALF_W), 0);
-                var dy = Math.max(panelY - NODE_HALF_H - cy, cy - (panelY + panelH + NODE_HALF_H), 0);
-                if ((dx / rx) * (dx / rx) + (dy / ry) * (dy / ry) < 1) {
-                    areaW = panelX;
-                    cx = areaW / 2;
-                    rxMax = Math.min(areaW * RX_RATIO, (areaW - 2 * NODE_HALF_W) / 2);
-                    rx = Math.min(rxMax, k);
-                }
+                var ex = Math.abs((w - panelW) - w / 2);
+                var ey = Math.abs((h - panelH) - cy);
+                var s = Math.hypot(ex / (rx + NODE_W2), ey / (ry + NODE_HALF));
+                if (s < 1) { rx *= s; ry *= s; }
             }
+            // 盘半径不能小于盘心净空：再小的话 (rx - HUB_CLEAR) 变负，
+            // 据点会翻进圆心那块空档里面去（条数极少时会出现）
+            rx = Math.max(rx, HUB_CLEAR);
+            ry = Math.max(ry, HUB_CLEAR);
 
             if (live.length) {
                 // 向日葵盘的 fRaw = √((i+0.5)/N) 最小只到 √(0.5/N)，永远取不到 0 ——
@@ -496,27 +472,24 @@
                     var rhoX = HUB_CLEAR + f * (rx - HUB_CLEAR);
                     var rhoY = HUB_CLEAR + f * (ry - HUB_CLEAR);
                     // 圆心 + 椭圆半径 × 单位方向，换算成百分比写进 left/top
-                    el.style.left = ((cx + Math.cos(a) * rhoX) / w * 100).toFixed(3) + '%';
+                    el.style.left = (50 + Math.cos(a) * rhoX / w * 100).toFixed(3) + '%';
                     el.style.top  = ((cy + Math.sin(a) * rhoY) / h * 100).toFixed(3) + '%';
                     // 入场错开：f 就是「第几圈」，内圈 0ms 先亮 —— 从本站向外长出一圈朋友
                     el.style.animationDelay = Math.round(f * 900) + 'ms';
                 });
             }
             // live 为空是合法状态（所有友链都连不上），不是错误：跳过摆盘，只留圆心与区域
-            hubPct.x = cx / w * 100;
+            hubPct.x = 50;
             hubPct.y = cy / h * 100;
-            board.style.setProperty('--hub-x', hubPct.x + '%');
 
-            // 区域内的据点是**面板内**的百分比，不是舞台的 —— .fr-zone 在星图模式下
-            // 就是面板那个盒子（见 site.css），坐标自然相对它
+            // 角落面板里的小点：从面板左上角起排，逐行往右下走
+            var dotX0 = w - panelW + ZONE_PAD;
+            var dotY0 = h - panelH + ZONE_PAD + ZONE_LABEL_H + ZONE_LABEL_GAP;
             dead.forEach(function (el, i) {
                 var row = Math.floor(i / zoneCols), col = i % zoneCols;
-                var inRow = Math.min(zoneCols, dead.length - row * zoneCols);
-                // 每行各自居中：末行不满时左对齐看着像掉了队
-                var offX = (panelW - inRow * ZONE_COL_W) / 2;
-                el.style.left = ((offX + col * ZONE_COL_W + ZONE_COL_W / 2) / panelW * 100).toFixed(3) + '%';
-                el.style.top  = ((ZONE_PAD + ZONE_TAG_H + row * ZONE_ROW_H + ZONE_ROW_H / 2) / panelH * 100).toFixed(3) + '%';
-                // 入场排在星图之后：盘先长满，够不着的那些再落到面板里
+                el.style.left = ((dotX0 + col * (ZONE_DOT + ZONE_GAP) + ZONE_DOT / 2) / w * 100).toFixed(3) + '%';
+                el.style.top  = ((dotY0 + row * (ZONE_DOT + ZONE_GAP) + ZONE_DOT / 2) / h * 100).toFixed(3) + '%';
+                // 入场排在星图之后：盘先长满，够不着的那些再落到角落里
                 el.style.animationDelay = Math.round(1000 + i * 45) + 'ms';
             });
         }
