@@ -20,6 +20,9 @@
 <th:block th:replace="~{fragments/chrome :: grain}"/>
 <th:block th:replace="~{fragments/chrome :: topbar('blog')}"/>
 
+<!--/* 阅读仪器：视口顶部 3px 信号黄条，随正文滚动 scaleX 生长（页尾脚本 scrub） */-->
+<div class="read-progress" aria-hidden="true"></div>
+
 <main>
 <article>
 
@@ -39,17 +42,17 @@
 
     <header class="post-head">
         <div class="wrap">
-            <div class="eyebrow">
+            <div class="eyebrow wipe-in">
                 <span class="bar"></span>
                 <span class="mono">Article / 文章</span>
             </div>
 
-            <h1 class="post-title" th:text="${blog.title}">文章标题</h1>
+            <h1 class="post-title wipe-in" th:text="${blog.title}">文章标题</h1>
 
-            <p class="post-lead" th:if="${not #strings.isEmpty(blog.description)}"
+            <p class="post-lead rise" th:if="${not #strings.isEmpty(blog.description)}"
                th:text="${blog.description}">文章摘要</p>
 
-            <div class="post-meta">
+            <div class="post-meta rise">
                 <img th:src="@{/images/me.jpg}" alt="" width="38" height="38">
                 <span>
                     <span class="who" th:text="${author}">ChenZhen</span>
@@ -68,7 +71,7 @@
                 </span>
             </div>
 
-            <div class="post-cover" th:if="${not #strings.isEmpty(blog.firstPicture)}">
+            <div class="post-cover wipe-in" th:if="${not #strings.isEmpty(blog.firstPicture)}">
                 <img class="cut-tr" th:src="${blog.firstPicture}" th:alt="${blog.title} + ' 的封面'"
                      width="1200" height="460" decoding="async">
             </div>
@@ -505,6 +508,37 @@
 
         // 页面脚本不再需要「打开时先 .load() 一次」：服务端渲染的就是第 1 页，
         // 那次多余的请求只会把分页抹掉（改版前就是这么坏的）。
+    })();
+</script>
+
+<!--/* 阅读仪器：进度条 + 小节标题揭示。独立于上面的交互脚本，
+     全是「增强」，但 GSAP 缺失只是不动，不是错误，所以安静跳过即可。 */-->
+<script th:inline="none">
+    (function () {
+        'use strict';
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // 顶部 3px 信号黄进度条，随正文滚动 scaleX 生长。
+        // 起点取正文上缘进入视口 30% 处：页头标题还在读的时候进度不该动
+        if (window.gsap && window.ScrollTrigger && !reduce) {
+            gsap.to('.read-progress', {
+                scaleX: 1, ease: 'none',
+                scrollTrigger: { trigger: '.post-body', start: 'top 30%', end: 'bottom 60%', scrub: true }
+            });
+        }
+
+        /* 小节标题的定向擦除。一篇文章的 h2 可能有几十个，不建 ScrollTrigger
+           实例（每个都要监听滚动），用 IntersectionObserver + CSS transition 做一次性的。
+           .anim 不在（reduce 或 JS 兜底）时 h2 本来就不藏，直接不建观察器。 */
+        if (!document.documentElement.classList.contains('anim')) return;
+        var heads = document.querySelectorAll('.md-body h2');
+        if (!heads.length || !('IntersectionObserver' in window)) return;
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (e.isIntersecting) { e.target.classList.add('wipe-done'); io.unobserve(e.target); }
+            });
+        }, { rootMargin: '0px 0px -12% 0px' });   // 进入视口下缘 12% 以内才揭示
+        heads.forEach(function (h) { io.observe(h); });
     })();
 </script>
 

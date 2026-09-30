@@ -732,13 +732,22 @@ button { font: inherit; }
 .js-toc .toc-list-item { border-left: 1px solid var(--line); }
 .js-toc .toc-list .toc-list { padding-left: 14px; }
 .js-toc a.toc-link {
-  display: block; padding: 6px 0 6px 12px; color: var(--ink-2);
+  display: block; position: relative; padding: 6px 0 6px 12px; color: var(--ink-2);
   font-size: var(--fs-label); line-height: 1.5; transition: color .3s, border-color .3s;
 }
 .js-toc a.toc-link:hover { color: var(--ink); }
-.js-toc .is-active-link { color: var(--signal); font-weight: 700; }
-.js-toc .is-active-link::before { background-color: var(--signal-fill); }
-.js-toc .toc-link::before { display: none; }
+/* 当前阅读到的那一节：左缘长出 3px 信号块，文字转墨。
+   两条都写成 a.is-active-link：tocbot 把活跃类直接加在 <a class="toc-link"> 上，
+   与上面的基础规则（.js-toc a.toc-link / ::after）特异性打平，靠源序赢。
+   写成 .js-toc .is-active-link 的话特异性反而低一位，会被基础规则压住（实测踩过）。
+   ::after 不用 ::before —— tocbot 自己的 stylesheet 用过 ::before，避开它就是避开一类冲突 */
+.js-toc a.toc-link::after {
+  content: ""; position: absolute; left: -1px; top: 0; bottom: 0; width: 3px;
+  background: var(--signal-fill); outline: 1px solid var(--signal-edge);
+  transform: scaleY(0); transform-origin: top; transition: transform .25s;
+}
+.js-toc a.is-active-link { color: var(--ink); font-weight: 700; }
+.js-toc a.is-active-link::after { transform: scaleY(1); }
 
 /* ==========================================================================
    15. 错误页
@@ -1139,6 +1148,24 @@ button { font: inherit; }
    21. 文章详情页
    ========================================================================== */
 
+/* 阅读仪器：视口顶部 3px 信号黄进度条，随正文滚动 scaleX 生长（页内脚本 scrub）。
+   z-index 压过 fixed 顶栏（50）。3px 黄条贴视口最顶缘，底缘给它一道 --signal-edge，
+   否则亮黄压在白底上边界会消失（§2.2）。 */
+.read-progress {
+  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 90;
+  background: var(--signal-fill); border-bottom: 1px solid var(--signal-edge);
+  transform: scaleX(0); transform-origin: left;
+  pointer-events: none;
+}
+
+/* 小节标题的定向擦除揭示。初始态（.anim 门控）裁到不可见，
+   页内脚本的 IntersectionObserver 看到它进视口就加 .wipe-done 放开。
+   显示规则写成 .anim .md-body h2.wipe-done（特异性 (0,3,1) > 隐藏规则的 (0,2,1)），
+   靠特异性赢，不依赖源序 —— 两条规则谁前谁后都不会翻车。 */
+.md-body h2 { transition: clip-path .7s cubic-bezier(.16, 1, .3, 1); }
+.anim .md-body h2 { clip-path: inset(0 100% 0 0); }
+.anim .md-body h2.wipe-done { clip-path: inset(0 0 0 0); }
+
 /* 页头。与内页的 .page-head 不同：这里没有下边框，正文区自己带分隔，
    而且宽度要大一些（标题可能很长）。 */
 .post-head { padding: 132px 0 0; }
@@ -1174,8 +1201,12 @@ button { font: inherit; }
 
 /* 正文 + 目录。目录 ≥1280px 才出现（再窄正文就没地方了）。
    用 align-self: start 让 sticky 生效：默认的 stretch 会把高度撑满，
-   sticky 就没有可移动的余量。 */
+   sticky 就没有可移动的余量。
+   基础规则 .post-toc{display:none} 必须排在 @media 覆盖之前：两条特异性同为 (0,1,0)，
+   媒体查询不加特异性，胜负纯看源序 —— 写反了目录在全宽度都出不来（实测踩过，
+   与 .idx-thumb 同型）。 */
 .post-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 56px; }
+.post-toc { display: none; }
 @media (min-width: 1280px) {
   .post-layout { grid-template-columns: minmax(0, 1fr) 260px; gap: 72px; }
   .post-toc {
@@ -1183,7 +1214,6 @@ button { font: inherit; }
     max-height: calc(100vh - 120px); overflow-y: auto;
   }
 }
-.post-toc { display: none; }
 .post-toc .toc-head {
   font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em;
   text-transform: uppercase; color: var(--ink-2);
