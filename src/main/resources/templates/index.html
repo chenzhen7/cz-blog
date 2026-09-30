@@ -31,7 +31,7 @@
 <!--/* 载入擦除与纸张纤维。擦屏只放首页：它表达的是「开幕」，逐页都放会变成每跳一次闪一块黄 */-->
 <th:block th:replace="~{fragments/chrome :: wipe}"/>
 <th:block th:replace="~{fragments/chrome :: grain}"/>
-<th:block th:replace="~{fragments/chrome :: pageWipe}"/>
+<th:block th:replace="~{fragments/chrome :: pageWipe('Index / 首页')}"/>
 
 <div class="layer">
 

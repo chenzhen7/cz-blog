@@ -174,16 +174,19 @@
 
 <!--/* ============================================================
      翻页擦除板。站内跳转的过渡，前台七页都引（紧跟 grain）。
+     参数 label：本页的名字（与各页 eyebrow 文案一致），到达半程显示在板上；
+     离开半程显示的是目的地名字 —— 由 chrome :: scripts 的点击拦截当场改写。
 
-     与首页 #wipe 的分工：#wipe 是「开幕仪式」—— 每次进首页都播、1.15s、带代号文字；
-     这块是「翻页工具」—— 只在站内跳转的前后各播半程（0.34s 盖 / 0.5s 抽），无文字。
-     离开半程由 chrome :: scripts 里的点击拦截给 <html> 加 .nav-out 触发；
-     到达半程由 animGate 读 sessionStorage 标记加 .nav-in 触发（首页有自己的 #wipe，
-     用 data-selfwipe 豁免到达半程，免得两块黄板叠着播）。
+     运动方向与首页 #wipe 一致：板从左侧进入盖满、停住（露出「正在加载哪页」）、
+     落点页上向右收走。与 #wipe 的分工：#wipe 是「开幕仪式」（每次进首页都播、
+     1.15s、带代号文字）；这块是「翻页工具」（只在站内跳转前后播、0.34s 盖 /
+     0.55s 收）。首页用 data-selfwipe 豁免到达半程，免得两块黄板叠着播。
 
      安全红线与 #wipe 相同：静止态必须是「裁没」，绝不能是「盖满」。
      ============================================================ */-->
-<div th:fragment="pageWipe" id="pagewipe" aria-hidden="true"></div>
+<div th:fragment="pageWipe(label)" id="pagewipe" aria-hidden="true">
+    <span class="wipe-code" th:text="${label}">CZ ARCHIVE</span>
+</div>
 
 <!--/* ============================================================
      载入擦除。首页专用，算「开幕」。
@@ -538,11 +541,32 @@
     })();
 
     /* 站内翻页擦除的离开半程：拦下同源普通点击，给 <html> 挂 .nav-out，
-       #pagewipe 从右扫入盖住（0.34s），盖满后再跳。落点页的 animGate 读
-       sessionStorage 标记播「抽走」半程，两段接成一次完整翻页。
+       #pagewipe 从左扫入盖住（0.34s），盖满后再跳。落点页的 animGate 读
+       sessionStorage 标记播「向右收走」半程，方向与首页 #wipe 一致。
        放行的点击：外链、新窗口（target/修饰键）、下载、同页锚点、
        已被其他脚本 preventDefault 的（比如留言板的删除确认框点了取消）。 */
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        // 目的地名 → 板上文案。与各页 eyebrow 保持一致；匹配不上的路径
+        // （分页、搜索结果等）归入所属栏目，再没有就显示通用文案
+        var PAGE_NAMES = [
+            ['/', 'Index / 首页'],
+            ['/tags', 'Tags / 文章分类'],
+            ['/archives', 'Archive / 流年记'],
+            ['/message', 'Message / 留言板'],
+            ['/friends', 'Friends / 友人帐'],
+            ['/about', 'Hello / 关于我'],
+            ['/blog', 'Article / 文章']
+        ];
+        function pageName(pathname) {
+            // 长前缀在前逐条匹配（/blog/12 归 Article）；'/' 放最后兜底首页
+            for (var i = PAGE_NAMES.length - 1; i >= 0; i--) {
+                var p = PAGE_NAMES[i][0];
+                if (p === '/' ? pathname === '/' : pathname.indexOf(p) === 0) {
+                    return PAGE_NAMES[i][1];
+                }
+            }
+            return 'CZ ARCHIVE / 加载中';
+        }
         document.addEventListener('click', function (e) {
             if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
             var a = e.target.closest('a[href]');
@@ -552,6 +576,9 @@
             // 同页锚点 / 只改 hash 的不算翻页
             if (url.pathname === location.pathname && url.search === location.search) return;
             e.preventDefault();
+            // 板上换成目的地名字：盖满后到跳转完成前的等待里，它回答「正在去哪」
+            var label = document.querySelector('#pagewipe .wipe-code');
+            if (label) label.textContent = pageName(url.pathname);
             try { sessionStorage.setItem('cz-nav', '1'); } catch (ignore) { /* 见 animGate */ }
             document.documentElement.classList.remove('nav-in');
             document.documentElement.classList.add('nav-out');

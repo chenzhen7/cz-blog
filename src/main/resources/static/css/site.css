@@ -134,28 +134,41 @@ button { font: inherit; }
 #wipe .wipe-code { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .24em; color: var(--ink-on-signal); }
 
 /* 翻页擦除板：站内跳转的过渡（chrome :: scripts 点击拦截 + animGate 标记驱动）。
-   静止态裁没、躲右屏外 —— 与 #wipe 同一条安全红线：
-   动画没跑起来（JS 禁用 / GSAP 无关这里，纯 CSS 但也靠类触发）页面也不该被盖住。
-   两段动画共用一条运动方向（从右向左）：离开时扫入盖住，到达时继续向左抽走，
-   感受上是同一块板横扫过整个跳转。 */
+   静止态裁没、躲左屏外 —— 与 #wipe 同一条安全红线：
+   动画没跑起来（JS 禁用 / 类没挂上）页面也不该被盖住。
+   运动方向与首页 #wipe 一致：板从左侧扫入盖满、停一拍（露出「正在加载哪页」）、
+   落点页上向右收走。两段共用同一条从左到右的动线，接成一次完整的翻页。 */
 #pagewipe {
   position: fixed; inset: 0; z-index: 101;
   background: var(--signal-fill);
+  display: flex; align-items: center; justify-content: center;
   pointer-events: none;
-  clip-path: inset(0 0 0 100%);
+  clip-path: inset(0 100% 0 0);
+}
+/* 板上的页面名。离开半程开始时字还没必要出现（板刚起步），
+   用延迟淡入让它跟着盖满一起到位；到达半程它随板一起被右收裁掉 */
+#pagewipe .wipe-code {
+  font-family: var(--font-mono); font-size: var(--fs-label);
+  letter-spacing: .24em; color: var(--ink-on-signal); opacity: 0;
 }
 /* 到达半程在前：离开与到达两个类同时存在时（本页既是落点又要离开），
    靠后的离开规则赢 —— 正要跳走的页面不该再播到达动画 */
-.anim.nav-in #pagewipe { animation: pagewipe-out .5s cubic-bezier(.16, 1, .3, 1) both; }
+.anim.nav-in #pagewipe { animation: pagewipe-out .55s cubic-bezier(.16, 1, .3, 1) both; }
+.anim.nav-in #pagewipe .wipe-code { opacity: 1; }
 @keyframes pagewipe-out {
   0%   { clip-path: inset(0 0 0 0); }        /* 盖满（上一页盖过来的那块板） */
-  22%  { clip-path: inset(0 0 0 0); }        /* 停一拍，让「翻页」被感知 */
-  100% { clip-path: inset(0 100% 0 0); }     /* 向左抽走 */
+  30%  { clip-path: inset(0 0 0 0); }        /* 停一拍，让页面名被读到 */
+  100% { clip-path: inset(0 0 0 100%); }     /* 向右收走，与首页 #wipe 同向 */
 }
 .anim.nav-out #pagewipe { animation: pagewipe-in .34s cubic-bezier(.16, 1, .3, 1) both; }
+.anim.nav-out #pagewipe .wipe-code { animation: pagewipe-code-in .34s ease-out both; }
 @keyframes pagewipe-in {
-  from { clip-path: inset(0 0 0 100%); }     /* 躲右屏外 */
+  from { clip-path: inset(0 100% 0 0); }     /* 躲左屏外 */
   to   { clip-path: inset(0 0 0 0); }        /* 扫入盖满 */
+}
+@keyframes pagewipe-code-in {
+  0%, 55% { opacity: 0; }
+  100%    { opacity: 1; }
 }
 
 /* ==========================================================================

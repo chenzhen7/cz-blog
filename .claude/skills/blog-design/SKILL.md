@@ -241,7 +241,7 @@ body { font-size: 17px; line-height: 1.75; }
 | 动效 | 实现 | 动机 |
 |---|---|---|
 | 载入擦除 | 满屏 `--signal-fill` 用 `clip-path: inset(0 0 0 100%)` 定向抽走 | 叙事：开幕 |
-| 翻页擦除 | `#pagewipe` 信号黄板横扫过站内跳转：离开时从右扫入盖住（0.34s，`.nav-out`），落点页向左抽走（0.5s，`.nav-in`，animGate 读 sessionStorage 标记）；首页以 `#wipe` 开幕兼任到达半程（`data-selfwipe` 豁免） | 状态转换：页面之间有前后关系 |
+| 翻页擦除 | `#pagewipe` 信号黄板带过站内跳转，方向与载入擦除一致：离开时从左扫入盖满（0.34s，`.nav-out`，板中央亮出目的地页名），落点页停一拍后向右收走（0.55s，`.nav-in`，animGate 读 sessionStorage 标记）；首页以 `#wipe` 开幕兼任到达半程（`data-selfwipe` 豁免） | 状态转换：页面之间有前后关系 |
 | 雷霆大字入場 | 逐字 `z:-820px, rotationX:-78°` 飞入回正，父级 `perspective:1000px` | 叙事：标题宣告自己 |
 | 定向裁切揭示 | `clip-path: inset(0 100% 0 0)` → `inset(0)` | 叙事：印刷式送出，比淡入更符合语言 |
 | 索引行悬停 | `::before` 用 `clip-path` 从左填满 `--signal-fill`，文字翻转为墨色 | 反馈：终末地官网的标志交互 |
