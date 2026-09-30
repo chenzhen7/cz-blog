@@ -1032,7 +1032,7 @@ button { font: inherit; }
    19. 友链页
    ========================================================================== */
 
-/* 上半：左边申请要求与格式，右边申请表单。窄屏堆叠 */
+/* 友链申请（排在星图**之后**，先看朋友再谈加入）：左边申请要求与格式，右边申请表单。窄屏堆叠 */
 .fr-apply { display: grid; grid-template-columns: minmax(0, 1fr); gap: 56px; }
 @media (min-width: 1024px) { .fr-apply { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 72px; } }
 

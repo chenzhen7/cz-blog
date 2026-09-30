@@ -31,89 +31,15 @@
                 <span class="mono">Friends / 友人帐</span>
             </div>
             <h1 class="page-title wipe-in">让我们，交个朋友</h1>
-            <p class="page-lead rise">不妨 , 留下你的痕迹🎞</p>
+            <p class="page-lead rise">不妨 , 留下你的痕迹</p>
         </div>
     </header>
 
-    <section class="section">
-        <div class="wrap">
-            <div class="fr-apply rise">
-
-                <!--/* 左栏：申请要求 + 申请格式。文案与改版前逐字一致。 */-->
-                <div class="fr-rules">
-                    <h3>申请友链网站要求</h3>
-                    <p>🚫 无色情内容，无政治敏感内容，网站要能长期正常访问</p>
-                    <p>📅 一个月内有新文章更新</p>
-                    <p>🤝 原创博客、技术博客、游记博客优先</p>
-                    <p>💖 先友后链，需要交换友链，先把本站添加到你的网站中，然后根据下面的格式，给我发email或在留言板给我留言~</p>
-
-                    <h3>👋申请格式</h3>
-                    <!--/* 这四行的 id（blogTitle / blogAddress / blogPicture / blogDescription）
-                           是下面复制脚本的取值锚点，不能改名。
-                           原来复制图标是内联 onclick + SVG，这里换成带 data-copy 的 <button>，
-                           好处是不用把 JS 写进属性、键盘也能聚焦到。 */-->
-                    <div class="fr-copy-row">
-                        <span class="k">博客标题：</span>
-                        <span class="v" id="blogTitle">ChenZhen的客栈</span>
-                        <button type="button" class="fr-copy" data-copy="blogTitle">复制</button>
-                    </div>
-                    <div class="fr-copy-row">
-                        <span class="k">博客地址：</span>
-                        <span class="v" id="blogAddress">https://www.chenzhen.space/</span>
-                        <button type="button" class="fr-copy" data-copy="blogAddress">复制</button>
-                    </div>
-                    <div class="fr-copy-row">
-                        <span class="k">图片地址：</span>
-                        <span class="v" id="blogPicture">https://www.chenzhen.space/images/me.jpg</span>
-                        <button type="button" class="fr-copy" data-copy="blogPicture">复制</button>
-                    </div>
-                    <div class="fr-copy-row">
-                        <span class="k">博客描述：</span>
-                        <span class="v" id="blogDescription">个人博客，分享技术文章、生活文章、自建ChatGPT提示库、AI应用大全</span>
-                        <button type="button" class="fr-copy" data-copy="blogDescription">复制</button>
-                    </div>
-
-                    <h3>❌无法访问或单方面取消</h3>
-                    <p>不定时排查，长期不更新文章、无法访问或单方面取消，将会移除链接，恕不告知😵</p>
-                </div>
-
-                <!--/* 右栏：申请表单。
-                       五个 name（blogName / blogAddress / pictureAddress / blogDescription / email）
-                       是后端 Friend 实体的绑定契约，一个字都不能改。
-                       注意这里不是 <form>，提交靠下面脚本发 fetch —— 与改版前一致（原来是 $.ajax）。
-                       button 上不再写 onclick，事件在脚本里绑。 */-->
-                <div class="fr-form">
-                    <div class="form-field">
-                        <label for="f-blogName">你的博客名称<span class="req" aria-hidden="true">*</span></label>
-                        <input id="f-blogName" name="blogName" type="text" class="form-input">
-                    </div>
-                    <div class="form-field">
-                        <label for="f-blogAddress">你的博客地址<span class="req" aria-hidden="true">*</span></label>
-                        <input id="f-blogAddress" name="blogAddress" type="text" class="form-input">
-                    </div>
-                    <div class="form-field">
-                        <label for="f-pictureAddress">你的博客头像<span class="req" aria-hidden="true">*</span></label>
-                        <input id="f-pictureAddress" name="pictureAddress" type="text" class="form-input">
-                    </div>
-                    <div class="form-field">
-                        <label for="f-blogDescription">你的博客描述<span class="req" aria-hidden="true">*</span></label>
-                        <textarea id="f-blogDescription" name="blogDescription" class="form-textarea"></textarea>
-                    </div>
-                    <div class="form-field">
-                        <label for="f-email">你的邮箱地址<span class="hint">（审核通过之后会提醒哦）</span></label>
-                        <input id="f-email" name="email" type="email" class="form-input">
-                    </div>
-
-                    <button type="button" class="btn-primary magnet" id="applyBtn">申请友链</button>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
     <!--/* 友链网络。netStatus 是 Friend.NetStatus 的四值枚举：0 良好 / 1 一般 / 2 异常 / 3 超时。
-           四值 + 枚举之外的坏值都必须在页面上可辨 —— 原模板对坏值什么都不画，那是静默回退。 */-->
-    <section class="section flush" th:if="${not #lists.isEmpty(friendlinks)}">
+           四值 + 枚举之外的坏值都必须在页面上可辨 —— 原模板对坏值什么都不画，那是静默回退。
+           这一节排在申请表单**前面**：先让访客看见「这里已经有哪些朋友」，再谈「怎么加入」，
+           顺序本身就是一次说服。 */-->
+    <section class="section" th:if="${not #lists.isEmpty(friendlinks)}">
         <div class="wrap">
             <div class="sec-head">
                 <h2 class="sec-title">友情链接</h2>
@@ -219,6 +145,91 @@
                    内容由页尾脚本填；没选中时显示一句提示，不留空白条。 */-->
             <div class="fr-detail" id="frDetail">
                 <span class="fr-detail-hint">指针停到任意据点上，这里显示它的详情。</span>
+            </div>
+        </div>
+    </section>
+
+    <!--/* 友链申请。左栏申请要求与格式，右栏申请表单，窄屏堆叠。
+           .flush 表示「接着上一节」，只在上面真的有星图时才加 ——
+           友链一条都没有（friendlinks 为空）时星图整节不渲染，这一节就直接跟在页头下面，
+           再去掉上边距会把标题贴到页头那条 1px 线上。 */-->
+    <section class="section" th:classappend="${not #lists.isEmpty(friendlinks)} ? 'flush' : ''">
+        <div class="wrap">
+            <div class="sec-head">
+                <h2 class="sec-title">友链申请</h2>
+            </div>
+
+            <div class="fr-apply rise">
+
+                <!--/* 左栏：申请要求 + 申请格式。文案与改版前逐字一致，只去掉了行首的 emoji
+                       （这套视觉是纸墨 + 单一信号黄，彩色 emoji 是配色表之外的第四种颜色）。 */-->
+                <div class="fr-rules">
+                    <h3>申请友链网站要求</h3>
+                    <p>无色情内容，无政治敏感内容，网站要能长期正常访问</p>
+                    <p>一个月内有新文章更新</p>
+                    <p>原创博客、技术博客、游记博客优先</p>
+                    <p>先友后链，需要交换友链，先把本站添加到你的网站中，然后根据下面的格式，给我发email或在留言板给我留言~</p>
+
+                    <h3>申请格式</h3>
+                    <!--/* 这四行的 id（blogTitle / blogAddress / blogPicture / blogDescription）
+                           是下面复制脚本的取值锚点，不能改名。
+                           原来复制图标是内联 onclick + SVG，这里换成带 data-copy 的 <button>，
+                           好处是不用把 JS 写进属性、键盘也能聚焦到。 */-->
+                    <div class="fr-copy-row">
+                        <span class="k">博客标题：</span>
+                        <span class="v" id="blogTitle">ChenZhen的客栈</span>
+                        <button type="button" class="fr-copy" data-copy="blogTitle">复制</button>
+                    </div>
+                    <div class="fr-copy-row">
+                        <span class="k">博客地址：</span>
+                        <span class="v" id="blogAddress">https://www.chenzhen.space/</span>
+                        <button type="button" class="fr-copy" data-copy="blogAddress">复制</button>
+                    </div>
+                    <div class="fr-copy-row">
+                        <span class="k">图片地址：</span>
+                        <span class="v" id="blogPicture">https://www.chenzhen.space/images/me.jpg</span>
+                        <button type="button" class="fr-copy" data-copy="blogPicture">复制</button>
+                    </div>
+                    <div class="fr-copy-row">
+                        <span class="k">博客描述：</span>
+                        <span class="v" id="blogDescription">个人博客，分享技术文章、生活文章、自建ChatGPT提示库、AI应用大全</span>
+                        <button type="button" class="fr-copy" data-copy="blogDescription">复制</button>
+                    </div>
+
+                    <h3>无法访问或单方面取消</h3>
+                    <p>不定时排查，长期不更新文章、无法访问或单方面取消，将会移除链接，恕不告知</p>
+                </div>
+
+                <!--/* 右栏：申请表单。
+                       五个 name（blogName / blogAddress / pictureAddress / blogDescription / email）
+                       是后端 Friend 实体的绑定契约，一个字都不能改。
+                       注意这里不是 <form>，提交靠下面脚本发 fetch —— 与改版前一致（原来是 $.ajax）。
+                       button 上不再写 onclick，事件在脚本里绑。 */-->
+                <div class="fr-form">
+                    <div class="form-field">
+                        <label for="f-blogName">你的博客名称<span class="req" aria-hidden="true">*</span></label>
+                        <input id="f-blogName" name="blogName" type="text" class="form-input">
+                    </div>
+                    <div class="form-field">
+                        <label for="f-blogAddress">你的博客地址<span class="req" aria-hidden="true">*</span></label>
+                        <input id="f-blogAddress" name="blogAddress" type="text" class="form-input">
+                    </div>
+                    <div class="form-field">
+                        <label for="f-pictureAddress">你的博客头像<span class="req" aria-hidden="true">*</span></label>
+                        <input id="f-pictureAddress" name="pictureAddress" type="text" class="form-input">
+                    </div>
+                    <div class="form-field">
+                        <label for="f-blogDescription">你的博客描述<span class="req" aria-hidden="true">*</span></label>
+                        <textarea id="f-blogDescription" name="blogDescription" class="form-textarea"></textarea>
+                    </div>
+                    <div class="form-field">
+                        <label for="f-email">你的邮箱地址<span class="hint">（审核通过之后会提醒哦）</span></label>
+                        <input id="f-email" name="email" type="email" class="form-input">
+                    </div>
+
+                    <button type="button" class="btn-primary magnet" id="applyBtn">申请友链</button>
+                </div>
+
             </div>
         </div>
     </section>
