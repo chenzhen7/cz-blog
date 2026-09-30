@@ -115,9 +115,7 @@
            0 良好 / 1 一般 / 2 超时 / 3 异常。
            原模板对 3 之内的值画了色块，对枚举之外的值（含 null）什么都不画 —— 那是静默回退，
            一个坏值在页面上完全看不出来。这里显式给未知值一个问号方块，让问题可见。 */-->
-    <section class="section flush fl-wall-sec" th:if="${not #lists.isEmpty(friendlinks)}">
-        <!--/* 幽灵字：压在墙后面的巨型 LINKS，随滚动反向漂移（motion 片段统一驱动） */-->
-        <span class="ghost-num fl-ghost" aria-hidden="true">LINKS</span>
+    <section class="section flush" th:if="${not #lists.isEmpty(friendlinks)}">
         <div class="wrap">
             <div class="sec-head">
                 <h2 class="sec-title">友情链接</h2>
@@ -126,43 +124,42 @@
                 </span>
             </div>
 
-            <!--/* 悬浮名片墙，三层 3D：
-                   - .fl-wall 是透视容器（perspective 1400px）
-                   - .fl-grid 整墙挂 data-tilt="1.4" + data-tilt-outer：指针移动时整面墙
-                     以 ±1.4° 迎向光标（共享循环的可配角度模式），墙的透视来自父级
-                   - .fl-card 保持自己的 data-tilt（±4°，独立透视场）：墙动 + 卡动叠加
-                   transform 所有权：墙的 rotate 与卡的 rotate 都归指针物理循环，
-                   所以卡片不能挂 .rise，入场走下面脚本的纵深 stagger 并 clearProps。 */-->
-            <div class="fl-wall">
-                <div class="fl-grid" data-tilt="1.4" data-tilt-outer>
-                    <a class="fl-card" data-tilt th:each="friendlink : ${friendlinks}"
-                       target="_blank" rel="noopener" th:href="@{${friendlink.blogAddress}}">
-                        <!--/* 扫光：hover 时一束信号黄斜光扫过卡面。独立一层 + overflow:hidden
-                               是为了不往 .fl-card 上挂 overflow —— 那会拍平子元素的 3D。 */-->
-                        <span class="fl-sheen" aria-hidden="true"></span>
-                        <!--/* 悬停时这层整体 translateZ(30px) 浮出卡面，头像再抬 16px，
-                               名片内容「悬」在墙上。translateZ 要能被看见，.fl-card 上挂了
-                               默认的 perspective(700px)（循环接管后其变换里也带同一透视） */-->
-                        <span class="fl-inner">
-                            <img class="fl-avatar" th:src="@{${friendlink.pictureAddress}}"
-                                 th:alt="${friendlink.blogName} + ' 的头像'" width="44" height="44"
-                                 loading="lazy" decoding="async">
-                            <span class="fl-body">
-                                <span class="fl-name" th:text="${friendlink.blogName}">友链名称</span>
-                                <span class="fl-desc" th:text="${friendlink.blogDescription}">友链描述</span>
-                            </span>
-                        </span>
-                        <!--/* title 是给人和读屏看的说明；原模板挂着 aria-labelledby="uptime-tooltip"，
-                               但页面上根本没有这个 id 的元素，等于没写。 */-->
-                        <span class="fl-status"
-                              th:attr="data-net=${friendlink.netStatus != null and friendlink.netStatus >= 0 and friendlink.netStatus <= 3} ? ${friendlink.netStatus} : 'unknown',
-                                       title=${friendlink.netStatus == 0} ? '网络状态良好'
-                                           : (${friendlink.netStatus == 1} ? '状态一般'
-                                           : (${friendlink.netStatus == 2} ? '网络异常'
-                                           : (${friendlink.netStatus == 3} ? '网络超时' : '状态未知')))"
-                              aria-hidden="true"></span>
-                    </a>
-                </div>
+            <!--/* 名片阵。卡片不再挂 data-tilt：这一版的 3D 由页尾脚本的「景深阵」统一驱动，
+                   它给每张卡写 transform（translateZ + 朝向光标的倾角），
+                   而全站的指针物理循环也在写 [data-tilt] 的 transform —— 一个属性只能有一个
+                   写入方（规范 §5.2），所以那边的挂载撤掉了。共享循环本身不动，
+                   它继续管本页「申请友链」按钮的磁吸。 */-->
+            <div class="fl-grid">
+                <a class="fl-card" th:each="friendlink : ${friendlinks}"
+                   target="_blank" rel="noopener" th:href="@{${friendlink.blogAddress}}">
+                    <img class="fl-avatar cut-tr" th:src="@{${friendlink.pictureAddress}}"
+                         th:alt="${friendlink.blogName} + ' 的头像'" width="56" height="56"
+                         loading="lazy" decoding="async">
+                    <span class="fl-name" th:text="${friendlink.blogName}">友链名称</span>
+                    <span class="fl-desc" th:text="${friendlink.blogDescription}">友链描述</span>
+                    <!--/* 页脚：加入时间与最近巡检，都是 t_friend 上的真字段（Friend 继承 BaseEntity）。
+                           create_time 是申请通过建档的时刻；update_time 实际是每日 0 点
+                           FriendServiceImpl.friendNetworkMonitorTask 逐条写回 netStatus 的时刻，
+                           也就是最后一次网络巡检 —— 这一页的扫描动画扫的就是它。
+                           两个字段都可空，逐项按需渲染，不做假的兜底值。 */-->
+                    <span class="fl-meta">
+                        <span th:if="${friendlink.createTime != null}"
+                              th:text="'加入 ' + ${#temporals.format(friendlink.createTime, 'yyyy-MM-dd')}">加入 2022-09-17</span>
+                        <span th:if="${friendlink.updateTime != null}"
+                              th:text="'巡检 ' + ${#temporals.format(friendlink.updateTime, 'MM-dd')}">巡检 09-30</span>
+                    </span>
+                    <!--/* 状态条的方块与文字都由 CSS 从 data-net 派生（见 site.css 第 19 节），
+                           模板这边只负责把枚举值翻成 data-net —— 单一事实来源，避免文字再写一遍三元。
+                           title 是给人和读屏看的说明；原模板挂着 aria-labelledby="uptime-tooltip"，
+                           但页面上根本没有这个 id 的元素，等于没写。 */-->
+                    <span class="fl-status"
+                          th:attr="data-net=${friendlink.netStatus != null and friendlink.netStatus >= 0 and friendlink.netStatus <= 3} ? ${friendlink.netStatus} : 'unknown',
+                                   title=${friendlink.netStatus == 0} ? '网络状态良好'
+                                       : (${friendlink.netStatus == 1} ? '状态一般'
+                                       : (${friendlink.netStatus == 2} ? '网络异常'
+                                       : (${friendlink.netStatus == 3} ? '网络超时' : '状态未知')))"
+                          aria-hidden="true"></span>
+                </a>
             </div>
         </div>
     </section>
@@ -265,22 +262,19 @@
     })();
 </script>
 
-<!--/* 名片墙入场：卡片从纵深逐格飞入（z -420 / rotationX -22° → 回正）。
-     与申请脚本分开，因为它是纯增强。clearProps 播完交出 transform 所有权 ——
-     之后墙的倾斜与卡的倾斜都归 chrome 的指针物理循环（data-tilt）管，
-     两个系统不抢同一个属性（规范 §5.2）。
+<!--/* 名片阵入场：卡片按序浮出。与申请脚本分开，因为它是纯增强。
+     clearProps 播完即交出 transform 所有权，交给下面那段景深循环 ——
+     同一属性只能有一个写入方（规范 §5.2）。
      GSAP 没到位就安静跳过：.anim 已被 motion 摘掉，卡片本来就全显示。 */-->
 <script th:inline="none">
     (function () {
         'use strict';
         if (!window.gsap || !window.ScrollTrigger) return;
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        gsap.fromTo('.fl-card', { opacity: 0, z: -420, rotationX: -22, y: 30 }, {
-            opacity: 1, z: 0, rotationX: 0, y: 0, duration: .9, ease: 'power3.out',
-            // grid:'auto' 按行列位置错开：从左上角蔓延开，比逐条线性更像「墙在组装」
-            stagger: { each: .05, grid: 'auto', from: 'start' },
-            clearProps: 'transform',
-            scrollTrigger: { trigger: '.fl-grid', start: 'top 85%', once: true }
+        gsap.fromTo('.fl-card', { opacity: 0, y: 18 }, {
+            opacity: 1, y: 0, duration: .55, ease: 'power3.out',
+            stagger: 0.045, clearProps: 'transform',
+            scrollTrigger: { trigger: '.fl-grid', start: 'top 88%' }
         });
     })();
 </script>

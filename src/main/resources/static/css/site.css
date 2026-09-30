@@ -1072,102 +1072,98 @@ button { font: inherit; }
 .form-input:focus, .form-textarea:focus { border-color: var(--signal); outline: none; }
 .form-textarea { min-height: 108px; resize: vertical; }
 
-/* 悬浮名片墙。
-   3D 结构：.fl-wall（透视容器）→ .fl-grid（preserve-3d，整墙随指针 ±1.4°）
-   → .fl-card（preserve-3d，单卡 ±4°，自己的透视场）→ .fl-inner（hover 浮出）。
-   墙与卡的倾斜都由 chrome 的指针物理循环写 transform（规范 §5.2：一个元素一个主人）。
-
-   网格线仍然画在单元格上（不用 gap:1px 透底色那套 —— 那套在行没填满时会把
-   容器底色整片漏出来，22 张卡在 5 列下右下角就是一大块灰）：
-   容器只负责上边与左边，格子各自负责右边与下边。 */
-.fl-wall-sec { position: relative; overflow: hidden; }
-/* 幽灵字 LINKS：压在墙后面随滚动漂移（motion 片段驱动 .ghost-num）。
-   基类字号是为两位数设计的（22vw），五个字母按它放会冲出右缘，这里收窄 */
-.fl-ghost { top: -24px; font-size: clamp(5rem, 13vw, 11rem); letter-spacing: .06em; }
-.fl-wall { perspective: 1400px; }
+/* 友链名片阵。
+   版面从「连续网格 + 细边框」改成了**分离的独立名片**（12px 间距）。
+   理由是这一版要上 3D：卡片会随观察者抬升、错开，而连续网格的线一旦断开就不再是网格，
+   只剩一堆错位的线头。反过来，独立卡片摊在一片等高线底图上、各自浮起来，
+   正好是「名片摆在图桌上」的画面。SKILL.md §4.3 说卡片只在高程真的表达层级时用
+   —— 这里高程就是在表达层级，所以用卡片是有理由的。
+   卡片等高由 grid 默认的 stretch 保证，页脚行靠 .fl-meta 的 margin-top:auto 沉底对齐。 */
 .fl-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  border-top: 1px solid var(--line); border-left: 1px solid var(--line);
-  transform-style: preserve-3d;
+  gap: 12px;
 }
 .fl-card {
-  position: relative; display: flex; align-items: flex-start;
-  padding: 22px 24px; background: var(--bg);
-  border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
-  outline: 1px solid transparent; outline-offset: -1px;
-  transition: background .3s, outline-color .3s;
-  /* 子层 translateZ 的透视场。指针循环接管后写的是 perspective(700px) rotate…，
-     透视一致；这里是还没碰过指针时的默认 */
-  transform: perspective(700px);
-  transform-style: preserve-3d;
+  position: relative; display: flex; flex-direction: column;
+  padding: 20px 22px 16px; background: var(--bg);
+  border: 1px solid var(--line);
+  transition: background .3s, border-color .3s;
 }
-.fl-card:hover { background: var(--panel); outline-color: var(--signal-edge); }
-/* 名片墙入场的初始态（.anim 门控）：透明度归 0，等页面脚本的纵深 stagger 播入。
-   只藏 opacity 不写 transform —— transform 归指针物理循环（data-tilt）管，
-   两个系统不能抢同一个属性（规范 §5.2）。reduce 下没有 .anim，卡片直接可见。 */
+.fl-card:hover { background: var(--panel); border-color: var(--signal-edge); }
+/* 左上角刻度：卡片在图桌上的定位标记。用边线档的黄（装饰带，不承载文字），
+   这类小刻度不适用「亮黄实心块必须带 --signal-edge 描边」那条 —— 它本身就是边线色。 */
+.fl-card::before {
+  content: ""; position: absolute; top: 0; left: 0;
+  width: 22px; height: 3px; background: var(--line-strong);
+  transition: background .3s;
+}
+.fl-card:hover::before { background: var(--signal-edge); }
+/* 名片阵入场的初始态（.anim 门控）：透明度归 0，等页面脚本的发牌时间轴播入。
+   只藏 opacity、不写 transform —— transform 归景深循环与发牌补间管，
+   这里再写一次就会两边打架（规范 §5.2）。reduce 下没有 .anim，卡片直接可见。 */
 .anim .fl-grid .fl-card { opacity: 0; }
-/* 悬停浮层：内容整体抬出卡面 30px，头像再抬 16px，名片「悬」在墙上 */
-.fl-inner {
-  display: flex; align-items: flex-start; gap: 14px; flex: 1; min-width: 0;
-  transform-style: preserve-3d;
-  transition: transform .35s cubic-bezier(.16, 1, .3, 1);
-}
-.fl-card:hover .fl-inner { transform: translateZ(30px); }
+
+/* 头像是外链，而这一页有一半友链已经挂掉（net_status=3），它们的图同样打不开。
+   这不是渲染故障，是真实数据 —— 所以不藏。给槽位一个底板 + 边框，
+   图挂了就是「一张空档案照片格」，配右上角红色的「超时」状态，语义完整。
+   color:transparent 只是不让浏览器把 alt 文本铺在槽位上（读屏仍读得到 alt），
+   空槽本身照旧可见，问题没有被掩盖。 */
 .fl-avatar {
-  flex-shrink: 0; width: 44px; height: 44px; object-fit: cover;
-  filter: grayscale(1) contrast(.96) brightness(1.15);
-  transition: filter .3s, transform .35s cubic-bezier(.16, 1, .3, 1);
+  width: 56px; height: 56px; object-fit: cover;
+  background: var(--bg-sunken); border: 1px solid var(--line);
+  color: transparent;
+  filter: grayscale(1) contrast(.96) brightness(1.15); transition: filter .3s;
 }
-.fl-card:hover .fl-avatar { filter: none; transform: translateZ(16px); }
-/* 扫光：一束斜切的信号黄从左到右扫过卡面。独立一层挂 overflow:hidden ——
-   overflow 不能挂 .fl-card 上，那会拍平它子元素的 3D（transform-style 失效） */
-.fl-sheen { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.fl-sheen::before {
-  content: ""; position: absolute; top: -20%; bottom: -20%; left: 0; width: 34%;
-  background: linear-gradient(105deg, transparent, rgba(var(--signal-rgb), .22) 50%, transparent);
-  transform: translateX(-140%) skewX(-14deg);
-  transition: transform .7s cubic-bezier(.16, 1, .3, 1);
+.fl-card:hover .fl-avatar { filter: none; }
+/* 站点名进「标题」字阶（20px），不再和正文同级 */
+.fl-name {
+  display: block; margin-top: 16px;
+  font-family: var(--font-cjk); font-weight: 700; font-size: 20px;
+  line-height: 1.35; color: var(--ink); overflow-wrap: break-word;
 }
-.fl-card:hover .fl-sheen::before { transform: translateX(420%) skewX(-14deg); }
-/* 名字下的高亮笔：hover 时从左往右划一道信号黄 */
-.fl-name { position: relative; }
-.fl-name::after {
-  content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 3px;
-  background: var(--signal-fill);
-  transform: scaleX(0); transform-origin: left;
-  transition: transform .35s cubic-bezier(.16, 1, .3, 1);
-}
-.fl-card:hover .fl-name::after { transform: scaleX(1); }
-/* 状态方块 hover 时放大一拍，提示「它是活的」 */
-.fl-card:hover .fl-status { transform: scale(1.35); }
-.fl-status { transition: transform .3s; }
-.fl-body { min-width: 0; }
-.fl-name { display: block; font-weight: 700; font-size: 17px; color: var(--ink); overflow-wrap: break-word; }
+/* 描述两行截断。旧版是 16px，低于正文 17px 的硬底 —— 这里归位。
+   t_blog 那批 description 掺 markdown 的毛病友链没有，但仍限两行保证卡片等高。 */
 .fl-desc {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  overflow: hidden; margin-top: 4px; color: var(--ink-2); font-size: 16px;
+  overflow: hidden; margin-top: 6px; color: var(--ink-2); font-size: 17px;
 }
 
-/* 网络状态方块。四值枚举（0 良好 / 1 一般 / 2 超时 / 3 异常）必须三色可辨，
-   一个颜色套不了。这里不新增色相 —— 绿与红直接取正文代码块里已经用过的两个
-   token 色（Prism 的字符串绿与关键字红），黄直接用信号色边线档。 */
+/* 页脚行：加入时间与最近巡检。两个都是真数据（t_friend 的 create_time / update_time），
+   不是流水号 —— 无信息量的编号是规范 §7 点名的反面教材，而这两个时间戳正好把
+   这一页「状态扫描」那条动效的语义坐实（扫的就是这条巡检记录）。
+   margin-top:auto 把页脚压到卡片底缘，等高卡片下整行页脚对齐。 */
+.fl-meta {
+  margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; gap: 2px 12px;
+  font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-2);
+}
+
+/* 网络状态条：方块 + 可见文字标签。
+   四值枚举（0 良好 / 1 一般 / 2 异常 / 3 超时）必须可辨，一个颜色套不了。
+   这里不新增色相 —— 绿与红直接取正文代码块里已经用过的两个 token 色
+   （Prism 的字符串绿与关键字红），黄直接用信号色边线档。
+   **文字标签由 CSS 从 data-net 派生，不在模板里再写一遍三元**
+   ——单一事实来源仍是 data-net，也和下面「未知值」的写法同构。 */
 .fl-status {
-  position: absolute; top: 14px; right: 14px;
-  width: 10px; height: 10px; border: 1px solid var(--line-strong);
+  position: absolute; top: 18px; right: 20px;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: var(--fs-label); color: var(--ink-2);
 }
-.fl-status[data-net="0"] { background: #2f6b3a; border-color: #2f6b3a; }   /* 网络状态良好 */
-.fl-status[data-net="1"] { background: var(--signal-edge); border-color: var(--signal-edge); }  /* 状态一般 */
-.fl-status[data-net="2"] { background: #8a2b1f; border-color: #8a2b1f; }   /* 网络异常 */
-/* 3 = 网络超时，与 2 同色但留描边：同属故障、可区分于「异常」 */
-.fl-status[data-net="3"] { background: #8a2b1f; border-color: var(--ink-on-signal); }
-/* 枚举之外的值（含 null）显式画成问号方块。原模板对这些值什么都不画，
-   于是一个坏值在页面上完全看不出来 —— 那是静默回退。 */
-.fl-status[data-net="unknown"] {
-  background: none; border-color: var(--line-strong); color: var(--ink-2);
-  width: 14px; height: 14px; top: 12px; right: 12px;
-  font-size: 11px; line-height: 12px; text-align: center; font-family: var(--font-mono);
-}
-.fl-status[data-net="unknown"]::after { content: "?"; }
+.fl-status::before { content: ""; width: 8px; height: 8px; border: 1px solid var(--line-strong); }
+/* 四值 + 未知值显式逐一列出，不用 else/default 兜 —— 契约变更必须看得见。
+   枚举之外的值（含 null）画空心方块 + 「未知」：原模板对这些值什么都不画，
+   于是一个坏值在页面上完全看不出来，那是静默回退。 */
+.fl-status[data-net="0"]::before { background: #2f6b3a; border-color: #2f6b3a; }
+.fl-status[data-net="0"]::after  { content: "良好"; }
+.fl-status[data-net="1"]::before { background: var(--signal-edge); border-color: var(--signal-edge); }
+.fl-status[data-net="1"]::after  { content: "一般"; }
+.fl-status[data-net="2"]::before { background: #8a2b1f; border-color: #8a2b1f; }
+.fl-status[data-net="2"]::after  { content: "异常"; }
+/* 3 与 2 同色但留一道墨描边：同属故障，可区分于「异常」 */
+.fl-status[data-net="3"]::before { background: #8a2b1f; border-color: var(--ink-on-signal); }
+.fl-status[data-net="3"]::after  { content: "超时"; }
+.fl-status[data-net="unknown"]::before { background: none; border-color: var(--line-strong); }
+.fl-status[data-net="unknown"]::after  { content: "未知"; }
 
 /* ==========================================================================
    20. 留言板
