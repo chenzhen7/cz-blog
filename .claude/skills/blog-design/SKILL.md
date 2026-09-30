@@ -246,9 +246,16 @@ body { font-size: 17px; line-height: 1.75; }
 | 索引行悬停 | `::before` 用 `clip-path` 从左填满 `--signal-fill`，文字翻转为墨色 | 反馈：终末地官网的标志交互 |
 | 图像场分层 | 三块停在不同 `translateZ`，容器随指针 `rotateX/rotateY` | 层级：产生真实视差分层，不是整体平移 |
 | 呼吸状态块 | 6px 方块 3.2s 透明度呼吸，全站仅一处 | 反馈：活着的系统状态 |
-| 磁性按钮 | `.magnet` 类 + `translate3d` + lerp 插值跟随光标（首页 rAF 循环内，横向 0.28 / 纵向 0.42 / 跟随 0.14） | 反馈：物理手感 |
-| 3D 等高线地形 | Three.js，见 `references/terrain-3d.md` | 层级 + 叙事：还原游戏主界面的重力感应地形 |
+| 指针物理（磁吸 + 倾斜） | `chrome :: scripts` 的共享 rAF 循环，按需启停：`.magnet` 位移吸附（横向 0.28 / 纵向 0.42 / 跟随 0.14），`[data-tilt]` 指针追踪 `perspective(700px) rotateX/rotateY` ±4° | 反馈：物理手感 |
+| 3D 等高线地形 | Three.js，见 `references/terrain-3d.md`；工厂在 `/js/terrain.js`（`CzTerrain.initGL` / `drawFlat`），首页重力感应、归档页头低速漂移标本（浓度 0.09，无指针响应） | 层级 + 叙事：还原游戏主界面的重力感应地形；归档用其标本喻「时间的沉积地层」 |
 | 章节浮出 | 标题/图片从 `translateZ(-260px)` 浮出 | 层级：页面有前后关系 |
+| 滚动时间轴（归档） | `.arc` 左缘墨轨 + `.arc-progress` 信号黄段 `scaleY` 随滚动 scrub 生长；年份刻度方块随视口当前年转黄（几何重算，不用边缘 IO） | 叙事：归档是一条时间轴 |
+| 阅读进度（文章） | 视口顶 3px 信号条 `scaleX` = 文章滚动进度（ScrollTrigger scrub） | 状态转换：读到哪里了 |
+| 正文标题揭示（文章） | `.md-body h2` 用 IntersectionObserver + CSS `clip-path` transition 逐节擦入；不建 ScrollTrigger 实例（文章几十个节点，防实例爆炸） | 叙事：章节依次送出 |
+| 磁吸标签云（标签） | `.tag-chip` 挂 `.magnet`；选中态是 `--signal-fill` 的 `clip-path` 定向擦入，提交延迟 280ms 让擦入播完 | 反馈：标签是可被吸引的物件 |
+| 名片墙倾斜（友链） | `.fl-card` 挂 `data-tilt`（共享循环驱动）；hover 时头像从灰度恢复彩色 | 反馈：名片被指尖捻起 |
+| 对话生长（留言板） | `.cm` 纯 CSS keyframes（translateY+opacity，前 10 条 nth-child 错开 delay）；AJAX 整块替换列表后新节点自动重播，零 JS 介入 | 叙事：留言一条条长出来 |
+| 逐字入场小号版（关于） | page-title 逐字 `z:-620, rotationX:-72°` 飞入（thunder 的收缩参数）；脚本拆字后才给标题开 `perspective`（`.chars-on`），reduce / 无 GSAP 时不拆字 | 叙事：人物档案的签名 |
 
 **缓动**：入场统一 `cubic-bezier(.16, 1, .3, 1)` 或 GSAP `power3.out` / `power4.out`。禁用 linear（除走马灯）。
 
