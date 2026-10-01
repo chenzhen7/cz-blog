@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>关于原型 B · 卷首语</title>
+<link rel="stylesheet" href="../src/main/resources/static/fonts/fonts.css">
+<link rel="stylesheet" href="../src/main/resources/static/css/site.css">
+<script>document.documentElement.classList.add('anim');</script>
+<style>
+/* ==========================================================================
+   关于原型 B · 卷首语
+
+   一句话：这一页是本站的**卷首语**，所以它按杂志开篇来排 ——
+   一栏宽行距的正文、一个首字下沉的起点、一张带图注的插图，插图让文字绕着走。
+   设计系统本来就叫「工业编辑风」，这一版把它按字面意思做到底。
+
+   与另外三个原型的分别：
+     图像的角色 —— 版面里的插图（文字环绕），不是标本、不是徽记
+     文字的骨架 —— 单栏宽行距 + 首字下沉 + 署名行，不是条款、不是并列栏
+     技能的形状 —— 一行连续排入的索引（像杂志的撰稿人名单），不是表格、不是标签片
+   ========================================================================== */
+
+/* ---------- 署名行 ----------
+   一条横贯的细线，上面等距排着这页的元信息。杂志开篇的必备件，
+   也是这一版把「页头」和「正文」连成一体的那个零件。 */
+.byline {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 34px;
+  border-top: 1px solid var(--ink); margin-top: 30px; padding-top: 14px;
+}
+.byline .it { display: flex; align-items: baseline; gap: 10px; }
+.byline .k { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em; color: var(--ink-2); }
+.byline .v { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .06em; color: var(--ink); }
+
+/* ---------- 正文 ---------- */
+/* flow-root = 现代写法的 clearfix。插图是浮动的，容器不建 BFC 的话，
+   插图一旦比正文高就会溢出到下一节去，和「技能索引」的标题叠在一起。
+   max-width 用 em 不用 ch：ch 量的是数字 0 的宽度，对中文完全不适用 ——
+   74ch 只有 ~666px 的拉丁宽度，换成中文却能塞下 56 个字，一行太长。 */
+.preface { display: flow-root; max-width: 46em; }
+
+/* 插图：浮在左侧，正文绕着走。这是「插图」和「配图卡片」的分界 ——
+   卡片是并排的两栏，插图是正文地形的一部分。 */
+.preface-fig {
+  float: left; width: 268px; margin: 6px 40px 22px 0;
+}
+.preface-fig .fr {
+  position: relative; border: 1px solid var(--line-strong); background: var(--bg); overflow: hidden;
+}
+/* me.jpg 是白底线稿：multiply 让白底透出去，插图和纸面是一体的，
+   不会出现一块方方正正的白砖压在正文边上 */
+.preface-fig img {
+  /* height: auto 见原型 A 同一处的说明：<img> 的 height 属性会架空 aspect-ratio */
+  width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: contain;
+  mix-blend-mode: multiply;
+  filter: grayscale(1) contrast(.98) brightness(1.04);
+  transition: filter .5s cubic-bezier(.16, 1, .3, 1);
+}
+.preface-fig:hover img { filter: grayscale(0) contrast(1) brightness(1); }
+.preface-fig figcaption {
+  border-top: 1px solid var(--line); margin-top: 10px; padding-top: 9px;
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .06em; color: var(--ink-2);
+}
+.preface-fig figcaption b { color: var(--signal); font-weight: 400; }
+
+.preface p { margin: 0 0 1.4em; color: var(--ink-2); }
+.preface p:last-child { margin-bottom: 0; }
+/* 首字下沉。第一段是这一页的起点，起点要有一个更重的墨点。
+   黄块照例带 --signal-edge 描边：纯亮黄对白底是 1:1，不描边就是一个隐形方块。 */
+.preface p.lede { color: var(--ink); font-size: 19px; }
+.preface p.lede::first-letter {
+  float: left;
+  font-family: var(--font-cjk); font-weight: 900; font-size: 46px; line-height: 1;
+  padding: 12px 14px 10px; margin: 6px 16px 4px 0;
+  background: var(--signal-fill); color: var(--ink-on-signal);
+  border: 1px solid var(--signal-edge);
+}
+
+/* ---------- 技能索引（连续排入） ----------
+   杂志的撰稿人名单排法：不换行成块、不加边框，只是一串名字，用一个小黄方块隔开。
+   十七个方块一共占不到 500 像素，信号黄预算远远够用。 */
+.runin {
+  border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink);
+  padding: 34px 0;
+}
+.runin-list {
+  font-family: var(--font-cjk); font-weight: 700;
+  font-size: clamp(20px, 2.4vw, 27px); line-height: 1.85; letter-spacing: -.01em;
+  color: var(--ink);
+}
+.runin-list a { transition: color .3s; }
+.runin-list a:hover { color: var(--signal); }
+.runin-list .sep {
+  display: inline-block; width: 6px; height: 6px; margin: 0 13px; vertical-align: middle;
+  background: var(--signal-fill); border: 1px solid var(--signal-edge);
+}
+.runin-note { margin: 26px 0 0; color: var(--ink-2); max-width: 70ch; }
+
+@media (max-width: 640px) {
+  .preface-fig { float: none; width: 100%; margin: 0 0 26px; }
+}
+
+/* ---------- 入场 ---------- */
+.anim [data-rv] { opacity: 0; transform: translateY(18px); }
+.anim [data-rv].in {
+  opacity: 1; transform: none;
+  transition: opacity .7s cubic-bezier(.16, 1, .3, 1), transform .7s cubic-bezier(.16, 1, .3, 1);
+}
+/* 署名行的横线从左抽出来，像一条被划下的编辑线 */
+.anim .byline { border-top-color: transparent; position: relative; }
+.anim .byline::before {
+  content: ""; position: absolute; left: 0; right: 0; top: -1px; height: 1px;
+  background: var(--ink); transform: scaleX(0); transform-origin: left;
+}
+.anim .byline.in::before { transform: scaleX(1); transition: transform .9s cubic-bezier(.16, 1, .3, 1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim [data-rv] { opacity: 1; transform: none; }
+  .anim .byline::before { transform: scaleX(1); }
+  .preface-fig img { transition: none; }
+}
+
+/* ---------- 原型导航（只在原型里，不进生产） ---------- */
+.proto-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+  display: flex; align-items: center; gap: 4px; height: 46px; padding: 0 20px;
+  background: var(--ink); color: var(--bg);
+  font-family: var(--font-mono); font-size: 13px; letter-spacing: .06em;
+  overflow-x: auto;
+}
+.proto-nav b { color: var(--signal-fill); margin-right: 14px; font-weight: 700; white-space: nowrap; }
+.proto-nav a { color: var(--bg); opacity: .55; padding: 4px 10px; transition: opacity .2s, background .2s; white-space: nowrap; }
+.proto-nav a:hover { opacity: 1; }
+.proto-nav a.on { opacity: 1; background: var(--signal-fill); color: var(--ink-on-signal); }
+</style>
+</head>
+<body>
+
+<nav class="proto-nav">
+  <b>关于页原型</b>
+  <a href="about-a-dossier.html">A 人物档案</a>
+  <a class="on" href="about-b-preface.html">B 卷首语</a>
+  <a href="about-c-section.html">C 断面</a>
+  <a href="about-d-plate.html">D 铭牌</a>
+</nav>
+
+<main>
+
+  <header class="page-head">
+    <div class="wrap">
+      <div class="eyebrow"><span class="bar"></span><span class="mono">Preface / 卷首语</span></div>
+      <h1 class="page-title">ChenZhen</h1>
+
+      <div class="byline" data-rv>
+        <span class="it"><span class="k">文</span><span class="v">CHENZHEN</span></span>
+        <span class="it"><span class="k">图</span><span class="v">01</span></span>
+        <span class="it"><span class="k">技能</span><span class="v">17 ITEMS</span></span>
+      </div>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="wrap">
+      <article class="preface">
+        <figure class="preface-fig" data-rv>
+          <div class="fr">
+            <img src="../src/main/resources/static/images/me.jpg" alt="陈震的照片" width="750" height="750" decoding="async">
+          </div>
+          <figcaption><b>图 01</b> 站长头像</figcaption>
+        </figure>
+
+        <p class="lede" data-rv>做这个博客的初衷是为了找一个练手的springboot项目，而且当时看别人都有个人博客，自己也眼红了，于是便着手搭建博客。</p>
+
+        <p data-rv>博客就相当于自己的学习笔记一样，将自己学到的东西写成博文的方式记录下来，可以加深你对知识点的理解，记录足迹，反映成长。写博客实际上是记录一个人思考和解决问题的成长过程。很久之后，你再翻看自己以前写的文章，你会感觉得到自己的变化和进步。</p>
+
+        <p data-rv>技术是很容易遗忘的，你学习完一门新的技术，很可能现在懂了，但是过一段时间没用很快就会遗忘，当你把你学习的内容写成博客，不仅可以加深记忆和理解，如果遗忘了还可以回头看看，也能帮助和你一样处于同一阶段的人。</p>
+
+        <p data-rv>酷爱Jpop、纯音、ACG、电子音乐，如果你也听：安田丽、泽野弘之、尾浦由纪、ClariS、桑田佳佑、YOASOBI的歌，说明我们品味很相似。最崇拜的作曲家：a_hisa、神前晓。</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section flush">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="sec-title">技能索引</h2>
+      </div>
+
+      <div class="runin" data-rv>
+        <div class="runin-list">
+          <a href="#">面向GPT编程</a><span class="sep"></span><a href="#">Java</a><span class="sep"></span><a href="#">SpringBoot</a><span class="sep"></span><a href="#">SpringCloud</a><span class="sep"></span><a href="#">Linux</a><span class="sep"></span><a href="#">Elastisearch</a><span class="sep"></span><a href="#">Docker</a><span class="sep"></span><a href="#">Nginx</a><span class="sep"></span><a href="#">Rabbitmq</a><span class="sep"></span><a href="#">Redis</a><span class="sep"></span><a href="#">Mysql</a><span class="sep"></span><a href="#">Html</a><span class="sep"></span><a href="#">CSS</a><span class="sep"></span><a href="#">JavaScript</a><span class="sep"></span><a href="#">Vue</a><span class="sep"></span><a href="#">GO</a><span class="sep"></span><a href="#">Python</a>
+        </div>
+      </div>
+
+      <p class="runin-note" data-rv>我的技能涵盖Java主流技术栈包含Web框架、微服务、数据库、缓存、消息队列，一些前端技术，以及Docker、Linux等运维相关技术</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* 入场：元素进入视口后加 .in。.anim 已在 <head> 里挂上，没 JS 时这条规则不生效，
+   内容保持可见 —— 隐藏初态绝不能不门控，否则脚本一挂整页就是空白。 */
+(function () {
+  'use strict';
+  var els = [].slice.call(document.querySelectorAll('[data-rv]'));
+  if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    els.forEach(function (el) { el.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { rootMargin: '0px 0px -10% 0px' });
+  els.forEach(function (el) { io.observe(el); });
+})();
+</script>
+
+</body>
+</html>

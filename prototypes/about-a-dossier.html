@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>关于原型 A · 人物档案</title>
+<link rel="stylesheet" href="../src/main/resources/static/fonts/fonts.css">
+<link rel="stylesheet" href="../src/main/resources/static/css/site.css">
+<script>document.documentElement.classList.add('anim');</script>
+<style>
+/* ==========================================================================
+   关于原型 A · 人物档案
+
+   一句话：这一页是「这个站背后是谁」的**档案**，所以它长得像一份技术档案 ——
+   一张带坐标网格、注册标记与刻度尺的标本图，配一列编号条款，
+   技能表则是一张编号索引。人是一份可被索引的记录。
+
+   与另外三个原型的分别：
+     图像的角色 —— 标本图（框 + 网格 + 刻度），不是头像、不是插图、不是徽记
+     文字的骨架 —— 左图右文，文按「条款」编号，不是连续文章
+     技能的形状 —— 编号索引表（每行一条，可扫读），不是标签片、不是连续排入
+   ========================================================================== */
+
+/* ---------- 标本图 ---------- */
+
+/* 外层留出 16px 余量：四个注册标记要落在框**外面**，落在里面就变成装饰角花了 */
+.spec { position: relative; margin: 0; padding: 16px; }
+.spec-frame {
+  position: relative; overflow: hidden;
+  border: 1px solid var(--line-strong);
+  background: var(--bg);
+}
+/* 坐标网格：24px 模数。压在插图底下，所以网格必须比插图淡一档（--line 而不是 --line-strong），
+   否则读起来是「纸上有格子」变成了「格子把图切碎了」 */
+.spec-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    repeating-linear-gradient(to right,  var(--line) 0 1px, transparent 1px 24px),
+    repeating-linear-gradient(to bottom, var(--line) 0 1px, transparent 1px 24px);
+}
+/* 每 5 格一根稍重的线，让网格有「主次」而不是一片均匀的纱 */
+.spec-grid::after {
+  content: ""; position: absolute; inset: 0;
+  background-image:
+    repeating-linear-gradient(to right,  var(--line-strong) 0 1px, transparent 1px 120px),
+    repeating-linear-gradient(to bottom, var(--line-strong) 0 1px, transparent 1px 120px);
+  opacity: .55;
+}
+/* 插图。me.jpg 是白底线稿，multiply 让白底透出去，网格才能穿到画面里 ——
+   这条是这份版面成立的前提：不给 multiply 的话插图是一块不透明的白砖，网格只在四周露一圈，
+   看起来像图没对齐。灰度是第一版的印刷处理，悬停恢复彩色（全站图像装置的既有语言）。 */
+.spec-img {
+  /* height: auto 是必需的：<img> 上那对 width="750" height="750" 是**表现性提示**，
+     优先级虽低于作者样式，但只在作者样式**没设过该属性**时才会被盖掉。
+     这里只写了 width，于是 height="750" 照样生效、aspect-ratio 直接被架空 ——
+     图片会渲染成 366×750 的竖条。height: auto 才能把比例交还给 aspect-ratio。 */
+  position: relative; width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: contain;
+  mix-blend-mode: multiply;
+  filter: grayscale(1) contrast(.98) brightness(1.04);
+  transition: filter .5s cubic-bezier(.16, 1, .3, 1), transform .6s cubic-bezier(.16, 1, .3, 1);
+}
+.spec:hover .spec-img { filter: grayscale(0) contrast(1) brightness(1); transform: scale(1.02); }
+
+/* 刻度尺。两条：小刻度 8px 通栏短齿，大刻度 40px 长齿。
+   用 background-size 裁出齿长（只画最左 6px / 12px），不必写两套渐变 */
+.spec-ruler { position: absolute; pointer-events: none; }
+.spec-ruler.l {
+  left: 0; top: 0; bottom: 0; width: 10px;
+  border-right: 1px solid var(--line-strong);
+}
+.spec-ruler.l::before, .spec-ruler.l::after {
+  content: ""; position: absolute; inset: 0; background-repeat: no-repeat;
+  background-image: repeating-linear-gradient(to bottom, var(--line-strong) 0 1px, transparent 1px 8px);
+  background-size: 5px 100%;
+}
+.spec-ruler.l::after {
+  background-image: repeating-linear-gradient(to bottom, var(--ink-2) 0 1px, transparent 1px 40px);
+  background-size: 9px 100%;
+}
+.spec-ruler.b {
+  left: 0; right: 0; bottom: 0; height: 10px;
+  border-top: 1px solid var(--line-strong);
+}
+.spec-ruler.b::before, .spec-ruler.b::after {
+  content: ""; position: absolute; inset: 0; background-repeat: no-repeat;
+  background-image: repeating-linear-gradient(to right, var(--line-strong) 0 1px, transparent 1px 8px);
+  background-size: 100% 5px;
+}
+.spec-ruler.b::after {
+  background-image: repeating-linear-gradient(to right, var(--ink-2) 0 1px, transparent 1px 40px);
+  background-size: 100% 9px;
+}
+
+/* 注册标记：落在标本框外的四角，工业印版的定位十字 */
+.spec-mark { position: absolute; width: 15px; height: 15px; pointer-events: none; }
+.spec-mark::before, .spec-mark::after { content: ""; position: absolute; background: var(--line-strong); }
+.spec-mark::before { left: 0; right: 0; top: 7px; height: 1px; }
+.spec-mark::after  { top: 0; bottom: 0; left: 7px; width: 1px; }
+.spec-mark.tl { left: 0; top: 0; }
+.spec-mark.tr { right: 0; top: 0; }
+.spec-mark.bl { left: 0; bottom: 0; }
+.spec-mark.br { right: 0; bottom: 0; }
+
+/* 图注：编号 + 一句说明，压在框下沿。这条是「标本」和「头像」的分界 ——
+   给出编号与说明，读者才会把它当成一张图去读，而不是一张装饰头像 */
+.spec-cap {
+  display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+  border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px;
+}
+.spec-cap .no {
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em;
+  background: var(--signal-fill); color: var(--ink-on-signal);
+  border: 1px solid var(--signal-edge); padding: 3px 9px;
+}
+.spec-cap .tx { color: var(--ink-2); font-size: var(--fs-label); }
+
+/* ---------- 条款 ---------- */
+
+.dossier { display: grid; grid-template-columns: minmax(0, 1fr); gap: 56px; align-items: start; }
+@media (min-width: 1024px) {
+  .dossier { grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 72px; }
+}
+
+.clause { border-top: 1px solid var(--line-strong); padding: 22px 0 26px; display: grid; gap: 4px 22px; }
+@media (min-width: 640px) { .clause { grid-template-columns: 52px minmax(0, 1fr); } }
+.clause:last-of-type { border-bottom: 1px solid var(--line-strong); }
+/* 条款号是纯数字，走 mono 没问题（没有中文要垫字体） */
+.clause .no {
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em;
+  color: var(--ink-2); padding-top: 5px;
+}
+/* 量宽用 em 不用 ch：ch 量的是数字 0 的宽度，对中文完全不适用 ——
+   在这套字体栈下 1ch ≈ 13.5px，66ch 会宽到 890px，一行塞 52 个汉字，读起来要来回找行头。
+   44em 正好是 44 个汉字。 */
+.clause p { margin: 0; color: var(--ink-2); max-width: 44em; }
+.clause:first-of-type p { color: var(--ink); font-size: 19px; }
+
+/* 音乐口味那两行来自库里的 about_me_introduction，原文带换行，pre-line 按原样断 */
+.taste {
+  border-top: 1px solid var(--line); margin-top: 34px; padding-top: 20px;
+  color: var(--ink-2); max-width: 44em; white-space: pre-line;
+}
+
+/* ---------- 编号索引技能表 ---------- */
+
+.skill-index {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 0;
+  border-top: 1px solid var(--line-strong);
+}
+@media (min-width: 700px)  { .skill-index { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .skill-index { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+.ski {
+  position: relative; isolation: isolate;
+  display: flex; align-items: baseline; gap: 16px;
+  padding: 15px 14px 15px 0; border-bottom: 1px solid var(--line);
+  transition: color .35s;
+}
+/* 悬停填充沿用首页索引行的语言：::before 用 clip-path 从左推入信号黄。
+   isolation 是必需的，否则 z-index: -1 的填充层会跑到页面背景后面去 */
+.ski::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: var(--signal-fill);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path .45s cubic-bezier(.16, 1, .3, 1);
+}
+.ski:hover::before { clip-path: inset(0 0 0 0); }
+.ski:hover .nm { color: var(--ink-on-signal); }
+.ski:hover .no { color: var(--ink-on-signal); }
+.ski .no {
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .1em;
+  color: var(--line-strong); flex-shrink: 0;
+  transition: color .35s;
+}
+.ski .nm { font-size: 17px; transition: color .35s; }
+.ski:hover .no { color: var(--ink-on-signal); }
+
+/* ---------- 入场 ---------- */
+.anim [data-rv] { opacity: 0; transform: translateY(18px); }
+.anim [data-rv].in {
+  opacity: 1; transform: none;
+  transition: opacity .7s cubic-bezier(.16, 1, .3, 1), transform .7s cubic-bezier(.16, 1, .3, 1);
+}
+/* 标本图的网格：从左上角擦出来，像图纸被铺开 */
+.anim .spec-grid { clip-path: inset(0 100% 0 0); }
+.anim .in .spec-grid { clip-path: inset(0 0 0 0); transition: clip-path .9s cubic-bezier(.16, 1, .3, 1) .1s; }
+.anim .spec-ruler { opacity: 0; }
+.anim .in .spec-ruler { opacity: 1; transition: opacity .5s ease .4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim [data-rv] { opacity: 1; transform: none; }
+  .anim .spec-grid { clip-path: none; }
+  .anim .spec-ruler { opacity: 1; }
+  .spec-img { transition: none; }
+}
+
+/* ---------- 原型导航（只在原型里，不进生产） ---------- */
+.proto-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+  display: flex; align-items: center; gap: 4px; height: 46px; padding: 0 20px;
+  background: var(--ink); color: var(--bg);
+  font-family: var(--font-mono); font-size: 13px; letter-spacing: .06em;
+  overflow-x: auto;
+}
+.proto-nav b { color: var(--signal-fill); margin-right: 14px; font-weight: 700; white-space: nowrap; }
+.proto-nav a { color: var(--bg); opacity: .55; padding: 4px 10px; transition: opacity .2s, background .2s; white-space: nowrap; }
+.proto-nav a:hover { opacity: 1; }
+.proto-nav a.on { opacity: 1; background: var(--signal-fill); color: var(--ink-on-signal); }
+</style>
+</head>
+<body>
+
+<nav class="proto-nav">
+  <b>关于页原型</b>
+  <a class="on" href="about-a-dossier.html">A 人物档案</a>
+  <a href="about-b-preface.html">B 卷首语</a>
+  <a href="about-c-section.html">C 断面</a>
+  <a href="about-d-plate.html">D 铭牌</a>
+</nav>
+
+<main>
+
+  <header class="page-head">
+    <div class="wrap">
+      <div class="eyebrow"><span class="bar"></span><span class="mono">Record / 关于我</span></div>
+      <h1 class="page-title">ChenZhen</h1>
+      <p class="page-lead">我是ChenZhen，欢迎来到我的博客！我热爱音乐、写作、探索技术和分享知识。</p>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="sec-title">档案</h2>
+        <span class="mono-sm" style="color: var(--ink-2);">4 条记录</span>
+      </div>
+
+      <div class="dossier">
+
+        <figure class="spec" data-rv>
+          <span class="spec-mark tl"></span>
+          <span class="spec-mark tr"></span>
+          <span class="spec-mark bl"></span>
+          <span class="spec-mark br"></span>
+          <div class="spec-frame">
+            <div class="spec-grid"></div>
+            <span class="spec-ruler l"></span>
+            <span class="spec-ruler b"></span>
+            <img class="spec-img" src="../src/main/resources/static/images/me.jpg" alt="陈震的照片" width="750" height="750" decoding="async">
+          </div>
+          <figcaption class="spec-cap">
+            <span class="no">PLATE 01</span>
+            <span class="tx">站长头像。悬停恢复原色。</span>
+          </figcaption>
+        </figure>
+
+        <div class="notes">
+          <div class="clause" data-rv>
+            <span class="no">01</span>
+            <p>做这个博客的初衷是为了找一个练手的springboot项目，而且当时看别人都有个人博客，自己也眼红了，于是便着手搭建博客。</p>
+          </div>
+          <div class="clause" data-rv>
+            <span class="no">02</span>
+            <p>博客就相当于自己的学习笔记一样，将自己学到的东西写成博文的方式记录下来，可以加深你对知识点的理解，记录足迹，反映成长。写博客实际上是记录一个人思考和解决问题的成长过程。很久之后，你再翻看自己以前写的文章，你会感觉得到自己的变化和进步。</p>
+          </div>
+          <div class="clause" data-rv>
+            <span class="no">03</span>
+            <p>技术是很容易遗忘的，你学习完一门新的技术，很可能现在懂了，但是过一段时间没用很快就会遗忘，当你把你学习的内容写成博客，不仅可以加深记忆和理解，如果遗忘了还可以回头看看，也能帮助和你一样处于同一阶段的人。</p>
+          </div>
+
+          <p class="taste" data-rv>酷爱Jpop、纯音、ACG、电子音乐，如果你也听：安田丽、泽野弘之、尾浦由纪、ClariS、桑田佳佑、YOASOBI的歌，说明我们品味很相似。最崇拜的作曲家：a_hisa、神前晓。</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="section flush">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="sec-title">技能索引</h2>
+        <span class="mono-sm" style="color: var(--ink-2);">共 17 项</span>
+      </div>
+
+      <div class="skill-index">
+        <div class="ski"><span class="no">01</span><span class="nm">面向GPT编程</span></div>
+        <div class="ski"><span class="no">02</span><span class="nm">Java</span></div>
+        <div class="ski"><span class="no">03</span><span class="nm">SpringBoot</span></div>
+        <div class="ski"><span class="no">04</span><span class="nm">SpringCloud</span></div>
+        <div class="ski"><span class="no">05</span><span class="nm">Linux</span></div>
+        <div class="ski"><span class="no">06</span><span class="nm">Elastisearch</span></div>
+        <div class="ski"><span class="no">07</span><span class="nm">Docker</span></div>
+        <div class="ski"><span class="no">08</span><span class="nm">Nginx</span></div>
+        <div class="ski"><span class="no">09</span><span class="nm">Rabbitmq</span></div>
+        <div class="ski"><span class="no">10</span><span class="nm">Redis</span></div>
+        <div class="ski"><span class="no">11</span><span class="nm">Mysql</span></div>
+        <div class="ski"><span class="no">12</span><span class="nm">Html</span></div>
+        <div class="ski"><span class="no">13</span><span class="nm">CSS</span></div>
+        <div class="ski"><span class="no">14</span><span class="nm">JavaScript</span></div>
+        <div class="ski"><span class="no">15</span><span class="nm">Vue</span></div>
+        <div class="ski"><span class="no">16</span><span class="nm">GO</span></div>
+        <div class="ski"><span class="no">17</span><span class="nm">Python</span></div>
+      </div>
+
+      <p class="mono-sm" style="color: var(--ink-2); margin-top: 24px; max-width: 70ch;">我的技能涵盖Java主流技术栈包含Web框架、微服务、数据库、缓存、消息队列，一些前端技术，以及Docker、Linux等运维相关技术</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* 入场：元素进入视口后加 .in。.anim 已在 <head> 里挂上，没 JS 时这条规则不生效，
+   内容保持可见 —— 隐藏初态绝不能不门控，否则脚本一挂整页就是空白。 */
+(function () {
+  'use strict';
+  var els = [].slice.call(document.querySelectorAll('[data-rv]'));
+  if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    els.forEach(function (el) { el.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { rootMargin: '0px 0px -10% 0px' });
+  els.forEach(function (el) { io.observe(el); });
+})();
+</script>
+
+</body>
+</html>

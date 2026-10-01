@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>关于原型 D · 铭牌</title>
+<link rel="stylesheet" href="../src/main/resources/static/fonts/fonts.css">
+<link rel="stylesheet" href="../src/main/resources/static/css/site.css">
+<script>document.documentElement.classList.add('anim');</script>
+<style>
+/* ==========================================================================
+   关于原型 D · 铭牌
+
+   一句话：这台机器（博客）上钉着一块牌，牌上写着它的制造者是谁 ——
+   所以这一版**全部压在中轴上**，两边对称，像一块真的铭牌。
+   四个原型里只有它是中轴对称的：另外三个都在用左对齐的编辑栅格，
+   这一个用对称，是因为铭牌这个东西本身就对称。
+
+   与另外三个原型的分别：
+     图像的角色 —— 徽记（中轴上的一个方形标记，两侧有刻线规），不是标本、不是插图
+     文字的骨架 —— 中轴对称：铭文带、标签线、居中量宽，不是左对齐的栅格
+     技能的形状 —— 铭文带（密排、居中、竖线分隔的规格条），不是表格、不是标签片
+   ========================================================================== */
+
+/* ---------- 页头（居中变体） ----------
+   眉标签、大标题、导语全部居中，末尾接一条铭牌编号带代替页头那条普通的下边线。 */
+.page-head.center { text-align: center; padding-bottom: 0; border-bottom: 0; }
+.page-head.center .eyebrow { justify-content: center; }
+.page-head.center .page-title {
+  font-variation-settings: 'wdth' 112, 'wght' 800;
+  font-size: clamp(40px, 11vw, 112px); line-height: 1; letter-spacing: .06em;
+  margin: 0 0 6px;
+}
+.page-head.center .page-lead { margin: 26px auto 0; max-width: 46ch; text-align: left; }
+
+/* 铭牌编号带：两端各一个小黄方块，中间一行等宽编号。
+   黄块照例带 --signal-edge 描边（纯亮黄对白底是 1:1，不描边就是隐形方块）。 */
+.serialband {
+  margin-top: 54px;
+  border-top: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong);
+  padding: 13px 0;
+  display: flex; align-items: center; justify-content: center; gap: 22px;
+}
+.serialband .sq { width: 8px; height: 8px; background: var(--signal-fill); border: 1px solid var(--signal-edge); flex-shrink: 0; }
+.serialband .tx {
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .3em;
+  text-transform: uppercase; color: var(--ink-2);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ---------- 徽记 ----------
+   两侧各一条刻度规（中间一根横线，上下是等距小齿），把徽记架在中轴上。 */
+.emblem-row { display: flex; align-items: center; justify-content: center; gap: 30px; }
+.tick-rule {
+  position: relative; flex: 1; max-width: 260px; height: 11px;
+  background-image: repeating-linear-gradient(to right, var(--line-strong) 0 1px, transparent 1px 12px);
+  background-size: 100% 5px; background-repeat: no-repeat; background-position: center;
+}
+.tick-rule::after { content: ""; position: absolute; left: 0; right: 0; top: 5px; height: 1px; background: var(--line-strong); }
+.emblem {
+  position: relative; width: 228px; flex-shrink: 0;
+  border: 1px solid var(--line-strong); background: var(--bg); overflow: hidden;
+}
+/* me.jpg 是白底线稿。multiply 让白底透出去，徽记和纸面是一体的，
+   不会是一块白色方块压在中间 —— 对称版面里一块白色的方块最刺眼 */
+.emblem img {
+  /* height: auto 见原型 A 同一处的说明：<img> 的 height 属性会架空 aspect-ratio */
+  width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: contain;
+  mix-blend-mode: multiply;
+  filter: grayscale(1) contrast(.98) brightness(1.03);
+  transition: filter .55s cubic-bezier(.16, 1, .3, 1);
+}
+.emblem:hover img { filter: grayscale(0) contrast(1) brightness(1); }
+
+/* ---------- 标签线 ----------
+   一条横线被中间的等宽小字截断：──── 标签 ────。
+   铭牌上的分区就是这样写的。 */
+.rule-label { display: flex; align-items: center; gap: 20px; margin: 0 auto; }
+.rule-label::before, .rule-label::after { content: ""; flex: 1; height: 1px; background: var(--line-strong); }
+.rule-label span { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .22em; color: var(--ink-2); text-transform: uppercase; }
+
+/* ---------- 正文 ----------
+   栏居中、字左对齐 —— 居中栏 + 左对齐正文是杂志的常规做法；
+   长段落整段居中会让每行的起读点都在变，读不了。 */
+.plate-prose { max-width: 56ch; margin: 0 auto; }
+.plate-prose p { margin: 0 0 1.5em; color: var(--ink-2); }
+.plate-prose p:last-child { margin-bottom: 0; }
+.plate-prose p.taste { white-space: pre-line; border-top: 1px solid var(--line); padding-top: 22px; }
+
+/* ---------- 铭文带（技能） ----------
+   密排、居中、竖线分隔。一条规格条，不是一堆标签片 ——
+   没有边框把每一项框起来，只有分隔线，读起来是「一行字」而不是「十七个盒子」。 */
+.engraved {
+  border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink);
+  padding: 4px 0;
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch;
+}
+.engraved span {
+  position: relative; padding: 14px 20px;
+  font-size: 17px; color: var(--ink); transition: color .3s, background .3s;
+}
+/* 分隔竖线：画在每一项的右缘，最后一个不画。用 ::after 而不是 border，
+   这样换行后每一行的最后一项也不会拖一条线到边缘 */
+.engraved span::after {
+  content: ""; position: absolute; right: 0; top: 12px; bottom: 12px; width: 1px; background: var(--line);
+}
+.engraved span:last-child::after { background: none; }
+.engraved span:hover { background: var(--signal-fill); color: var(--ink-on-signal); }
+
+.plate-note { text-align: center; margin: 30px auto 0; max-width: 70ch; color: var(--ink-2); }
+
+/* 窄屏上铭文带要换行，而分隔竖线是画在每一项右缘的 ——
+   行尾那一项的分隔线就悬在半空。窄屏直接不画线，只靠间距分隔。 */
+@media (max-width: 700px) {
+  .engraved span::after { display: none; }
+}
+@media (max-width: 640px) {
+  .emblem-row { gap: 16px; }
+  .tick-rule { display: none; }
+  .emblem { width: min(228px, 70vw); }
+  .serialband .tx { letter-spacing: .16em; }
+}
+
+/* ---------- 入场 ---------- */
+.anim [data-rv] { opacity: 0; transform: translateY(16px); }
+.anim [data-rv].in {
+  opacity: 1; transform: none;
+  transition: opacity .7s cubic-bezier(.16, 1, .3, 1), transform .7s cubic-bezier(.16, 1, .3, 1);
+}
+/* 徽记两侧的刻度规从中间向两边伸出去，像铭牌被拧上 */
+.anim .tick-rule { transform: scaleX(.2); opacity: 0; transform-origin: center; }
+.anim .emblem-row.in .tick-rule {
+  transform: scaleX(1); opacity: 1;
+  transition: transform .8s cubic-bezier(.16, 1, .3, 1), opacity .5s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim [data-rv] { opacity: 1; transform: none; }
+  .anim .tick-rule { transform: none; opacity: 1; }
+  .emblem img { transition: none; }
+}
+
+/* ---------- 原型导航（只在原型里，不进生产） ---------- */
+.proto-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+  display: flex; align-items: center; gap: 4px; height: 46px; padding: 0 20px;
+  background: var(--ink); color: var(--bg);
+  font-family: var(--font-mono); font-size: 13px; letter-spacing: .06em;
+  overflow-x: auto;
+}
+.proto-nav b { color: var(--signal-fill); margin-right: 14px; font-weight: 700; white-space: nowrap; }
+.proto-nav a { color: var(--bg); opacity: .55; padding: 4px 10px; transition: opacity .2s, background .2s; white-space: nowrap; }
+.proto-nav a:hover { opacity: 1; }
+.proto-nav a.on { opacity: 1; background: var(--signal-fill); color: var(--ink-on-signal); }
+</style>
+</head>
+<body>
+
+<nav class="proto-nav">
+  <b>关于页原型</b>
+  <a href="about-a-dossier.html">A 人物档案</a>
+  <a href="about-b-preface.html">B 卷首语</a>
+  <a href="about-c-section.html">C 长卷</a>
+  <a class="on" href="about-d-plate.html">D 铭牌</a>
+</nav>
+
+<main>
+
+  <header class="page-head center">
+    <div class="wrap">
+      <div class="eyebrow"><span class="bar"></span><span class="mono">Nameplate / 关于我</span></div>
+      <h1 class="page-title">CHENZHEN</h1>
+      <p class="page-lead">我是ChenZhen，欢迎来到我的博客！我热爱音乐、写作、探索技术和分享知识。</p>
+
+      <div class="serialband" data-rv>
+        <span class="sq"></span>
+        <span class="tx">CZ·BLOG · 个人博客 · 关于</span>
+        <span class="sq"></span>
+      </div>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="wrap">
+
+      <div class="emblem-row" data-rv>
+        <span class="tick-rule"></span>
+        <div class="emblem">
+          <img src="../src/main/resources/static/images/me.jpg" alt="陈震的照片" width="750" height="750" decoding="async">
+        </div>
+        <span class="tick-rule"></span>
+      </div>
+
+      <div class="rule-label" style="margin-top: 56px; margin-bottom: 34px;" data-rv><span>自述</span></div>
+
+      <div class="plate-prose">
+        <p data-rv>做这个博客的初衷是为了找一个练手的springboot项目，而且当时看别人都有个人博客，自己也眼红了，于是便着手搭建博客。</p>
+        <p data-rv>博客就相当于自己的学习笔记一样，将自己学到的东西写成博文的方式记录下来，可以加深你对知识点的理解，记录足迹，反映成长。写博客实际上是记录一个人思考和解决问题的成长过程。很久之后，你再翻看自己以前写的文章，你会感觉得到自己的变化和进步。</p>
+        <p data-rv>技术是很容易遗忘的，你学习完一门新的技术，很可能现在懂了，但是过一段时间没用很快就会遗忘，当你把你学习的内容写成博客，不仅可以加深记忆和理解，如果遗忘了还可以回头看看，也能帮助和你一样处于同一阶段的人。</p>
+        <p class="taste" data-rv>酷爱Jpop、纯音、ACG、电子音乐，如果你也听：安田丽、泽野弘之、尾浦由纪、ClariS、桑田佳佑、YOASOBI的歌，说明我们品味很相似。最崇拜的作曲家：a_hisa、神前晓。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="section flush">
+    <div class="wrap">
+      <div class="rule-label" style="margin-bottom: 40px;" data-rv><span>技能 · 17</span></div>
+
+      <div class="engraved" data-rv>
+        <span>面向GPT编程</span><span>Java</span><span>SpringBoot</span><span>SpringCloud</span><span>Linux</span><span>Elastisearch</span><span>Docker</span><span>Nginx</span><span>Rabbitmq</span><span>Redis</span><span>Mysql</span><span>Html</span><span>CSS</span><span>JavaScript</span><span>Vue</span><span>GO</span><span>Python</span>
+      </div>
+
+      <p class="plate-note" data-rv>我的技能涵盖Java主流技术栈包含Web框架、微服务、数据库、缓存、消息队列，一些前端技术，以及Docker、Linux等运维相关技术</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* 入场：元素进入视口后加 .in。.anim 已在 <head> 里挂上，没 JS 时这条规则不生效，
+   内容保持可见 —— 隐藏初态绝不能不门控，否则脚本一挂整页就是空白。 */
+(function () {
+  'use strict';
+  var els = [].slice.call(document.querySelectorAll('[data-rv]'));
+  if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    els.forEach(function (el) { el.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { rootMargin: '0px 0px -10% 0px' });
+  els.forEach(function (el) { io.observe(el); });
+})();
+</script>
+
+</body>
+</html>

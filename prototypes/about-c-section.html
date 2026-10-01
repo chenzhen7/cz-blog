@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>关于原型 C · 长卷</title>
+<link rel="stylesheet" href="../src/main/resources/static/fonts/fonts.css">
+<link rel="stylesheet" href="../src/main/resources/static/css/site.css">
+<script>document.documentElement.classList.add('anim');</script>
+<style>
+/* ==========================================================================
+   关于原型 C · 长卷
+
+   一句话：自述是一卷要往下读的东西，读它的时候**人应该始终在场** ——
+   所以头像那一栏吸附在左边不动，右边的内容从它旁边流过去。
+   走到一半，头像从灰度转回原色：读到后面，你才真的看清这个人。
+
+   与另外三个原型的分别：
+     图像的角色 —— 常驻的栏（吸附），不是标本、不是插图、不是徽记
+     文字的骨架 —— 左栏不动、右栏滚动，这是全站唯一一页有「不动的东西」
+     技能的形状 —— 清单行（编号 + 名称），悬停从左边长出一条黄条
+   ========================================================================== */
+
+.split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; }
+@media (min-width: 1024px) {
+  .split { grid-template-columns: 320px minmax(0, 1fr); gap: 84px; align-items: start; }
+}
+
+/* ---------- 左栏（吸附） ----------
+   只在宽屏吸附。窄屏上它退成页首的一块，跟着页面滚 ——
+   窄屏视口本来就矮，再钉一个 300px 高的栏，正文只剩一条缝。 */
+.side { position: static; }
+@media (min-width: 1024px) { .side { position: sticky; top: 96px; } }
+
+.side-frame {
+  position: relative; border: 1px solid var(--line-strong); background: var(--bg-sunken); overflow: hidden;
+}
+/* me.jpg 是白底线稿。multiply 让白底透出去，底色（--bg-sunken）才能真正吃到画面上，
+   否则插图永远是一块纯白的方块浮在米色底上，像贴歪了 */
+.side-frame img {
+  /* height: auto 见原型 A 同一处的说明：<img> 的 height 属性会架空 aspect-ratio */
+  width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: contain;
+  mix-blend-mode: multiply;
+  filter: grayscale(1) contrast(.98) brightness(1.03);
+  transition: filter 1s cubic-bezier(.16, 1, .3, 1);
+}
+.side.is-live .side-frame img { filter: grayscale(0) contrast(1) brightness(1); }
+
+.side-fields { margin-top: 20px; }
+.side-fields .row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+  border-bottom: 1px solid var(--line); padding: 10px 0;
+}
+.side-fields .k { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em; color: var(--ink-2); }
+.side-fields .v { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .06em; color: var(--ink); }
+
+/* 进度：四个方块，读过一条亮一格。用方块而不是连续进度条 ——
+   连续条是归档页「时间轴」的装置，这里换成离散的状态块，才不是同一件东西的重复 */
+.side-steps { display: flex; align-items: center; gap: 8px; margin-top: 18px; }
+.side-steps .sq {
+  width: 10px; height: 10px; border: 1px solid var(--line-strong); background: transparent;
+  transition: background .4s, border-color .4s;
+}
+.side-steps .sq.on { background: var(--signal-fill); border-color: var(--signal-edge); }
+.side-steps .cnt {
+  margin-left: auto; font-family: var(--font-mono); font-size: var(--fs-label);
+  letter-spacing: .1em; color: var(--ink-2);
+}
+
+/* ---------- 右栏（滚动） ---------- */
+.cl {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px;
+  border-top: 1px solid var(--line); padding: 30px 0 34px;
+}
+@media (min-width: 640px) { .cl { grid-template-columns: 84px minmax(0, 1fr); gap: 28px; } }
+.cl:last-of-type { border-bottom: 1px solid var(--line-strong); }
+/* 条款号是大号数字，走 Archivo（--font-disp）。静态时是浅灰，读到它时转信号黄 ——
+   一个明确的「正在读这一条」的指示 */
+.cl .n {
+  font-family: var(--font-disp); font-variation-settings: 'wdth' 100, 'wght' 800;
+  font-size: 34px; line-height: 1; color: var(--line-strong);
+  transition: color .45s cubic-bezier(.16, 1, .3, 1);
+}
+.cl.is-cur .n { color: var(--signal); }
+/* 量宽用 em 不用 ch：ch 量的是数字 0 的宽度，对中文完全不适用（详见原型 A 同一处的说明） */
+.cl p { margin: 0; color: var(--ink-2); max-width: 44em; }
+.cl.lead p { color: var(--ink); font-size: 19px; }
+/* 音乐口味来自 about_me_introduction，原文带换行，pre-line 按原样断 */
+.cl p.taste { white-space: pre-line; margin-top: 12px; }
+
+/* 技能清单 */
+.skl {
+  position: relative; display: flex; align-items: baseline; gap: 18px;
+  border-bottom: 1px solid var(--line); padding: 15px 0;
+  transition: padding-left .4s cubic-bezier(.16, 1, .3, 1);
+}
+.skl::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: var(--signal-fill); border-right: 1px solid var(--signal-edge);
+  transform: scaleY(0); transform-origin: center;
+  transition: transform .4s cubic-bezier(.16, 1, .3, 1);
+}
+.skl:hover { padding-left: 18px; }
+.skl:hover::before { transform: scaleY(1); }
+.skl .no { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .1em; color: var(--line-strong); flex-shrink: 0; }
+.skl .nm { font-size: 17px; }
+
+/* ---------- 入场 ---------- */
+.anim [data-rv] { opacity: 0; transform: translateY(18px); }
+.anim [data-rv].in {
+  opacity: 1; transform: none;
+  transition: opacity .7s cubic-bezier(.16, 1, .3, 1), transform .7s cubic-bezier(.16, 1, .3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim [data-rv] { opacity: 1; transform: none; }
+  .side-frame img { transition: none; }
+  .skl, .skl::before, .cl .n { transition: none; }
+}
+
+/* ---------- 原型导航（只在原型里，不进生产） ---------- */
+.proto-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+  display: flex; align-items: center; gap: 4px; height: 46px; padding: 0 20px;
+  background: var(--ink); color: var(--bg);
+  font-family: var(--font-mono); font-size: 13px; letter-spacing: .06em;
+  overflow-x: auto;
+}
+.proto-nav b { color: var(--signal-fill); margin-right: 14px; font-weight: 700; white-space: nowrap; }
+.proto-nav a { color: var(--bg); opacity: .55; padding: 4px 10px; transition: opacity .2s, background .2s; white-space: nowrap; }
+.proto-nav a:hover { opacity: 1; }
+.proto-nav a.on { opacity: 1; background: var(--signal-fill); color: var(--ink-on-signal); }
+</style>
+</head>
+<body>
+
+<nav class="proto-nav">
+  <b>关于页原型</b>
+  <a href="about-a-dossier.html">A 人物档案</a>
+  <a href="about-b-preface.html">B 卷首语</a>
+  <a class="on" href="about-c-section.html">C 长卷</a>
+  <a href="about-d-plate.html">D 铭牌</a>
+</nav>
+
+<main>
+
+  <header class="page-head">
+    <div class="wrap">
+      <div class="eyebrow"><span class="bar"></span><span class="mono">About / 关于我</span></div>
+      <h1 class="page-title">ChenZhen</h1>
+      <p class="page-lead">我是ChenZhen，欢迎来到我的博客！我热爱音乐、写作、探索技术和分享知识。</p>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="split">
+
+        <aside class="side" id="side">
+          <div class="side-frame">
+            <img src="../src/main/resources/static/images/me.jpg" alt="陈震的照片" width="750" height="750" decoding="async">
+          </div>
+          <div class="side-fields">
+            <div class="row"><span class="k">代号</span><span class="v">CHENZHEN</span></div>
+            <div class="row"><span class="k">技能</span><span class="v">17 ITEMS</span></div>
+          </div>
+          <div class="side-steps" id="steps">
+            <span class="sq"></span><span class="sq"></span><span class="sq"></span><span class="sq"></span>
+            <span class="cnt" id="stepCnt">01 / 04</span>
+          </div>
+        </aside>
+
+        <div class="flow" id="flow">
+          <div class="cl lead">
+            <span class="n">01</span>
+            <div>
+              <p>做这个博客的初衷是为了找一个练手的springboot项目，而且当时看别人都有个人博客，自己也眼红了，于是便着手搭建博客。</p>
+              <p class="taste">酷爱Jpop、纯音、ACG、电子音乐，如果你也听：安田丽、泽野弘之、尾浦由纪、ClariS、桑田佳佑、YOASOBI的歌，说明我们品味很相似。最崇拜的作曲家：a_hisa、神前晓。</p>
+            </div>
+          </div>
+
+          <div class="cl">
+            <span class="n">02</span>
+            <div><p>博客就相当于自己的学习笔记一样，将自己学到的东西写成博文的方式记录下来，可以加深你对知识点的理解，记录足迹，反映成长。写博客实际上是记录一个人思考和解决问题的成长过程。很久之后，你再翻看自己以前写的文章，你会感觉得到自己的变化和进步。</p></div>
+          </div>
+
+          <div class="cl">
+            <span class="n">03</span>
+            <div><p>技术是很容易遗忘的，你学习完一门新的技术，很可能现在懂了，但是过一段时间没用很快就会遗忘，当你把你学习的内容写成博客，不仅可以加深记忆和理解，如果遗忘了还可以回头看看，也能帮助和你一样处于同一阶段的人。</p></div>
+          </div>
+
+          <div class="cl" style="border-bottom: 1px solid var(--line-strong);">
+            <span class="n">04</span>
+            <div>
+              <div class="sec-head" style="margin-bottom: 8px;">
+                <h2 class="sec-title" style="font-size: clamp(1.4rem, 2.4vw, 1.9rem);">技能清单</h2>
+              </div>
+              <div style="border-top: 1px solid var(--line-strong);">
+                <div class="skl"><span class="no">01</span><span class="nm">面向GPT编程</span></div>
+                <div class="skl"><span class="no">02</span><span class="nm">Java</span></div>
+                <div class="skl"><span class="no">03</span><span class="nm">SpringBoot</span></div>
+                <div class="skl"><span class="no">04</span><span class="nm">SpringCloud</span></div>
+                <div class="skl"><span class="no">05</span><span class="nm">Linux</span></div>
+                <div class="skl"><span class="no">06</span><span class="nm">Elastisearch</span></div>
+                <div class="skl"><span class="no">07</span><span class="nm">Docker</span></div>
+                <div class="skl"><span class="no">08</span><span class="nm">Nginx</span></div>
+                <div class="skl"><span class="no">09</span><span class="nm">Rabbitmq</span></div>
+                <div class="skl"><span class="no">10</span><span class="nm">Redis</span></div>
+                <div class="skl"><span class="no">11</span><span class="nm">Mysql</span></div>
+                <div class="skl"><span class="no">12</span><span class="nm">Html</span></div>
+                <div class="skl"><span class="no">13</span><span class="nm">CSS</span></div>
+                <div class="skl"><span class="no">14</span><span class="nm">JavaScript</span></div>
+                <div class="skl"><span class="no">15</span><span class="nm">Vue</span></div>
+                <div class="skl"><span class="no">16</span><span class="nm">GO</span></div>
+                <div class="skl"><span class="no">17</span><span class="nm">Python</span></div>
+              </div>
+              <p class="mono-sm" style="color: var(--ink-2); margin-top: 24px; max-width: 70ch;">我的技能涵盖Java主流技术栈包含Web框架、微服务、数据库、缓存、消息队列，一些前端技术，以及Docker、Linux等运维相关技术</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* 入场 */
+  var rv = [].slice.call(document.querySelectorAll('[data-rv]'));
+  if (!('IntersectionObserver' in window) || reduce) {
+    rv.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -10% 0px' });
+    rv.forEach(function (el) { io.observe(el); });
+  }
+
+  /* 读到哪一条：条款进入视口上半区就算「正在读」，条款号转黄、进度方块点亮。
+     用 IntersectionObserver 而不是 scroll 监听 —— 规范禁止 scroll 事件（§5.2）。 */
+  var cls = [].slice.call(document.querySelectorAll('.cl'));
+  var steps = [].slice.call(document.querySelectorAll('#steps .sq'));
+  var cnt = document.getElementById('stepCnt');
+  var side = document.getElementById("side");
+  if (!('IntersectionObserver' in window)) return;
+
+  function setStep(i) {
+    steps.forEach(function (sq, k) { sq.classList.toggle('on', k <= i); });
+    // 编号补零到两位：01 / 04，与全站的等宽数字一致
+    cnt.textContent = ('0' + (i + 1)).slice(-2) + ' / 0' + cls.length;
+    /* 走过一半才让头像转回原色：这是这一版的落点 ——
+       读到后面，灰度的记录才变回一个具体的人。 */
+    side.classList.toggle('is-live', i >= Math.floor(cls.length / 2));
+  }
+  setStep(0);
+
+  var cur = -1;
+  var io2 = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var i = cls.indexOf(e.target);
+      if (i === cur) return;
+      cur = i;
+      cls.forEach(function (c, k) { c.classList.toggle('is-cur', k === i); });
+      setStep(i);
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  cls.forEach(function (c) { io2.observe(c); });
+})();
+</script>
+
+</body>
+</html>
