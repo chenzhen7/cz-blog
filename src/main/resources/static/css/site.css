@@ -348,13 +348,20 @@ button { font: inherit; }
 /* ---------- 3D 分层图像场 ---------- */
 .field-wrap { perspective: 1500px; }
 .field {
+  /* 整块不收指针事件：三块 .tile 都是负 translateZ，在 preserve-3d 里位于 .field
+     平面「后方」，命中测试按 3D 深度排序会让透明的 .field 挡住所有 tile ——
+     悬停恢复彩色因此永远不触发（2026-10-01 实测 elementFromPoint 命中的是 .field）。
+     事件放行给下层的 .tile（它那边显式 pointer-events: auto） */
+  pointer-events: none;
   display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(6, 46px); gap: 12px;
   transform-style: preserve-3d;
   will-change: transform;
 }
 @media (min-width: 1024px) { .field { grid-template-rows: repeat(6, 58px); gap: 14px; } }
 
-.tile { position: relative; will-change: transform; }
+/* pointer-events: auto 是显式声明，不是默认值复读：父级 .field 被设成了 none（原因见上），
+   这里必须显式接回事件，:hover 恢复彩色与角标变色才会生效 */
+.tile { position: relative; will-change: transform; pointer-events: auto; }
 /* 每块停在不同纵深：指针一动就产生真实视差分层，不是整体平移 */
 .t1 { grid-column: 1 / 2; grid-row: 1 / 4; transform: translateZ(-30px); }
 .t2 { grid-column: 2 / 3; grid-row: 2 / 6; transform: translateZ(-160px); }
