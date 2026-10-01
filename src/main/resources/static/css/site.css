@@ -579,12 +579,23 @@ button { font: inherit; }
 
 /* ==========================================================================
    10. 关于
+
+   版面叫「长卷」：左栏（.side）吸附在左边不动，右栏（.flow）从它旁边流过去。
+   全站只有这一页有「不动的东西」—— 读自述的全程，人始终在场。
+
+   .about / .about-photo / .about-body 这三个类是**首页**在用的（index.html 的
+   「关于写字的人」段），关于页改版后不再使用，但规则一条都不能删。
    ========================================================================== */
 .about { display: grid; grid-template-columns: 1fr; gap: 40px; align-items: center; }
 @media (min-width: 900px) { .about { grid-template-columns: 300px 1fr; gap: 60px; } }
 .about-photo { position: relative; perspective: 1000px; }
 .about-photo img {
-  width: 100%; aspect-ratio: 3 / 4; object-fit: cover;
+  /* height: auto 不能省。模板里 <img> 带着 width="750" height="750"，那是**表现性提示**：
+     优先级虽然低于作者样式，但只在作者样式**没设过该属性**时才会被盖掉。这里只写了 width，
+     于是 height="750" 照样生效，aspect-ratio 被完全架空 —— 首页那张头像实测渲染成
+     300×750 的竖条（从方形原图中间裁出来的一条），不是这条规则写的 300×400。
+     同一个坑关于页也踩了，那边改成 height: auto 之后恢复正常。 */
+  width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover;
   filter: grayscale(1) contrast(.96) brightness(1.2);
   will-change: transform;
 }
@@ -606,6 +617,109 @@ button { font: inherit; }
 .about-body .links { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 30px; }
 .about-body .links a { color: var(--ink-2); border-bottom: 1px solid var(--line-strong); padding-bottom: 3px; transition: color .3s, border-color .3s; }
 .about-body .links a:hover { color: var(--signal); border-color: var(--signal); }
+
+/* ---- 长卷骨架 ---- */
+
+.split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; }
+@media (min-width: 1024px) {
+  .split { grid-template-columns: 320px minmax(0, 1fr); gap: 84px; align-items: start; }
+}
+
+/* 左栏。只在宽屏吸附：窄屏视口本来就矮，再钉一个 320px 高的栏，正文只剩一条缝 */
+.side { position: static; }
+@media (min-width: 1024px) { .side { position: sticky; top: 96px; } }
+
+.side-frame {
+  position: relative; border: 1px solid var(--line-strong); background: var(--bg-sunken); overflow: hidden;
+}
+/* me.jpg 是白底线稿。multiply 让白底透出去，--bg-sunken 才能真正吃到画面上；
+   不加这一条，插图就是一块纯白方块浮在米色底上，像贴歪了。
+   height: auto 的理由见上面 .about-photo img（同一个坑）。 */
+.side-frame img {
+  width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: contain;
+  mix-blend-mode: multiply;
+  filter: grayscale(1) contrast(.98) brightness(1.03);
+  transition: filter 1s cubic-bezier(.16, 1, .3, 1);
+}
+/* 读到一半，灰度转回原色。这是这一版的落点：灰度的记录，读到后面才变回一个具体的人 */
+.side.is-live .side-frame img { filter: grayscale(0) contrast(1) brightness(1); }
+
+.side-fields { margin-top: 20px; }
+.side-fields .row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+  border-bottom: 1px solid var(--line); padding: 10px 0;
+}
+.side-fields .k { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em; color: var(--ink-2); }
+/* 值转大写用 CSS 不用 Thymeleaf 的 toUpperCase：DOM 里留的还是库里的原值 */
+.side-fields .v {
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .06em;
+  color: var(--ink); text-transform: uppercase;
+}
+
+/* 进度：一格一条。方块由页内脚本按实际的条款数生成 —— 条款数来自数据
+   （技能清单为空时少一条），写死在模板里就会出现一个永远不亮的方块。
+   用离散方块而不是连续进度条：连续条是归档页「时间轴」的装置，这里不重复它。 */
+.side-steps { display: flex; align-items: center; gap: 8px; margin-top: 18px; }
+.side-steps .sq {
+  width: 10px; height: 10px; border: 1px solid var(--line-strong); background: transparent;
+  transition: background .4s, border-color .4s;
+}
+.side-steps .sq.on { background: var(--signal-fill); border-color: var(--signal-edge); }
+.side-steps .cnt {
+  margin-left: auto; font-family: var(--font-mono); font-size: var(--fs-label);
+  letter-spacing: .1em; color: var(--ink-2);
+}
+
+/* ---- 条款 ---- */
+.cl {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px;
+  border-top: 1px solid var(--line); padding: 30px 0 34px;
+}
+@media (min-width: 640px) { .cl { grid-template-columns: 84px minmax(0, 1fr); gap: 28px; } }
+.cl:last-child { border-bottom: 1px solid var(--line-strong); }
+/* 条款号是大号数字，走 Archivo（--font-disp）。静态时浅灰，读到它时转信号黄 ——
+   一个明确的「正在读这一条」的指示 */
+.cl .n {
+  font-family: var(--font-disp); font-variation-settings: 'wdth' 100, 'wght' 800;
+  font-size: 34px; line-height: 1; color: var(--line-strong);
+  transition: color .45s cubic-bezier(.16, 1, .3, 1);
+}
+.cl.is-cur .n { color: var(--signal); }
+/* 条款里的抬头收一号。.sec-title 是整页章节的尺寸（clamp 到 2.9rem），
+   条款只是长卷里的一节，用整页的尺寸会把条款本身压没 */
+.cl .sec-head { margin-bottom: 24px; }
+.cl .sec-title { font-size: clamp(1.4rem, 2.4vw, 1.9rem); }
+/* 正文量宽用 em 不用 ch：ch 量的是数字 0 的宽度，对中文完全不适用。
+   在这套字体栈下 1ch ≈ 13.5px，.md-body 默认的 74ch 会宽到 1000px，一行 59 个汉字 */
+.cl .md-body { max-width: 44em; }
+
+/* ---- 技能清单 ---- */
+.skl-list {
+  list-style: none; margin: 0; padding: 0;
+  border-top: 1px solid var(--line-strong);
+}
+.skl {
+  position: relative; display: flex; align-items: baseline; gap: 18px;
+  border-bottom: 1px solid var(--line); padding: 15px 0;
+  transition: padding-left .4s cubic-bezier(.16, 1, .3, 1);
+}
+/* 悬停从左边长出一条信号黄。亮黄块照例带 --signal-edge 描边（§2.2） */
+.skl::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: var(--signal-fill); border-right: 1px solid var(--signal-edge);
+  transform: scaleY(0); transform-origin: center;
+  transition: transform .4s cubic-bezier(.16, 1, .3, 1);
+}
+.skl:hover { padding-left: 18px; }
+.skl:hover::before { transform: scaleY(1); }
+.skl .no {
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .1em;
+  color: var(--line-strong); flex-shrink: 0;
+}
+.skl .nm { font-size: 17px; }
+
+/* 技能说明。改版前是写死在模板 style 里的，收进样式表；文案逐字未改 */
+.cl-note { color: var(--ink-2); margin: 24px 0 0; max-width: 44em; }
 
 /* ==========================================================================
    11. 页脚
@@ -877,19 +991,10 @@ button { font: inherit; }
 .page-title.chars-on { perspective: 1000px; transform-style: preserve-3d; }
 .page-title .ch { display: inline-block; transform-style: preserve-3d; will-change: transform, opacity; }
 
-/* 清单式罗列（技能等）。
-   改版前每项下面画一根等宽进度条 —— 所有项宽度都一样，因为那条 bar 的宽度
-   不来自任何数据，等于没有信息量。这里换成等价清单：只呈现「会哪些」，
-   不假装有程度。等真有了分级数据再谈进度条。 */
-.skills { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; margin: 0; padding: 0; }
-.skills li {
-  border: 1px solid var(--line-strong); padding: 10px 18px; font-size: 17px;
-  transition: background .3s, color .3s, border-color .3s;
-}
-.skills li:hover { background: var(--signal-fill); color: var(--ink-on-signal); border-color: var(--signal-edge); }
-/* 级联入场的初始态（.anim 门控）：透明度归 0，等页面脚本的 stagger 播入。
-   只藏 opacity 不写 transform —— y 位移由 GSAP 的 fromTo 自己设初值。 */
-.anim .skills li { opacity: 0; }
+/* 技能清单的样式在 §10 的 .skl-list / .skl。
+   改版前这里是一组 .skills 标签片，每片下面还画一根等宽进度条 ——
+   所有条一样宽，因为宽度不来自任何数据，等于没有信息量。改版后换成
+   带编号的清单行，已在 §10 定义，这一段随之删除。 */
 
 /* ==========================================================================
    17. 归档（流年记）
