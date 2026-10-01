@@ -25,6 +25,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +54,12 @@ public class LogAspect {
     private static final long time = 60;
     //时间段内最大访问次数
     private static final int maxCount = 60;
+    /* 取真实 IP 时按顺序看的转发头。
+       isLocalRequest 判断「有没有经过代理」也用这一份 —— 名单各写一遍，迟早只改一处。 */
+    private static final String[] IP_HEADERS = {
+            "X-Forwarded-For", "X-Real-IP", "Proxy-Client-IP",
+            "WL-Proxy-Client-IP", "HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR"
+    };
 
     // 获取日志信息
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -68,8 +76,10 @@ public class LogAspect {
         HttpServletRequest request = attributes.getRequest();
         //获取ip
         String realIp = getRealIp(request);
-        //判断是否黑名单
-        before(realIp);
+        //判断是否黑名单。本机访问自己不进这一步，理由见 isLocalRequest
+        if (!isLocalRequest(request)) {
+            before(realIp);
+        }
         //执行业务
         Object result = point.proceed();
         try {
@@ -151,9 +161,8 @@ public class LogAspect {
             if (null == request) {
                 return "";
             }
-            String[] headers = {"X-Forwarded-For", "X-Real-IP", "Proxy-Client-IP", "WL-Proxy-Client-IP", "HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR"};
             String ip;
-            for (String header : headers) {
+            for (String header : IP_HEADERS) {
                 ip = request.getHeader(header);
                 if (isValidIp(ip)) {
                     return getMultistageReverseProxyIp(ip);
@@ -166,6 +175,45 @@ public class LogAspect {
             e.printStackTrace();
         }
         return "";
+    }
+
+    /**
+     * 判断这次请求是不是「本机访问自己」。
+     *
+     * 它是一个有意为之的例外：本机调试（浏览器开 127.0.0.1、curl、Playwright 跑回归）
+     * 一分钟内很容易把 60 次的额度打满，接着这个 IP 被**永久**写进黑名单 ——
+     * 结果是开发时最常访问的那个人，第一个被关在门外。回环地址代表的是
+     * 「跑着这个服务的这台机器本身」，不该受这套针对外部访客的限流管。
+     *
+     * 两个条件缺一不可：
+     *   一、请求没有带任何转发头。带了就说明前面站着反向代理，这段回环连接是
+     *       「代理转发到应用」而不是「本机自己访问自己」，真实访客另有其人
+     *       （就是头里那个 IP）；放行等于把限流整个关掉。
+     *   二、getRemoteAddr() 落在回环地址上（IPv4 / IPv6 都认）。
+     * 刻意**不**看 X-Forwarded-For 里的值来判断本机：那个头客户端随便写，
+     * 拿它认本机，就是给限流开一个「把自己说成本机」的后门。
+     *
+     * @param request 当前请求
+     * @return true 表示本机直连，调用方应跳过黑名单与频率统计
+     */
+    private boolean isLocalRequest(HttpServletRequest request) {
+        if (null == request) {
+            return false;
+        }
+        for (String header : IP_HEADERS) {
+            if (isValidIp(request.getHeader(header))) {
+                return false;
+            }
+        }
+        String remoteAddr = request.getRemoteAddr();
+        try {
+            return InetAddress.getByName(remoteAddr).isLoopbackAddress();
+        } catch (UnknownHostException e) {
+            // 解析不出来就按外部访客处理：保守的一侧是「继续限流」，不是「放行」。
+            // 但要留下日志 —— 这条路静默走过一次，就再也查不出某段流量为什么没被限住。
+            log.warn("请求来源地址无法解析，按外部访客处理：{}", remoteAddr, e);
+            return false;
+        }
     }
 
     /**
