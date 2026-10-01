@@ -40,20 +40,24 @@ a{
 
 /* 滚动条整体样式 */
 ::-webkit-scrollbar {
-    width: 12px; /* 滚动条宽度 */
+    width: 8px; /* 滚动条宽度 */
+    height: 8px;
+
 }
 
 /* 滚动条轨道 */
 ::-webkit-scrollbar-track {
     /*background-color: #f1f1f1; !* 轨道背景色 *!*/
-    border-radius: 6px; /* 轨道圆角 */
+    border-radius: 4px; /* 轨道圆角 */
 
 }
 
 /* 滚动条滑块 */
 ::-webkit-scrollbar-thumb {
+    width: 8px; /* 滚动条宽度 */
+    height: 8px;
     background-color: #888; /* 滑块颜色 */
-    border-radius: 6px; /* 滑块圆角 */
+    border-radius: 4px; /* 滑块圆角 */
 }
 
 /* 滚动条滑块悬停状态 */
@@ -2026,6 +2030,13 @@ a{
     padding: 45px;
 }
 
+.markdown-body  {
+   img{
+       border-radius: 8px;
+       border: 1px solid #ddd;
+   }
+}
+
 @media (max-width: 767px) {
     .markdown-body {
         padding: 15px;
@@ -2214,4 +2225,19 @@ a{
     left: -7px;
     height: 10px;
     border-bottom: solid 2px #fa4729;
+}
+
+@media (prefers-color-scheme: dark) {
+  .markdown-body {
+    color: #24292e !important;
+  }
+
+    pre, code {
+      background-color: #161b22;
+      color: #c9d1d9;
+    }
+
+    hr {
+      border-color: #30363d;
+    }
 }
