@@ -422,8 +422,8 @@ button { font: inherit; }
 /* ==========================================================================
    7. 章节
    ========================================================================== */
-.section { padding: 104px 0; position: relative; }
-@media (min-width: 1024px) { .section { padding: 136px 0; } }
+.section { padding: 52px 0; position: relative; }
+@media (min-width: 1024px) { .section { padding: 68px 0; } }
 .section.flush { padding-top: 0; }
 
 .sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 44px; flex-wrap: wrap; }
@@ -1451,6 +1451,57 @@ button { font: inherit; }
 .compose-inputs { flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
 @media (min-width: 768px) { .compose-inputs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
+/* 发帖区（留言板）：「续写对话」式。表单套用留言项 .cm 的骨架，与列表同一套语言，
+   写留言看起来就是往对话末尾续一条。它在 #message-container 之外，
+   发送成功后那个容器会被 AJAX 整块替换，表单放进去会一起被冲掉。
+   左侧 3px 信号黄边 + 微沉底色是「编辑中」的标记，发出去它就是普通的一条。 */
+.cm-compose {
+  border-left: 3px solid var(--signal-edge);
+  background: var(--bg-sunken);
+  padding-left: 20px;
+}
+
+/* 头部填空。昵称输入框的位置与字重对齐 .cm-name：它就是这条留言将来的名字。
+   下划线是「这里能填」的唯一线索，聚焦转深金。 */
+.cc-input {
+  border: 0; border-bottom: 1px solid var(--line-strong); background: transparent;
+  padding: 2px; font: inherit; font-size: 17px; color: var(--ink);
+  min-width: 0; max-width: 100%; transition: border-color .3s;
+}
+.cc-input:focus { outline: none; border-color: var(--signal); }
+.cc-name { font-weight: 700; width: 140px; }
+.cc-mail { width: 190px; color: var(--ink-2); }
+.cc-site { width: 180px; color: var(--ink-2); }
+
+/* 「你」徽章：复用 .cm-badge 的实心信号块语言，预告这条留言的主人 */
+.cc-badge { cursor: default; }
+
+/* 正文：对齐 .cm-text 的颜色与行距，写的时候看到的就是发出去的样子。
+   虚线底线区分于头部填空（实线），暗示这里可以写很多行 */
+.cc-text {
+  width: 100%; border: 0; border-bottom: 1px dashed var(--line-strong); background: transparent;
+  color: var(--ink-2); font: inherit; line-height: 1.75;
+  margin: 8px 0 0; padding: 2px;
+  resize: vertical; min-height: 84px;
+  transition: border-color .3s;
+}
+.cc-text:focus { outline: none; border-color: var(--signal); }
+.cc-text::placeholder { opacity: .65; }
+
+.cm-compose .emoji-bar { margin: 14px 0 0; }
+.cm-compose .cm-foot { align-items: center; }
+.cc-hint { color: var(--ink-2); }
+.cc-send { margin-left: auto; padding: 10px 22px; }
+
+/* 表情开关：与 .cm-foot a 同一语言的文字工具钮 */
+.cc-tool {
+  border: 0; background: none; cursor: pointer; padding: 0;
+  font-size: var(--fs-label); color: var(--ink-2);
+  border-bottom: 1px solid transparent;
+  transition: color .3s, border-color .3s;
+}
+.cc-tool:hover { color: var(--signal); border-color: var(--signal-edge); }
+
 /* 表情条。90 个表情一行放不下，固定高度内滚动；高度压到两行半，
    刚好露出"还有更多"，比做成弹层的成本低得多。 */
 .emoji-bar {
@@ -1459,6 +1510,9 @@ button { font: inherit; }
   padding: 10px 12px; margin: 16px 0;
   border: 1px solid var(--line); background: var(--bg-sunken);
 }
+/* hidden 失效的坑：UA 样式表的 [hidden] { display:none } 优先级低于作者样式，
+   上面那条 display:flex 会把它盖掉，于是「收起」形同虚设。作者样式里必须自己补一条 */
+.emoji-bar[hidden] { display: none; }
 .emoji-bar button {
   border: 0; background: none; cursor: pointer;
   font-size: 20px; line-height: 1; padding: 4px 5px;

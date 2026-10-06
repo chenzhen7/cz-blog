@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>留言表单原型 C · 续写对话</title>
+<link rel="stylesheet" href="../src/main/resources/static/fonts/fonts.css">
+<link rel="stylesheet" href="../src/main/resources/static/css/site.css">
+<script>document.documentElement.classList.add('anim');</script>
+<style>
+/* ==========================================================================
+   留言表单原型 C · 续写对话
+
+   一句话：表单就是留言列表里的「下一条」。它完全套用 .cm 的结构与排版
+   （头像在左、名字在头、正文居中、操作在脚），写留言看起来就是往对话
+   末尾续写一条，发出去之后它在列表里的样子就是你写它时的样子。
+
+   与另外两个原型的分别：
+     结构 —— 复用留言项 .cm 骨架，表单与列表共用一套语言，衔接无缝
+     输入 —— 昵称/邮箱/站点是头部行内的下划线填空，正文是无框 textarea
+     预示 —— 「你」徽章与灰度头像提前展示这条留言发出后的模样
+   ========================================================================== */
+
+/* 让表单这一条与真正的留言区分开：左侧 3px 信号黄边 + 微沉底色。
+   边条是「正在编辑」的标记，发出去它就消失，成为普通留言 */
+.cm-compose {
+  border-left: 3px solid var(--signal-edge);
+  background: var(--bg-sunken);
+  padding-left: 20px;
+}
+
+/* ---------- 头部填空 ---------- */
+/* 昵称：位置与字重对齐 .cm-name，它就是这条留言将来的名字。
+   下划线是唯一提示「这里能填」的线索，聚焦转深金 */
+.cc-input {
+  border: 0; border-bottom: 1px solid var(--line-strong); background: transparent;
+  padding: 2px 2px; font: inherit; font-size: 17px; color: var(--ink);
+  min-width: 0; transition: border-color .3s;
+}
+.cc-input:focus { outline: none; border-color: var(--signal); }
+.cc-name { font-weight: 700; width: 140px; }
+.cc-mail { width: 190px; color: var(--ink-2); }
+.cc-site { width: 180px; color: var(--ink-2); }
+
+/* 「你」徽章：复用 .cm-badge 的实心信号块语言，预告这条留言的主人 */
+.cc-badge { cursor: default; }
+
+/* ---------- 正文 ---------- */
+/* 对齐 .cm-text 的颜色与行距：写的时候看到的就是发出去的样子 */
+.cc-text {
+  width: 100%; border: 0; background: transparent;
+  color: var(--ink-2); font: inherit; line-height: 1.75;
+  margin: 8px 0 0; padding: 2px;
+  resize: vertical; min-height: 84px;
+  border-bottom: 1px dashed var(--line-strong);
+  transition: border-color .3s;
+}
+.cc-text:focus { outline: none; border-color: var(--signal); }
+.cc-text::placeholder { opacity: .65; }
+
+/* ---------- 表情条 ---------- */
+.cm-compose .emoji-bar { margin: 14px 0 0; }
+
+/* ---------- 脚部 ---------- */
+/* 复用 .cm-foot 的排布，发送钮右推 */
+.cm-compose .cm-foot { align-items: center; }
+.cc-hint { color: var(--ink-2); }
+.cc-send { margin-left: auto; padding: 10px 22px; }
+
+/* 表情开关：与 .cm-foot a 同一语言的文字工具钮 */
+.cc-tool {
+  border: 0; background: none; cursor: pointer; padding: 0;
+  font-size: var(--fs-label); color: var(--ink-2);
+  border-bottom: 1px solid transparent;
+  transition: color .3s, border-color .3s;
+}
+.cc-tool:hover { color: var(--signal); border-color: var(--signal-edge); }
+
+/* ---------- 入场揭示（原型自带） ----------
+   线上靠 chrome 的 motion 片段（GSAP）放出 .rise/.wipe-in，原型不引那段脚本，
+   改用 prototypes 目录统一的 data-rv 约定：IO 进视口后加 .in。
+   没 JS / 减少动效时 .anim 挂不上或规则被下面的 media 覆盖，内容直接可见。 */
+.anim [data-rv] { opacity: 0; transform: translateY(18px); }
+.anim [data-rv].in {
+  opacity: 1; transform: none;
+  transition: opacity .7s cubic-bezier(.16, 1, .3, 1), transform .7s cubic-bezier(.16, 1, .3, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .anim [data-rv] { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<header class="page-head">
+    <div class="wrap">
+        <div class="eyebrow" data-rv>
+            <span class="bar"></span>
+            <span class="mono">Message / 留言板</span>
+        </div>
+        <h1 class="page-title" data-rv>留言板</h1>
+        <p class="page-lead" data-rv>有什么对我想说的话，来吧！（原型 C：续写对话）</p>
+    </div>
+</header>
+
+<section class="section">
+    <div class="wrap">
+
+        <!-- 原型 C：表单与列表在同一个 .cm-list 里，表单就是第一条（编辑中） -->
+        <div class="cm-list" style="border-top: 0;">
+
+            <!-- 编辑中的「下一条」。name 属性与后端契约保持一致 -->
+            <div class="cm cm-compose" id="message-form" data-rv>
+                <div class="cm-avatar">
+                    <img id="avatar" src="../src/main/resources/static/images/me.jpg" alt="头像预览" width="48" height="48">
+                </div>
+                <div class="cm-body">
+                    <input type="hidden" name="parentMessageId">
+                    <input type="hidden" name="rootMessageId">
+                    <input type="hidden" name="avatar" value="/images/me.jpg">
+
+                    <div class="cm-head">
+                        <input name="nickname" type="text" class="cc-input cc-name" placeholder="昵称">
+                        <span class="cm-badge cc-badge">你</span>
+                        <input id="emailInput" name="email" type="email" class="cc-input cc-mail" placeholder="邮箱">
+                        <input name="address" type="text" class="cc-input cc-site" placeholder="站点（选填）">
+                    </div>
+
+                    <textarea id="message-content" name="content" class="cc-text" rows="3"
+                              placeholder="注意文明发言哦~"></textarea>
+
+                    <div class="emoji-bar" id="emojiBar" aria-label="表情" hidden>
+                        <button type="button" data-emoji="😀">😀</button><button type="button" data-emoji="😄">😄</button>
+                        <button type="button" data-emoji="😁">😁</button><button type="button" data-emoji="😂">😂</button>
+                        <button type="button" data-emoji="🤣">🤣</button><button type="button" data-emoji="😊">😊</button>
+                        <button type="button" data-emoji="😍">😍</button><button type="button" data-emoji="😘">😘</button>
+                        <button type="button" data-emoji="😜">😜</button><button type="button" data-emoji="🤔">🤔</button>
+                        <button type="button" data-emoji="😎">😎</button><button type="button" data-emoji="😭">😭</button>
+                        <button type="button" data-emoji="😡">😡</button><button type="button" data-emoji="😅">😅</button>
+                        <button type="button" data-emoji="😉">😉</button><button type="button" data-emoji="🙃">🙃</button>
+                        <button type="button" data-emoji="😴">😴</button><button type="button" data-emoji="👍">👍</button>
+                        <button type="button" data-emoji="👎">👎</button><button type="button" data-emoji="👏">👏</button>
+                        <button type="button" data-emoji="🙏">🙏</button><button type="button" data-emoji="🤝">🤝</button>
+                        <button type="button" data-emoji="❤️">❤️</button><button type="button" data-emoji="🎉">🎉</button>
+                        <button type="button" data-emoji="🔥">🔥</button><button type="button" data-emoji="✨">✨</button>
+                        <button type="button" data-emoji="💯">💯</button><button type="button" data-emoji="🌟">🌟</button>
+                    </div>
+
+                    <div class="cm-foot">
+                        <button type="button" class="cc-tool" id="emojiToggle" aria-expanded="false" aria-controls="emojiBar">😀 表情</button>
+                        <span class="cc-hint mono-sm">邮箱只用来取头像，不会公开</span>
+                        <button type="button" class="btn-primary magnet cut-br cc-send">发送</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 示例留言，紧接着表单，演示「续写」的衔接感 -->
+            <div class="cm">
+                <div class="cm-avatar"><img src="../src/main/resources/static/images/qq.jpg" alt="" width="48" height="48"></div>
+                <div class="cm-body">
+                    <div class="cm-head"><span class="cm-name">路过的小白</span></div>
+                    <div class="cm-text">样式改版之后好看多了，留一条支持一下 👍</div>
+                    <div class="cm-foot"><span>2026-10-02 09:41</span><a>回复</a></div>
+                </div>
+            </div>
+            <div class="cm">
+                <div class="cm-avatar"><img src="../src/main/resources/static/images/me.jpg" alt="" width="48" height="48"></div>
+                <div class="cm-body">
+                    <div class="cm-head"><span class="cm-name">ChenZhen</span><span class="cm-badge">站主</span></div>
+                    <div class="cm-text">快来说点什么吧</div>
+                    <div class="cm-foot"><span>2026-09-30 22:14</span><a>回复</a></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<script>
+(function () {
+    // 入场揭示：进视口的元素加 .in，配合 <style> 里的 data-rv 规则
+    var rv = document.querySelectorAll('[data-rv]');
+    if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        rv.forEach(function (el) { el.classList.add('in'); });
+    } else {
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (en) {
+                if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+            });
+        }, { threshold: .12 });
+        rv.forEach(function (el) { io.observe(el); });
+    }
+
+    // 表情插入（与线上一致的事件委托）
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-emoji]');
+        if (!btn) return;
+        var ta = document.getElementById('message-content');
+        ta.value += btn.getAttribute('data-emoji');
+        ta.focus();
+    });
+
+    // 表情条开合
+    var toggle = document.getElementById('emojiToggle');
+    var bar = document.getElementById('emojiBar');
+    toggle.addEventListener('click', function () {
+        var open = bar.hasAttribute('hidden');
+        if (open) { bar.removeAttribute('hidden'); } else { bar.setAttribute('hidden', ''); }
+        toggle.setAttribute('aria-expanded', String(open));
+    });
+
+    // 头像随 QQ 邮箱变（线上同款逻辑的演示）
+    document.getElementById('emailInput').addEventListener('input', function () {
+        var email = this.value.trim();
+        var qq = /^[1-9]\d{4,10}@qq\.com$/;
+        document.getElementById('avatar').src = qq.test(email)
+            ? 'http://q1.qlogo.cn/g?b=qq&nk=' + email.split('@')[0] + '&s=100'
+            : '../src/main/resources/static/images/me.jpg';
+    });
+})();
+</script>
+
+</body>
+</html>

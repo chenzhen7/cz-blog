@@ -39,33 +39,43 @@
     <section class="section">
         <div class="wrap">
 
-            <!--/* 发帖区。这里不是 <form>：提交走下面的 fetch，与改版前一致（原来是 $.ajax 的 .load()）。
+            <!--/* 发帖区。「续写对话」式：表单套用留言项 .cm 的骨架，写的时候看到的就是
+                   发出去的样子。它在 #message-container 之外 —— 发送成功后那个容器会被
+                   AJAX 整块替换，表单放进去会一起被冲掉。
+                   这里不是 <form>：提交走下面的 fetch，与改版前一致（原来是 $.ajax 的 .load()）。
                    所有 name 都是后端 Message 实体的绑定契约，一个字不能改：
                    parentMessageId / rootMessageId / avatar / email / nickname / address / content。
                    三个 hidden 由脚本维护：avatar 由邮箱推出来，另两个由「回复」按钮填。 */-->
-            <div class="compose rise" id="message-form">
-                <div class="compose-head">
-                    <div class="compose-avatar">
-                        <img id="avatar" th:src="@{/images/me.jpg}" alt="头像预览" width="56" height="56">
-                    </div>
-                    <div class="compose-inputs">
-                        <input type="hidden" name="parentMessageId">
-                        <input type="hidden" name="rootMessageId">
-                        <input type="hidden" name="avatar" value="/images/me.jpg">
-                        <input id="emailInput" name="email" type="email" class="form-input" placeholder="邮箱"
-                               th:value="${session.user != null ? session.user.email : ''}">
-                        <input name="nickname" type="text" class="form-input" placeholder="昵称"
+            <div class="cm cm-compose rise" id="message-form">
+                <div class="cm-avatar">
+                    <img id="avatar" th:src="@{/images/me.jpg}" alt="头像预览" width="48" height="48">
+                </div>
+                <div class="cm-body">
+                    <input type="hidden" name="parentMessageId">
+                    <input type="hidden" name="rootMessageId">
+                    <input type="hidden" name="avatar" value="/images/me.jpg">
+
+                    <div class="cm-head">
+                        <input name="nickname" type="text" class="cc-input cc-name" placeholder="昵称"
                                th:value="${session.user != null ? session.user.nickname : ''}">
-                        <input name="address" type="text" class="form-input" placeholder="站点">
+                        <span class="cm-badge cc-badge">你</span>
+                        <input id="emailInput" name="email" type="email" class="cc-input cc-mail" placeholder="邮箱"
+                               th:value="${session.user != null ? session.user.email : ''}">
+                        <input name="address" type="text" class="cc-input cc-site" placeholder="站点（选填）">
+                    </div>
+
+                    <textarea id="message-content" name="content" class="cc-text" rows="3"
+                              placeholder="注意文明发言哦~"></textarea>
+
+                    <th:block th:replace="~{fragments/chrome :: emojiBar}"/>
+
+                    <div class="cm-foot">
+                        <button id="emojiToggle" type="button" class="cc-tool"
+                                aria-expanded="false" aria-controls="emojiBar">😀 表情</button>
+                        <span class="cc-hint mono-sm">邮箱只用来取头像，不会公开</span>
+                        <button id="messagepost-btn" type="button" class="btn-primary magnet cut-br cc-send">发送</button>
                     </div>
                 </div>
-
-                <textarea id="message-content" name="content" class="form-textarea" rows="4"
-                          placeholder="注意文明发言哦~"></textarea>
-
-                <th:block th:replace="~{fragments/chrome :: emojiBar}"/>
-
-                <button id="messagepost-btn" type="button" class="btn-primary magnet">发送</button>
             </div>
 
             <!--/* 留言列表。
@@ -205,6 +215,19 @@
         }
         var emailInput = document.getElementById('emailInput');
         if (emailInput) emailInput.addEventListener('input', syncAvatar);
+
+        // ---------- 表情条开合 ----------
+        // 默认收起：90 个表情常年占着两行半。无 JS 时保持展开，不挡功能。
+        var emojiBar = document.getElementById('emojiBar');
+        var emojiToggle = document.getElementById('emojiToggle');
+        if (emojiBar && emojiToggle) {
+            emojiBar.setAttribute('hidden', '');
+            emojiToggle.addEventListener('click', function () {
+                var open = emojiBar.hasAttribute('hidden');
+                if (open) { emojiBar.removeAttribute('hidden'); } else { emojiBar.setAttribute('hidden', ''); }
+                emojiToggle.setAttribute('aria-expanded', String(open));
+            });
+        }
 
         // ---------- 表情 ----------
         document.addEventListener('click', function (e) {
