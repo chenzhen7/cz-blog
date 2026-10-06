@@ -347,6 +347,10 @@
             contentSelector: '.js-toc-content',
             headingSelector: 'h1, h2, h3',
             collapseDepth: 3,
+            // tocbot 自绘的平滑滚动不读 CSS 的 scroll-margin-top（84px，与顶栏 60px 留白一致），
+            // 必须用这两个选项手动告诉它，否则点目录后标题会被固定顶栏遮住
+            scrollSmoothOffset: -84,
+            headingsOffset: 84,
         });
 
         // ---------- 工具 ----------
