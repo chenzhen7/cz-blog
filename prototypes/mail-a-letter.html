@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>邮件原型 A · 信笺</title>
+<style>
+/* 仅原型脚手架的样式：页面底、分隔标签。邮件本体全部是内联样式 + table 布局，
+   与邮件客户端能渲染的写法完全一致，所见即所得。 */
+body { margin: 0; background: #e8e8e8; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+.proto-label { max-width: 600px; margin: 40px auto 10px; font-size: 13px; color: #666; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+
+<!-- ==================================================================
+     邮件原型 A · 信笺
+
+     一句话：一封从博客里寄出来的信。灰色工作台上一张白色信纸，
+     纸顶一道信号黄封缄线，品牌字标（纯 HTML，不用图片）在左上，
+     引文用左侧黄边竖条（与站内 .cm-replies / 引用块同一语言），
+     动作是一个实心信号黄按钮。
+
+     与另外两个原型的分别：
+       结构 —— 灰底 + 白卡，最「邮件」的一个，层次最柔和
+       动作 —— 实心信号黄按钮（全站主按钮的邮件版）
+       引文 —— 左侧 3px 黄边竖条
+     ================================================================== -->
+
+<!-- ==================== ① 评论回复通知（mail.html） ==================== -->
+<p class="proto-label">【① 评论回复通知 · mail.html】</p>
+<div style="background:#f7f8fa; padding:28px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px;">
+
+    <!-- 品牌行：纯 HTML 字标。原模板的有道云外链 logo 在多数客户端默认被拦，必裂 -->
+    <tr><td style="padding:0 4px 14px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+            <td align="left">
+                <span style="display:inline-block; width:10px; height:10px; background:#ffe600; border:1px solid #edc800; vertical-align:middle;"></span>
+                <span style="font-size:15px; font-weight:bold; color:#111111; vertical-align:middle; margin-left:8px;">ChenZhen的客栈</span>
+            </td>
+            <td align="right" style="font-size:12px; letter-spacing:2px; color:#4a4a4a;">MESSAGE / 评论回复</td>
+        </tr></table>
+    </td></tr>
+
+    <!-- 封缄线：信号黄。亮黄块必须带 signal-edge 描边，否则边界隐形（规范 §2.2） -->
+    <tr><td style="height:4px; background:#ffe600; border-bottom:1px solid #edc800; font-size:0; line-height:0;">&nbsp;</td></tr>
+
+    <!-- 信纸 -->
+    <tr><td style="background:#ffffff; border:1px solid #e8e8e8; border-top:0; padding:34px 38px;">
+
+        <p style="margin:0 0 16px; font-size:20px; line-height:1.6; color:#111111; font-weight:bold;">亲爱的：路过的小白</p>
+        <p style="margin:0 0 24px; font-size:15px; line-height:1.9; color:#4a4a4a;">你在《SpringBoot 整合邮件服务》下的评论有了新的回复。</p>
+
+        <p style="margin:0 0 8px; font-size:13px; letter-spacing:2px; color:#6b5d00;">您的评论</p>
+        <div style="border-left:3px solid #edc800; background:#fafaf9; padding:12px 16px; margin:0 0 24px; font-size:14px; line-height:1.8; color:#333333;">博主好，按这篇配置完发不出邮件，一直报 535，是授权码的问题吗？</div>
+
+        <p style="margin:0 0 8px; font-size:13px; letter-spacing:2px; color:#6b5d00;">ChenZhen 给您的回复</p>
+        <div style="border-left:3px solid #edc800; background:#fafaf9; padding:12px 16px; margin:0 0 28px; font-size:14px; line-height:1.8; color:#333333;">是的，535 基本是授权码错误。注意要用 SMTP 授权码而不是 QQ 密码，另外检查下是否开启了 SMTP 服务。</div>
+
+        <!-- 主按钮：实心信号黄 + signal-edge 描边 + 墨字，全站 .btn-primary 的邮件版 -->
+        <a href="https://www.chenzhen.space/blog/42" style="display:inline-block; background:#ffe600; border:1px solid #edc800; color:#111111; font-size:15px; font-weight:bold; letter-spacing:2px; text-decoration:none; padding:12px 26px;">查看原网站评论</a>
+        <p style="margin:14px 0 0; font-size:13px; line-height:1.8; color:#999999;">按钮点不动？复制链接到浏览器打开：<a href="https://www.chenzhen.space/blog/42" style="color:#6b5d00; text-decoration:none; word-break:break-all;">https://www.chenzhen.space/blog/42</a></p>
+
+        <p style="margin:32px 0 0; font-size:14px; line-height:1.9; color:#111111;">此致<br><strong>陈震（chenzhen）</strong></p>
+
+    </td></tr>
+
+    <!-- 页脚 -->
+    <tr><td style="padding:18px 0 0; text-align:center; font-size:12px; line-height:1.8; color:#999999;">此为系统邮件，请勿回复 · ChenZhen的客栈</td></tr>
+
+</table>
+</td></tr></table>
+</div>
+
+<!-- ==================== ② 友链申请通知（站长收，mail-friendlink-apply.html） ==================== -->
+<p class="proto-label">【② 友链申请通知 · mail-friendlink-apply.html】</p>
+<div style="background:#f7f8fa; padding:28px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px;">
+
+    <tr><td style="padding:0 4px 14px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+            <td align="left">
+                <span style="display:inline-block; width:10px; height:10px; background:#ffe600; border:1px solid #edc800; vertical-align:middle;"></span>
+                <span style="font-size:15px; font-weight:bold; color:#111111; vertical-align:middle; margin-left:8px;">ChenZhen的客栈</span>
+            </td>
+            <td align="right" style="font-size:12px; letter-spacing:2px; color:#4a4a4a;">FRIENDS / 友链申请</td>
+        </tr></table>
+    </td></tr>
+
+    <tr><td style="height:4px; background:#ffe600; border-bottom:1px solid #edc800; font-size:0; line-height:0;">&nbsp;</td></tr>
+
+    <tr><td style="background:#ffffff; border:1px solid #e8e8e8; border-top:0; padding:34px 38px;">
+
+        <p style="margin:0 0 16px; font-size:20px; line-height:1.6; color:#111111; font-weight:bold;">亲爱的：ChenZhen</p>
+        <p style="margin:0 0 14px; font-size:15px; line-height:1.9; color:#4a4a4a;">有人在您的博客申请了友链。</p>
+        <p style="margin:0 0 28px; font-size:15px; line-height:1.9; color:#4a4a4a;">请及时登录博客后台查看并处理。如果对方博客符合您的友链标准，请不要犹豫，与他们建立友链关系，互相支持，共同进步！</p>
+
+        <a href="https://www.chenzhen.space/admin/friendlinks" style="display:inline-block; background:#ffe600; border:1px solid #edc800; color:#111111; font-size:15px; font-weight:bold; letter-spacing:2px; text-decoration:none; padding:12px 26px;">进入友链管理</a>
+        <p style="margin:14px 0 0; font-size:13px; line-height:1.8; color:#999999;">按钮点不动？复制链接到浏览器打开：<a href="https://www.chenzhen.space/admin/friendlinks" style="color:#6b5d00; text-decoration:none; word-break:break-all;">https://www.chenzhen.space/admin/friendlinks</a></p>
+
+        <p style="margin:32px 0 0; font-size:14px; line-height:1.9; color:#111111;">此致<br><strong>陈震（chenzhen）</strong></p>
+
+    </td></tr>
+
+    <tr><td style="padding:18px 0 0; text-align:center; font-size:12px; line-height:1.8; color:#999999;">此为系统邮件，请勿回复 · ChenZhen的客栈</td></tr>
+
+</table>
+</td></tr></table>
+</div>
+
+<!-- ==================== ③ 友链申请通过（mail-friendlink-pass.html） ==================== -->
+<p class="proto-label">【③ 友链申请通过 · mail-friendlink-pass.html】</p>
+<div style="background:#f7f8fa; padding:28px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px;">
+
+    <tr><td style="padding:0 4px 14px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+            <td align="left">
+                <span style="display:inline-block; width:10px; height:10px; background:#ffe600; border:1px solid #edc800; vertical-align:middle;"></span>
+                <span style="font-size:15px; font-weight:bold; color:#111111; vertical-align:middle; margin-left:8px;">ChenZhen的客栈</span>
+            </td>
+            <td align="right" style="font-size:12px; letter-spacing:2px; color:#4a4a4a;">FRIENDS / 申请通过</td>
+        </tr></table>
+    </td></tr>
+
+    <tr><td style="height:4px; background:#ffe600; border-bottom:1px solid #edc800; font-size:0; line-height:0;">&nbsp;</td></tr>
+
+    <tr><td style="background:#ffffff; border:1px solid #e8e8e8; border-top:0; padding:34px 38px;">
+
+        <p style="margin:0 0 16px; font-size:20px; line-height:1.6; color:#111111; font-weight:bold;">亲爱的：路过的小白</p>
+        <p style="margin:0 0 14px; font-size:15px; line-height:1.9; color:#4a4a4a;">您的博客友链申请通过了。</p>
+        <p style="margin:0 0 28px; font-size:15px; line-height:1.9; color:#4a4a4a;">感谢您对我的博客的关注和支持。很高兴通知您，您的友链申请已成功通过审核，您的博客链接已经出现在我的友链页面。</p>
+
+        <a href="https://www.chenzhen.space/friends" style="display:inline-block; background:#ffe600; border:1px solid #edc800; color:#111111; font-size:15px; font-weight:bold; letter-spacing:2px; text-decoration:none; padding:12px 26px;">查看友链页面</a>
+        <p style="margin:14px 0 0; font-size:13px; line-height:1.8; color:#999999;">按钮点不动？复制链接到浏览器打开：<a href="https://www.chenzhen.space/friends" style="color:#6b5d00; text-decoration:none; word-break:break-all;">https://www.chenzhen.space/friends</a></p>
+
+        <p style="margin:32px 0 0; font-size:14px; line-height:1.9; color:#111111;">此致<br><strong>陈震（chenzhen）</strong></p>
+
+    </td></tr>
+
+    <tr><td style="padding:18px 0 0; text-align:center; font-size:12px; line-height:1.8; color:#999999;">此为系统邮件，请勿回复 · ChenZhen的客栈</td></tr>
+
+</table>
+</td></tr></table>
+</div>
+
+<!-- ==================== ④ 友链申请驳回（mail-friendlink-reject.html） ==================== -->
+<p class="proto-label">【④ 友链申请驳回 · mail-friendlink-reject.html】</p>
+<div style="background:#f7f8fa; padding:28px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px;">
+
+    <tr><td style="padding:0 4px 14px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+            <td align="left">
+                <span style="display:inline-block; width:10px; height:10px; background:#ffe600; border:1px solid #edc800; vertical-align:middle;"></span>
+                <span style="font-size:15px; font-weight:bold; color:#111111; vertical-align:middle; margin-left:8px;">ChenZhen的客栈</span>
+            </td>
+            <td align="right" style="font-size:12px; letter-spacing:2px; color:#4a4a4a;">FRIENDS / 申请未通过</td>
+        </tr></table>
+    </td></tr>
+
+    <tr><td style="height:4px; background:#ffe600; border-bottom:1px solid #edc800; font-size:0; line-height:0;">&nbsp;</td></tr>
+
+    <tr><td style="background:#ffffff; border:1px solid #e8e8e8; border-top:0; padding:34px 38px;">
+
+        <p style="margin:0 0 16px; font-size:20px; line-height:1.6; color:#111111; font-weight:bold;">亲爱的：路过的小白</p>
+        <p style="margin:0 0 14px; font-size:15px; line-height:1.9; color:#4a4a4a;">很遗憾，您的友链申请未能通过审核。</p>
+        <p style="margin:0 0 24px; font-size:15px; line-height:1.9; color:#4a4a4a;">感谢您对我的博客的关注和支持。经过审核，您的友链申请未能通过，原因如下：</p>
+
+        <p style="margin:0 0 8px; font-size:13px; letter-spacing:2px; color:#6b5d00;">未通过原因</p>
+        <div style="border-left:3px solid #edc800; background:#fafaf9; padding:12px 16px; margin:0 0 28px; font-size:14px; line-height:1.8; color:#333333;">站点最近三个月没有更新，且存在多处死链。欢迎整改后重新申请。</div>
+
+        <a href="https://www.chenzhen.space/friends" style="display:inline-block; background:#ffe600; border:1px solid #edc800; color:#111111; font-size:15px; font-weight:bold; letter-spacing:2px; text-decoration:none; padding:12px 26px;">重新申请</a>
+        <p style="margin:14px 0 0; font-size:13px; line-height:1.8; color:#999999;">按钮点不动？复制链接到浏览器打开：<a href="https://www.chenzhen.space/friends" style="color:#6b5d00; text-decoration:none; word-break:break-all;">https://www.chenzhen.space/friends</a></p>
+
+        <p style="margin:32px 0 0; font-size:14px; line-height:1.9; color:#111111;">此致<br><strong>陈震（chenzhen）</strong></p>
+
+    </td></tr>
+
+    <tr><td style="padding:18px 0 0; text-align:center; font-size:12px; line-height:1.8; color:#999999;">此为系统邮件，请勿回复 · ChenZhen的客栈</td></tr>
+
+</table>
+</td></tr></table>
+</div>
+
+</body>
+</html>
