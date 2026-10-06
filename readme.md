@@ -3,11 +3,11 @@
 地址：[https://www.chenzhen.space/](https://www.chenzhen.space/)
 
 
-![在这里插入图片描述](images/index.gif)
+![在这里插入图片描述](images/index.webp)
 
-![在这里插入图片描述](images/blog.gif)
+![在这里插入图片描述](images/blog.webp)
 
-![在这里插入图片描述](images/admin.gif)
+![在这里插入图片描述](images/admin.webp)
 
 
 # 项目简介
