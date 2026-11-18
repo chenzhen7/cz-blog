@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>贡献观测站 · ChenZhen 的客栈</title>
+  <link rel="stylesheet" href="../src/main/resources/static/fonts/fonts.css">
+  <link rel="stylesheet" href="../src/main/resources/static/css/github-calendar.css">
+  <link rel="stylesheet" href="about-v2.css">
+  <script src="../src/main/resources/static/js/github-calendar-snapshot.js" defer></script>
+  <script src="../src/main/resources/static/js/github-calendar.js" defer></script>
+</head>
+<body class="observatory">
+  <header class="prototype-nav">
+    <a class="wordmark" href="#about">ChenZhen 的客栈</a>
+    <nav aria-label="切换设计原型">
+      <a href="about-v2-terrain.html">A 地形档案</a>
+      <a href="about-v2-observatory.html" aria-current="page">B 贡献观测站</a>
+      <a href="about-v2-journal.html">C 个人杂志</a>
+    </nav>
+  </header>
+  <main class="wrap" id="about">
+    <header class="station-hero enter">
+      <div>
+        <p class="eyebrow">关于我 / About</p>
+        <h1>ChenZhen</h1>
+        <p class="intro">从 Java 学习笔记到这间客栈，写作和代码都在继续。</p>
+      </div>
+      <img src="../src/main/resources/static/images/me.jpg" alt="ChenZhen 的博客头像" width="750" height="750">
+    </header>
+
+    <section class="section station-notes" aria-label="博客和技术">
+      <article>
+        <h2>博客是我的学习笔记</h2>
+        <p>最初只是想用 Spring Boot 做个练手项目。把遇到的问题和学到的技术写下来之后，这里也成了能回头查阅的个人档案。</p>
+        <a class="text-link" href="https://github.com/chenzhen7/cz-blog">浏览 cz-blog 源码 <span aria-hidden="true">↗</span></a>
+      </article>
+      <article>
+        <h2>常用技术领域</h2>
+        <ul class="skill-lines">
+          <li><strong>后端</strong><span>Java · Web 框架 · 微服务</span></li>
+          <li><strong>数据</strong><span>数据库 · 缓存 · 消息队列</span></li>
+          <li><strong>应用</strong><span>前端 · Docker · Linux</span></li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="station-activity" id="github" aria-labelledby="activity-title">
+      <div class="section-head">
+        <h2 id="activity-title">GitHub 贡献</h2>
+        <a class="text-link" href="https://github.com/chenzhen7">@chenzhen7 <span aria-hidden="true">↗</span></a>
+      </div>
+      <div class="github-calendar-dark" data-calendar></div>
+      <noscript><p>在 GitHub 个人资料页查看贡献日历。</p></noscript>
+    </section>
+  </main>
+  <footer class="page-end wrap">ChenZhen 的客栈</footer>
+</body>
+</html>

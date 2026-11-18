@@ -8,211 +8,68 @@
     <meta name="description" content="ChenZhen的个人博客，专注于技术生活分享">
     <meta name="keywords" content="ChenZhen,关于我,陈震，个人博客">
 
-    <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
+    <link th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
     <link rel="stylesheet" th:href="@{/fonts/fonts.css}">
     <link rel="stylesheet" th:href="@{/css/site.css}">
+    <link rel="stylesheet" th:href="@{/css/github-calendar.css}">
     <link rel="alternate" type="application/rss+xml" title="ChenZhen的客栈" th:href="@{/rss}">
 
-    <!--/* 动效初始态的门控。必须留在 <head> 里，不能挪到 </body> 前 —— 理由见片段内注释。 */-->
     <th:block th:replace="~{fragments/chrome :: animGate}"/>
 </head>
-<body>
+<body class="about-station">
 
 <th:block th:replace="~{fragments/chrome :: grain}"/>
 <th:block th:replace="~{fragments/chrome :: pageWipe('Hello / 关于我')}"/>
 <th:block th:replace="~{fragments/chrome :: topbar('about')}"/>
 
-<main>
-
-    <!--/* 页头。model 来自 AboutController：intro（带换行的自我介绍）、content（富文本）、
-           skills（字符串数组）、author。 */-->
-    <header class="page-head">
-        <div class="wrap">
-            <div class="eyebrow wipe-in">
-                <span class="bar"></span>
-                <span class="mono">Hello / 关于我</span>
+<main class="about-station-main">
+    <div class="wrap">
+        <header class="about-station-hero">
+            <div>
+                <p class="eyebrow"><span class="bar"></span><span class="mono">Hello / 关于我</span></p>
+                <h1 th:text="${author}">ChenZhen</h1>
+                <p class="about-station-intro" th:text="${intro}">我是陈震，欢迎来到我的博客！</p>
             </div>
-            <!--/* page-title 不挂 wipe-in：它的入场是逐字 3D 飞入（下面脚本拆字，
-                   首页 thunder 的小号版），两个揭示系统不叠在同一个元素上。 */-->
-            <h1 class="page-title" th:text="${author}">ChenZhen</h1>
-            <p class="page-lead rise" th:text="${intro}">我是陈震，欢迎来到我的博客！</p>
-        </div>
-    </header>
-
-    <!--/* 长卷。左栏吸附不动，右栏从它旁边流过去 —— 读自述的全程，人始终在场。
-           窄屏不吸附（见 site.css 第 10 节）：视口本来就矮，再钉一个 320px 高的栏，
-           正文只剩一条缝。
-
-           条款数由数据决定（技能清单为空时这一条不渲染），所以进度方块由页内脚本
-           按实际的 .cl 数量生成，不写死在模板里 —— 写死就会出现一个永远不亮的方块。 */-->
-    <section class="section">
-        <div class="wrap">
-            <div class="split">
-
-                <aside class="side" id="aboutSide">
-                    <div class="side-frame">
-                        <img th:src="@{/images/me.jpg}" alt="陈震的照片" width="750" height="750" decoding="async">
-                    </div>
-                    <div class="side-fields">
-                        <div class="row">
-                            <span class="k">代号</span>
-                            <span class="v" th:text="${author}">ChenZhen</span>
-                        </div>
-                        <div class="row" th:if="${not #lists.isEmpty(skills)}">
-                            <span class="k">技能</span>
-                            <span class="v" th:text="${#lists.size(skills)} + ' ITEMS'">17 ITEMS</span>
-                        </div>
-                    </div>
-                    <div class="side-steps" id="aboutSteps">
-                        <span class="cnt" id="aboutStepCnt"></span>
-                    </div>
-                </aside>
-
-                <div class="flow" id="aboutFlow">
-
-                    <!--/* 01 博客自述。content 是后台维护的富文本，照旧用 th:utext 原样输出 ——
-                           来源只有管理员自己，与改版前一致。
-                           整段不切分：按段落切富文本只能靠字符串处理，而管理员写几段就变成几个条款，
-                           编号会跟着内容飘，“条款”这个结构就成了摆设。
-                           用 .md-body 承接而不是 .about-body：后者带 white-space: pre-line，
-                           会把这段 HTML 源码里的换行也渲染出来。 */-->
-                    <div class="cl lead rise">
-                        <span class="n">01</span>
-                        <div>
-                            <div class="sec-head">
-                                <h2 class="sec-title">关于这个博客</h2>
-                            </div>
-                            <div class="md-body" th:utext="${content}">
-                                <p>博客自述正文。</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!--/* 02 技能清单。skills 是 Controller 按 [,，] 切好的数组，
-                           这里不做任何判断，遍历输出即可。空数组时整条不渲染，
-                           避免留一个空标题，右侧的进度也自然只剩一条。 */-->
-                    <div class="cl rise" th:if="${not #lists.isEmpty(skills)}">
-                        <span class="n">02</span>
-                        <div>
-                            <div class="sec-head">
-                                <h2 class="sec-title">我的技能</h2>
-                            </div>
-                            <ul class="skl-list">
-                                <li class="skl" th:each="skill, st : ${skills}">
-                                    <span class="no" th:text="${#numbers.formatInteger(st.count, 2)}">01</span>
-                                    <span class="nm" th:text="${skill}">Java</span>
-                                </li>
-                            </ul>
-                            <!--/* 这段说明改版前是写死在模板里的，逐字保留，不因为改版改写文案 */-->
-                            <p class="cl-note mono-sm">我的技能涵盖Java主流技术栈包含Web框架、微服务、数据库、缓存、消息队列，一些前端技术，以及Docker、Linux等运维相关技术</p>
-                        </div>
-                    </div>
-
-                </div>
-
+            <div class="about-station-portrait">
+                <img th:src="@{/images/me.jpg}" alt="ChenZhen 的博客头像" width="750" height="750" decoding="async">
             </div>
-        </div>
-    </section>
+        </header>
 
+        <div class="about-station-notes" th:classappend="${#lists.isEmpty(skills)} ? 'single'">
+            <article aria-labelledby="about-blog">
+                <h2 id="about-blog">关于这个博客</h2>
+                <!--/* 保留后台自述的富文本格式。 */-->
+                <div class="md-body" th:utext="${content}"><p>博客自述正文。</p></div>
+            </article>
+            <section th:if="${not #lists.isEmpty(skills)}" aria-labelledby="about-skills">
+                <h2 id="about-skills">我的技能</h2>
+                <p class="about-station-skill-note">主要关注 Java、Web 框架、微服务、数据库、缓存和消息队列，也涉及前端、Docker 和 Linux。</p>
+                <ul class="about-station-skills">
+                    <li th:each="skill : ${skills}" th:text="${skill}">Java</li>
+                </ul>
+            </section>
+        </div>
+
+        <section class="about-station-activity" id="github" aria-labelledby="about-github">
+            <div class="about-station-activity-head">
+                <h2 id="about-github">GitHub 贡献</h2>
+                <a class="about-station-profile" href="https://github.com/chenzhen7">@chenzhen7 <span aria-hidden="true">↗</span></a>
+            </div>
+            <div class="github-calendar-dark" data-calendar
+                 data-contributions-url="https://github-contributions-api.jogruber.de/v4/chenzhen7?y=last">
+                <p class="about-station-loading" data-calendar-loading role="status" hidden>正在加载 GitHub 贡献…</p>
+                <noscript><p>在 GitHub 个人资料页查看贡献日历。</p></noscript>
+            </div>
+        </section>
+    </div>
 </main>
 
 <th:block th:replace="~{fragments/chrome :: footer}"/>
-
 <th:block th:replace="~{fragments/chrome :: searchDialog}"/>
 <th:block th:replace="~{fragments/chrome :: scripts}"/>
-<!--/* 前台七页统一引 motion：揭示范围含 .page-head / .post-head / .section / .footer，
-     细节见片段头注释。 */-->
 <th:block th:replace="~{fragments/chrome :: motion}"/>
-
-<!--/* 长卷的两个招牌动作：
-     1) page-title 逐字 3D 入场 —— 首页 thunder 的小号版：逐字从纵深 rotationX 飞入回正，
-        字号沿用 page-title 不放大。只在真要动画时才拆字：拆了不动的收益是零。
-        GSAP 没到位就安静跳过：不拆字、不建补间，标题本就完整可见。
-     2) 长卷的进度：条款走到视口上半区就算「正在读」，条款号转黄、进度方块点亮，
-        读到一半头像从灰度转回原色。
-
-     揭示（.rise 的入场）不在这里，交给 chrome :: motion 片段 —— 那一套已经在跑，
-     而且 GSAP / ScrollTrigger 没到位时它会摘掉 .anim 让内容直接可见。
-     上一版这里用 GSAP 的 stagger 播技能清单，ScrollTrigger 缺一个就永远停在 opacity: 0，
-     这次换成复用既有机制，没有那个失败模式。 */-->
-<script th:inline="none">
-    (function () {
-        'use strict';
-        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-        /* ---- 1. 标题逐字入场 ---- */
-        if (window.gsap && !reduce) {
-            var title = document.querySelector('.page-head .page-title');
-            if (title) {
-                var text = title.textContent;
-                title.textContent = '';
-                // perspective 只在拆了字之后才开：不拆字的页面不需要这层 3D 上下文
-                title.classList.add('chars-on');
-                var chars = [];
-                text.split('').forEach(function (c) {
-                    var span = document.createElement('span');
-                    span.className = 'ch';
-                    span.textContent = c;
-                    title.appendChild(span);
-                    chars.push(span);
-                });
-                // 比首页收一点：纵深 620（首页 820）、角度 -72°（首页 -78°）、时长 1.0（首页 1.25）
-                gsap.fromTo(chars,
-                    { z: -620, rotationX: -72, opacity: 0 },
-                    { z: 0, rotationX: 0, opacity: 1, duration: 1.0, stagger: 0.06, ease: 'power4.out' });
-            }
-        }
-
-        /* ---- 2. 长卷进度 ---- */
-        var cls = [].slice.call(document.querySelectorAll('#aboutFlow > .cl'));
-        var steps = document.getElementById('aboutSteps');
-        var cnt = document.getElementById('aboutStepCnt');
-        var side = document.getElementById('aboutSide');
-        // 拿不到就什么都不做。这一段只改状态、不藏内容，失败时页面照样完整可见
-        if (!cls.length || !steps || !cnt || !side) return;
-        if (!('IntersectionObserver' in window)) return;
-
-        // 方块按实际的条款数生成，插在计数前面（计数靠 margin-left: auto 顶到右端）
-        var squares = cls.map(function () {
-            var sq = document.createElement('span');
-            sq.className = 'sq';
-            steps.insertBefore(sq, cnt);
-            return sq;
-        });
-        var pad = function (n) { return ('0' + n).slice(-2); };
-
-        /* 窄屏左栏不吸附，在页首就滚走了，「读到一半转彩色」根本无从发生 ——
-           所以窄屏直接给彩色：它是这一页的开场图，不是给滚动的奖励。 */
-        var wide = window.matchMedia('(min-width: 1024px)');
-        var cur = -1;
-
-        function show(i) {
-            cur = i;
-            cls.forEach(function (c, k) { c.classList.toggle('is-cur', k === i); });
-            squares.forEach(function (sq, k) { sq.classList.toggle('on', k <= i); });
-            cnt.textContent = pad(i + 1) + ' / ' + pad(cls.length);
-            side.classList.toggle('is-live', !wide.matches || i >= Math.floor(cls.length / 2));
-        }
-
-        /* rootMargin 取「视口上半区」：条款滚到那儿才算正在读，取得太宽会一次点亮两条。
-           用 IntersectionObserver 而不是 scroll 监听 —— 规范 §5.2 禁止 scroll 事件。 */
-        var io = new IntersectionObserver(function (entries) {
-            entries.forEach(function (e) {
-                if (!e.isIntersecting) return;
-                var i = cls.indexOf(e.target);
-                if (i !== -1 && i !== cur) show(i);
-            });
-        }, { rootMargin: '-20% 0px -70% 0px' });
-        cls.forEach(function (c) { io.observe(c); });
-
-        // 跨过 1024 时重算一次，否则 is-live 会一直停在窄屏的判定上
-        if (wide.addEventListener) {
-            wide.addEventListener('change', function () { show(cur < 0 ? 0 : cur); });
-        }
-
-        show(0);
-    })();
-</script>
+<script th:src="@{/js/github-calendar-snapshot.js}" defer></script>
+<script th:src="@{/js/github-calendar.js}" defer></script>
 
 </body>
 </html>

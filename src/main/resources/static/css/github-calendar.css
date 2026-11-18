@@ -1,0 +1,62 @@
+/* GitHub 贡献日历，关于我页面和原型共用。 */
+[data-calendar] {
+  --heat-0: #ececea;
+  --heat-1: #faf0ad;
+  --heat-2: #f4da48;
+  --heat-3: #c3a400;
+  --heat-4: #756100;
+}
+.github-calendar-dark {
+  --heat-0: #2b2e26;
+  --heat-1: #4d4524;
+  --heat-2: #807020;
+  --heat-3: #c7ad29;
+  --heat-4: #ffe34a;
+}
+.calendar { min-width: 0; font-variant-numeric: tabular-nums; }
+.calendar-meta { display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 12px 24px; margin-bottom: 14px; }
+.calendar-totals { display: flex; gap: 12px 32px; flex-wrap: wrap; }
+.calendar-totals span { color: var(--muted); }
+.calendar-number { display: block; color: var(--ink); font: 800 clamp(28px, 4vw, 47px)/1.15 var(--display); letter-spacing: -.025em; }
+.calendar-range { display: flex; flex-wrap: wrap; gap: 6px; }
+.calendar-range button {
+  padding: 5px 10px; border: 1px solid var(--rule); background: transparent; color: var(--ink); cursor: pointer;
+}
+.calendar-range button:hover { border-color: var(--focus); }
+.calendar-range [aria-pressed="true"] { border-color: var(--yellow-border); background: var(--yellow); color: #141414; }
+.calendar-body { --cell: clamp(10px, 1.12vw, 16px); --gap: 3px; }
+.calendar-matrix { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 7px; }
+.calendar-weekdays { color: var(--muted); display: grid; grid-template-rows: repeat(7, var(--cell)); gap: var(--gap); margin-top: 22px; text-align: center; font-size: 15px; line-height: var(--cell); }
+.calendar-weekdays span:nth-child(1) { grid-row: 2; }
+.calendar-weekdays span:nth-child(2) { grid-row: 4; }
+.calendar-weekdays span:nth-child(3) { grid-row: 6; }
+.calendar-scroll { overflow-x: auto; overscroll-behavior-x: contain; padding: 0 3px 5px; }
+.calendar-track {
+  min-width: calc(var(--weeks) * (9px + var(--gap)) - var(--gap));
+  max-width: calc(var(--weeks) * 25px);
+}
+.calendar-months, .calendar-grid { display: grid; grid-template-columns: repeat(var(--weeks), minmax(0, 1fr)); gap: var(--gap); }
+.calendar-months { height: 22px; font: 15px/1.2 var(--mono); white-space: nowrap; color: var(--muted); }
+.calendar-months span { grid-row: 1; }
+.calendar-grid { grid-template-rows: repeat(7, var(--cell)); grid-auto-flow: column; }
+.activity-cell {
+  display: block; min-width: 0; width: 100%; min-height: 0;
+  padding: 0; border: 0; cursor: pointer;
+}
+.activity-cell:focus-visible, .activity-cell:hover, .activity-cell[aria-pressed="true"] {
+  outline: 2px solid var(--focus); outline-offset: 0; z-index: 1;
+}
+.calendar [data-level="0"] { background-color: var(--heat-0); }
+.calendar [data-level="1"] { background-color: var(--heat-1); }
+.calendar [data-level="2"] { background-color: var(--heat-2); }
+.calendar [data-level="3"] { background-color: var(--heat-3); }
+.calendar [data-level="4"] { background-color: var(--heat-4); }
+.calendar-key { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; margin-top: 6px; color: var(--muted); font-size: 15px; }
+.calendar-key output { min-height: 1.65em; color: var(--ink); }
+.calendar-legend { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.calendar-legend i { width: 11px; height: 11px; }
+.calendar-source { margin-top: 5px; color: var(--muted); font-size: 15px; }
+
+@media (max-width: 700px) {
+  .calendar-key { align-items: start; }
+}

@@ -1,0 +1,178 @@
+:root {
+  color-scheme: light;
+  --paper: #fff;
+  --surface: #f6f6f4;
+  --ink: #141414;
+  --muted: #53534f;
+  --rule: #d7d7d2;
+  --yellow: #ffe600;
+  --yellow-border: #c9ad00;
+  --focus: #6b5d00;
+  --sans: "Space Grotesk", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --display: "Archivo", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --mono: "JetBrains Mono", "Noto Sans SC", "Microsoft YaHei", monospace;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.65 var(--sans); }
+button { font: inherit; }
+a { color: inherit; }
+img { display: block; width: 100%; height: auto; }
+p, h1, h2, figure { margin: 0; }
+h1, h2 { font-family: var(--display); }
+h2 { font-size: clamp(26px, 4.1vw, 46px); line-height: 1.21; letter-spacing: -.025em; }
+p { text-wrap: pretty; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
+::selection { background: var(--yellow); color: #141414; }
+.wrap { width: min(100% - 112px, 1320px); margin-inline: auto; }
+.prototype-nav {
+  display: flex; justify-content: space-between; align-items: center; gap: 18px;
+  padding: 12px max(24px, calc((100vw - 1320px) / 2)); min-height: 64px;
+  border-bottom: 1px solid var(--rule);
+}
+.prototype-nav a { text-decoration: none; }
+.wordmark { font-weight: 700; white-space: nowrap; }
+.prototype-nav nav { display: flex; flex-wrap: wrap; gap: 4px; }
+.prototype-nav nav a { padding: 5px 10px; color: var(--muted); }
+.prototype-nav nav a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: .25em; }
+.prototype-nav [aria-current] { background: var(--yellow); color: #141414; border: 1px solid var(--yellow-border); }
+.prototype-nav nav [aria-current]:hover { color: #141414; }
+.eyebrow { margin-bottom: 16px; color: var(--muted); font: 600 15px/1.4 var(--mono); }
+.intro { max-width: 36ch; color: var(--muted); }
+.action {
+  display: inline-flex; align-items: center; gap: 22px; width: fit-content;
+  padding: 11px 15px; border: 1px solid var(--yellow-border);
+  font-weight: 600; text-decoration: none;
+}
+.primary { background: var(--yellow); color: #141414; }
+.primary:hover { background: #f4d900; }
+.text-link { width: fit-content; font-weight: 600; text-decoration-thickness: 1px; text-underline-offset: .24em; }
+.section { border-top: 1px solid var(--rule); padding-block: 45px; }
+.section-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px 24px; margin-bottom: 20px; }
+.page-end { border-top: 1px solid var(--rule); color: var(--muted); padding-block: 22px 32px; font-size: 15px; }
+.enter { animation: rise-in .7s cubic-bezier(.16, 1, .3, 1) both; }
+.enter + .enter { animation-delay: .13s; }
+@keyframes rise-in { from { opacity: 0; transform: translateY(12px); } }
+
+/* 地形档案 */
+.terrain-hero {
+  display: grid; grid-template-columns: minmax(280px, .82fr) minmax(0, 1.42fr);
+  gap: 38px; align-items: center; padding-block: 46px 42px;
+}
+.terrain h1 {
+  font-size: clamp(92px, 10vw, 155px); line-height: .81; letter-spacing: -.075em;
+  font-variation-settings: "wdth" 97, "wght" 850; margin: 0 0 24px;
+}
+.terrain h1 span { display: block; }
+.terrain-copy .intro { margin-bottom: 20px; }
+.terrain-art {
+  position: relative; width: 100%; aspect-ratio: 1.55; min-height: 390px;
+  border: 1px solid var(--rule); background: var(--surface); overflow: hidden;
+}
+.terrain-landscape { width: 100%; height: 100%; object-fit: cover; filter: saturate(.72); }
+.terrain-lines {
+  position: absolute; inset: 0; pointer-events: none; opacity: .27;
+  background: repeating-linear-gradient(0deg, transparent 0 44px, #f4f3cb 45px 46px),
+              repeating-linear-gradient(90deg, transparent 0 44px, #f4f3cb 45px 46px);
+  mask-image: linear-gradient(150deg, transparent 25%, #000);
+}
+.terrain-avatar {
+  position: absolute; bottom: 16px; left: 16px; width: 80px; height: 80px;
+  object-fit: cover; border: 2px solid var(--yellow); box-shadow: 3px 3px 0 #181818;
+}
+.terrain-activity { padding-top: 32px; }
+.terrain-notes { display: grid; grid-template-columns: .8fr 1.2fr; align-items: start; gap: 40px; }
+.terrain-notes p { max-width: 58ch; margin-bottom: 15px; color: var(--muted); }
+
+/* 贡献观测站 */
+.observatory {
+  color-scheme: dark;
+  --paper: #131412;
+  --surface: #1b1d17;
+  --ink: #f4f4ed;
+  --muted: #bbbbb0;
+  --rule: #3d4037;
+  --focus: #ffe600;
+  background-image: linear-gradient(90deg, transparent calc(100% - 1px), #2c2e27 100%);
+  background-size: max(70px, 8vw) 100%;
+}
+.observatory .prototype-nav { background: var(--paper); }
+.station-hero {
+  display: flex; justify-content: space-between; align-items: center; gap: 20px;
+  padding-block: 38px 30px;
+}
+.station-hero h1 {
+  font-size: clamp(50px, 9.6vw, 142px); line-height: .95; letter-spacing: -.077em;
+  font-variation-settings: "wdth" 108, "wght" 850; margin-bottom: 12px;
+}
+.station-hero img { width: clamp(70px, 12vw, 164px); border: 1px solid var(--rule); padding: 5px; background: var(--surface); }
+.station-activity {
+  position: relative; border: 1px solid var(--rule); border-top-color: var(--yellow-border);
+  padding: clamp(16px, 3vw, 34px); background: var(--surface); margin-bottom: 45px;
+}
+.station-activity .section-head { margin-bottom: 18px; }
+.station-activity .calendar-number { color: var(--yellow); }
+.station-activity .calendar-body { padding: 10px 0 0; }
+.station-notes { display: grid; grid-template-columns: 1fr 1fr; gap: 32px 72px; }
+.station-notes h2 { font-size: clamp(24px, 3.3vw, 34px); margin-bottom: 16px; }
+.station-notes p { max-width: 52ch; color: var(--muted); margin-bottom: 18px; }
+.skill-lines { list-style: none; margin: 0; padding: 0; }
+.skill-lines li { display: flex; gap: 14px; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.skill-lines strong { flex: 0 0 3em; }
+.skill-lines span { color: var(--muted); }
+
+/* 个人杂志 */
+.journal-title { text-align: center; padding: 32px 0 20px; border-bottom: 2px solid var(--ink); }
+.journal-title .eyebrow { margin-bottom: 10px; }
+.journal-title h1 {
+  font-size: clamp(61px, 14vw, 194px); line-height: .85; letter-spacing: -.084em;
+  font-variation-settings: "wdth" 111, "wght" 860;
+}
+.journal-feature {
+  display: grid; grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+  gap: clamp(24px, 5vw, 82px); align-items: center; padding: 24px 0 38px;
+}
+.journal-art { height: clamp(320px, 27vw, 380px); overflow: hidden; background: var(--surface); }
+.journal-art img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 62%; transition: transform .5s ease; }
+.journal-art:hover img { transform: scale(1.035); }
+.journal-story { border-inline-start: 3px solid var(--yellow-border); padding-inline-start: clamp(16px, 2vw, 26px); }
+.journal-story h2 { margin-bottom: 17px; }
+.journal-story p { color: var(--muted); max-width: 55ch; margin-bottom: 13px; }
+.journal-activity { padding-top: 32px; }
+.journal-activity .calendar { background: var(--surface); padding: clamp(14px, 2.2vw, 26px); }
+.journal-skills { display: grid; grid-template-columns: minmax(160px, .7fr) minmax(0, 1.3fr); gap: 24px 42px; }
+.journal-skills dl { margin: 0; }
+.journal-skills dl > div { padding: 8px 0; border-bottom: 1px solid var(--rule); display: grid; grid-template-columns: 8em 1fr; gap: 8px; }
+.journal-skills dt { font-weight: 700; }
+.journal-skills dd { margin: 0; color: var(--muted); }
+
+@media (max-width: 980px) {
+  .wrap { width: calc(100% - 48px); }
+  .terrain-hero { grid-template-columns: minmax(238px, .8fr) minmax(0, 1.2fr); gap: 22px; }
+  .terrain-art { min-height: 320px; }
+}
+@media (max-width: 700px) {
+  .prototype-nav { display: grid; gap: 6px; padding: 9px 14px; }
+  .prototype-nav nav a { padding: 4px 6px; font-size: 15px; }
+  .wrap { width: calc(100% - 32px); }
+  .section { padding-block: 30px; }
+  .section-head { margin-bottom: 14px; }
+  .terrain-hero, .terrain-notes, .journal-feature, .journal-skills, .station-notes { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .terrain-hero { padding: 30px 0 24px; }
+  .terrain h1 { font-size: clamp(48px, 13vw, 88px); letter-spacing: -.07em; margin-bottom: 15px; }
+  .terrain h1 span { display: inline; }
+  .terrain-art { min-height: 0; aspect-ratio: 1.52; }
+  .terrain-avatar { width: 59px; height: 59px; left: 10px; bottom: 10px; }
+  .station-hero { padding: 28px 0 20px; align-items: start; }
+  .station-hero h1 { font-size: clamp(38px, 10vw, 68px); }
+  .station-hero img { width: 65px; }
+  .station-activity { margin-bottom: 30px; }
+  .journal-title { padding: 27px 0 14px; }
+  .journal-title h1 { font-size: clamp(46px, 14vw, 100px); }
+  .journal-feature { padding: 16px 0 30px; }
+  .journal-art { height: clamp(190px, 43vw, 280px); }
+  .journal-skills dl > div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}

@@ -9,7 +9,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 /**
  * @author ChenZhen
@@ -34,7 +36,11 @@ public class AboutController {
 
         model.addAttribute("intro",sysConfig.getAboutMeIntroduction());
         model.addAttribute("content",sysConfig.getAboutMeContent());
-        model.addAttribute("skills",sysConfig.getAboutMeSkill().split("[,，]"));
+        String skills = sysConfig.getAboutMeSkill();
+        model.addAttribute("skills", skills == null ? Collections.emptyList() : Arrays.stream(skills.split("[,，]"))
+                .map(String::trim)
+                .filter(skill -> !skill.isEmpty())
+                .collect(Collectors.toList()));
         model.addAttribute("author",sysConfig.getAuthor());
 
         // 更新总浏览量
