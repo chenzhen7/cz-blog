@@ -140,27 +140,37 @@ button { font: inherit; }
    落点页上向右收走。两段共用同一条从左到右的动线，接成一次完整的翻页。 */
 #pagewipe {
   position: fixed; inset: 0; z-index: 101;
-  background: var(--signal-fill);
+  background: linear-gradient(118deg, #1b1e18 18%, #25291e 68%, #1d2119);
   display: flex; align-items: center; justify-content: center;
   pointer-events: none;
   clip-path: inset(0 100% 0 0);
 }
+#pagewipe .wipe-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 41px, rgba(224,227,207,.12) 41px 42px),
+    linear-gradient(0deg, transparent calc(50% - 1px), rgba(255,230,0,.44) calc(50% - 1px) 50%, transparent 50%);
+  mask-image: radial-gradient(ellipse at center, transparent 9%, #000 42%, rgba(0,0,0,.36) 72%, transparent);
+  transform: skewX(-9deg) scale(1.2);
+}
 /* 板上的页面名。离开半程开始时字还没必要出现（板刚起步），
    用延迟淡入让它跟着盖满一起到位；到达半程它随板一起被右收裁掉 */
 #pagewipe .wipe-code {
-  font-family: var(--font-mono); font-size: var(--fs-label);
-  letter-spacing: .24em; color: var(--ink-on-signal); opacity: 0;
+  position: relative; padding: 8px 14px 8px 17px;
+  border-inline-start: 2px solid var(--signal-edge);
+  background: #21251b; color: #eeefe6; opacity: 0;
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .24em;
 }
 /* 到达半程在前：离开与到达两个类同时存在时（本页既是落点又要离开），
    靠后的离开规则赢 —— 正要跳走的页面不该再播到达动画 */
-.anim.nav-in #pagewipe { animation: pagewipe-out .55s cubic-bezier(.16, 1, .3, 1) both; }
+.anim.nav-in #pagewipe { animation: pagewipe-out .55s cubic-bezier(.48, .04, .26, 1) both; }
 .anim.nav-in #pagewipe .wipe-code { opacity: 1; }
 @keyframes pagewipe-out {
   0%   { clip-path: inset(0 0 0 0); }        /* 盖满（上一页盖过来的那块板） */
   30%  { clip-path: inset(0 0 0 0); }        /* 停一拍，让页面名被读到 */
   100% { clip-path: inset(0 0 0 100%); }     /* 向右收走，与首页 #wipe 同向 */
 }
-.anim.nav-out #pagewipe { animation: pagewipe-in .34s cubic-bezier(.16, 1, .3, 1) both; }
+.anim.nav-out #pagewipe { animation: pagewipe-in .34s cubic-bezier(.44, .04, .26, 1) both; }
 .anim.nav-out #pagewipe .wipe-code { animation: pagewipe-code-in .34s ease-out both; }
 @keyframes pagewipe-in {
   from { clip-path: inset(0 100% 0 0); }     /* 躲左屏外 */
@@ -1840,3 +1850,29 @@ button { font: inherit; }
    那个容器会被 AJAX 整块重写，分页放里面会被一起抹掉（改版前就是这样，
    加载后整页一个 .pagination 都不剩，评论分页等于不存在）。 */
 #comment-pager { margin-top: 40px; }
+
+/* ==========================================================================
+   22. HERO 场线叠印（装饰背景）
+
+   叠在地形画布之上、paper 渐层之下的一层测量线。没有读数、没有轴 ——
+   它只负责把 hero 的右半边串起来，借终末地 PV 里仪器扫过地形的那层质感。
+
+   图层顺序：canvas (z0) → .hero-field (z0，DOM 在其后，所以画在地形上) →
+   .hero-scrim (z1，左侧纸色渐层把文字区的线洗掉) → .wrap (z2，正文)。
+   ========================================================================== */
+.hero-field { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.hero-field svg { width: 100%; height: 100%; display: block; }
+/* slice 缩放会把描边一并放粗，non-scaling-stroke 把线压回 1px */
+.hero-field line, .hero-field path, .hero-field circle, .hero-field rect { vector-effect: non-scaling-stroke; }
+
+/* 信号色标记走令牌；红叉沿用 Prism 关键字红 */
+.hero-field .field-sig   { fill: var(--signal-fill); stroke: var(--signal-edge); }
+.hero-field .field-alert { stroke: #8a2b1f; }
+
+/* 窄屏上 hero 变成竖构图，弧线组容易糊在头像上，把两组圆和右下角的测量盘收掉，
+   只留横向的函数曲线与十字标记 */
+@media (max-width: 767px) {
+  .hero-field .field-arcs,
+  .hero-field .field-marks circle,
+  .hero-field .field-marks line { display: none; }
+}

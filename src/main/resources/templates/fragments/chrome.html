@@ -180,11 +180,12 @@
      运动方向与首页 #wipe 一致：板从左侧进入盖满、停住（露出「正在加载哪页」）、
      落点页上向右收走。与 #wipe 的分工：#wipe 是「开幕仪式」（每次进首页都播、
      1.15s、带代号文字）；这块是「翻页工具」（只在站内跳转前后播、0.34s 盖 /
-     0.55s 收）。首页用 data-selfwipe 豁免到达半程，免得两块黄板叠着播。
+     0.55s 收）。首页用 data-selfwipe 豁免到达半程，避免两段转场叠播。
 
      安全红线与 #wipe 相同：静止态必须是「裁没」，绝不能是「盖满」。
      ============================================================ */-->
 <div th:fragment="pageWipe(label)" id="pagewipe" aria-hidden="true">
+    <span class="wipe-grid"></span>
     <span class="wipe-code" th:text="${label}">CZ ARCHIVE</span>
 </div>
 
