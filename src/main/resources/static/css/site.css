@@ -1084,6 +1084,91 @@ button { font: inherit; }
 .page-head { padding: 132px 0 52px; border-bottom: 1px solid var(--line); }
 @media (min-width: 1024px) { .page-head { padding: 156px 0 60px; } }
 
+/* 透明线谱等比铺在页头留白处。脚本就绪前直接显示静态图。 */
+.page-head.has-tide-lines { position: relative; isolation: isolate; min-height: 530px; }
+.tide-art {
+  position: absolute;
+  inset: 52px max(16px, calc((100% - 1376px) / 2)) 8px 29%;
+  z-index: -1;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  container-type: size;
+  overflow: clip;
+}
+.tide-still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+/* 兼容开发预览仍缓存旧标签页模板的情况。 */
+.tide-art[data-tide-source] {
+  background: url("../images/tide-lines.svg") center / contain no-repeat;
+}
+.tide-scene {
+  /* SVG 上方留白较多，以线条和刻度的视觉中心为转轴。 */
+  --tide-pivot-y: 58%;
+  --tide-depth: clamp(24px, 4.5cqw, 46px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: min(100cqw, 200cqh);
+  aspect-ratio: 2;
+}
+.tide-projection,
+.tide-light,
+.tide-rig > svg { grid-area: 1 / 1; }
+.tide-projection {
+  display: grid;
+  perspective: max(720px, 165cqw);
+  perspective-origin: 50% var(--tide-pivot-y);
+}
+.tide-rig {
+  display: grid;
+  transform-style: preserve-3d;
+  transform-origin: 50% var(--tide-pivot-y);
+  transform: rotateX(var(--tide-tilt-x, 0deg)) rotateY(var(--tide-tilt-y, 0deg));
+  transition: transform .22s ease-out;
+}
+.tide-rig > svg { display: block; width: 100%; height: auto; }
+.tide-plane-back { transform: translateZ(calc(-2 * var(--tide-depth))); }
+.tide-plane-middle { transform: translateZ(calc(-1 * var(--tide-depth))); }
+.tide-light {
+  display: grid;
+  opacity: 0;
+  transition: opacity .18s ease-out;
+  /* 在透视后的屏幕坐标裁切，同一光斑可对准不同深度的线段。 */
+  mask-image: radial-gradient(circle var(--tide-light-radius) at var(--tide-light-x) var(--tide-light-y), #000 12%, transparent);
+}
+.tide-scene.is-lit .tide-light { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .tide-art.is-enhanced .tide-still { visibility: hidden; }
+  .tide-art.is-enhanced[data-tide-source] { background-image: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tide-scene { display: none; }
+}
+@media (min-width: 901px) {
+  .page-head.has-tide-lines .page-lead {
+    max-width: min(58ch, max(23vw, calc(100vw - 940px)));
+  }
+  .tide-art[data-tide-variant="wavefront"] {
+    inset-inline-start: max(40%, 465px, calc((100% - 1376px) / 2 + 510px));
+  }
+}
+@media (max-width: 900px) {
+  .page-head.has-tide-lines {
+    --tide-lines-height: min(372px, 50vw);
+    min-height: 0;
+    padding-bottom: calc(var(--tide-lines-height) + 24px);
+  }
+  .tide-art {
+    inset: auto 0 12px;
+    height: var(--tide-lines-height);
+  }
+}
+
 /* 与首页 .thunder 同一套配方，这样内页标题和首页大字是一张脸 */
 .page-title {
   font-family: var(--font-disp); font-variation-settings: 'wdth' 105, 'wght' 800;
@@ -1113,18 +1198,6 @@ button { font: inherit; }
 /* ==========================================================================
    17. 归档（流年记）
    ========================================================================== */
-
-/* 「时间地层」：页头背后那层缓慢漂移的等高线地形（/js/terrain.js 驱动，
-   与首页 hero 同一片地形的另一个标本）。只裁在页头范围内；浓度由页内脚本
-   压到 0.09（首页是 0.22）——它是背景装置，不能抢页头标题的阅读。
-   画布默认 display:none，由脚本初始化成功后显示，免得 JS 没跑时留一个空画布占位。 */
-.page-head.has-terrain { position: relative; overflow: hidden; }
-.page-head .head-terrain {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  pointer-events: none; display: none;
-}
-/* 内容压到画布之上 */
-.page-head.has-terrain .wrap { position: relative; z-index: 1; }
 
 /* 滚动时间轴。左缘一条 1px 墨轨（::before），上面压一段 3px 信号黄进度
    （.arc-progress，由页内脚本按滚动进度 scaleY 生长）。

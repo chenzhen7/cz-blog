@@ -17,6 +17,11 @@
 */-->
 <body>
 
+<!--/* 线谱先作为静态装饰图显示，tide-lines.js 读取同一资源制作分层动效。 */-->
+<div th:fragment="tideArt(source, variant)" class="tide-art" aria-hidden="true" th:attr="data-tide-variant=${variant}">
+    <img class="tide-still" th:src="${source}" alt="" width="1120" height="560">
+</div>
+
 <!--/* ============================================================
      动效初始态的开关。这个片段要放进页面的 <head>，不是 <body>。
 

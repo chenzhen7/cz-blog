@@ -10,6 +10,7 @@
     <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
     <link rel="stylesheet" th:href="@{/fonts/fonts.css}">
     <link rel="stylesheet" th:href="@{/css/site.css}">
+    <script defer th:src="@{/js/tide-lines.js}"></script>
     <link rel="alternate" type="application/rss+xml" title="ChenZhen的客栈" th:href="@{/rss}">
 
     <!--/* 动效初始态的门控。必须留在 <head> 里，不能挪到 </body> 前 —— 理由见片段内注释。 */-->
@@ -24,7 +25,8 @@
 <main>
 
     <!--/* model 来自 FriendLinkController：friendlinks（status=PASS 的友链）、author。 */-->
-    <header class="page-head">
+    <header class="page-head has-tide-lines">
+        <div th:replace="~{fragments/chrome :: tideArt(@{/images/wavefront-lines.svg}, 'wavefront')}"></div>
         <div class="wrap">
             <div class="eyebrow wipe-in">
                 <span class="bar"></span>

@@ -10,6 +10,7 @@
     <link href="../static/images/favicon.ico" th:href="@{/images/me.jpg}" rel="icon" type="image/x-ico">
     <link rel="stylesheet" th:href="@{/fonts/fonts.css}">
     <link rel="stylesheet" th:href="@{/css/site.css}">
+    <script defer th:src="@{/js/tide-lines.js}"></script>
     <link rel="alternate" type="application/rss+xml" title="ChenZhen的客栈" th:href="@{/rss}">
 
     <!--/* 动效初始态的门控。必须留在 <head> 里，不能挪到 </body> 前 —— 理由见片段内注释。 */-->
@@ -24,15 +25,9 @@
 <main>
 
     <!--/* model 来自 ArchivesController：memoryList（BlogService.getArchiveList()，
-           已发布的全部文章、按 create_time 倒序、描述在 service 层截到 100 字以内）、author。
-           改版前这里是一条 45vh 的背景图带，新版的 .page-head 是纯排版的，
-           而且 archives.jpg 已经派生出首页 hero 的第三张图，不算丢。
-           has-terrain：页头背后铺一层「时间地层」—— 与首页 hero 同一片等高线地形
-           （/js/terrain.js），但不跟指针、只随时间漂移，语义是沉积而不是感应。
-           两块画布默认藏着，由页尾脚本决定显示哪块（WebGL / 2D 兜底）。 */-->
-    <header class="page-head has-terrain">
-        <canvas class="head-terrain" id="arcGl" aria-hidden="true"></canvas>
-        <canvas class="head-terrain" id="arcFlat" aria-hidden="true"></canvas>
+           已发布的全部文章、按 create_time 倒序、描述在 service 层截到 100 字以内）、author。 */-->
+    <header class="page-head has-tide-lines">
+        <div th:replace="~{fragments/chrome :: tideArt(@{/images/shore-lines.svg}, 'shore')}"></div>
         <div class="wrap">
             <div class="eyebrow wipe-in">
                 <span class="bar"></span>
@@ -106,73 +101,11 @@
 <th:block th:replace="~{fragments/chrome :: scripts}"/>
 <th:block th:replace="~{fragments/chrome :: motion}"/>
 
-<!--/* 归档页招牌：时间地层 + 滚动时间轴 + 年份刻度。
-     three.js 与 terrain.js 是这页（和首页）专属的 600KB，不进公共片段。 */-->
-<script th:src="@{/lib/three/three.min.js}"></script>
-<script th:src="@{/js/terrain.js}"></script>
+<!--/* 归档滚动时间轴与年份刻度。 */-->
 <script th:inline="none">
     (function () {
         'use strict';
         var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-        /* ---- 时间地层：页头背后的等高线地形 ----
-           与首页 hero 同一片地形的另一个标本：首页跟指针（重力感应 = 当下），
-           这里不跟指针、只随时间漂移（沉积 = 过往）。整段是增强不是内容，
-           但库文件缺失仍然是部署事故，要抛出来让人看见，不静默吞掉。 */
-        (function () {
-            if (!window.CzTerrain) throw new Error('CzTerrain 未加载：/js/terrain.js 缺失或被拦截');
-            var head = document.querySelector('.page-head.has-terrain');
-            if (!head) return;
-            var glCanvas = document.getElementById('arcGl');
-            var flatCanvas = document.getElementById('arcFlat');
-            /* 浓度 0.09，远低于首页的 0.22：它是页头背景装置，压不住标题就是失败。
-               更浅的浓度也让「地层」读起来比 hero 那张更远、更旧。 */
-            var OPACITY = 0.09;
-
-            // 减少动效时不上 WebGL：直接走静态 2D 等高线，地层还在，只是不动
-            var gl = (window.THREE && !reduce) ? CzTerrain.initGL(glCanvas, head) : null;
-            if (!gl) {
-                if (glCanvas) glCanvas.style.display = 'none';
-                CzTerrain.drawFlat(flatCanvas, head);
-                return;
-            }
-            glCanvas.style.display = 'block';
-            gl.terrain.material.uniforms.uOpacity.value = OPACITY;
-            // 比首页（-1.16 / y-150 / z-300）放得更平、压得更低：
-            // 页头是一条横带，只露出层叠的线，不追求首页那种俯视纵深
-            gl.terrain.rotation.x = -0.9;
-            gl.terrain.position.set(0, -210, -420);
-
-            // 漂移循环只推 uTime。页头滚出视野或标签页隐藏时停（规范 §5.2）：
-            // 页头只有几百像素高，滚过它之后这个循环就该彻底休息
-            var clock = 0, running = false, rafId = null, headVisible = true;
-            function tick() {
-                if (!running) return;
-                rafId = requestAnimationFrame(tick);
-                clock += 0.016;
-                gl.terrain.material.uniforms.uTime.value = clock;
-                gl.renderer.render(gl.scene, gl.camera);
-            }
-            function sync() {
-                var should = headVisible && !document.hidden;
-                if (should && !running) { running = true; rafId = requestAnimationFrame(tick); }
-                if (!should && running) { running = false; if (rafId) { cancelAnimationFrame(rafId); rafId = null; } }
-            }
-            if ('IntersectionObserver' in window) {
-                new IntersectionObserver(function (entries) {
-                    entries.forEach(function (e) { headVisible = e.isIntersecting; });
-                    sync();
-                }, { threshold: 0 }).observe(head);
-            }
-            document.addEventListener('visibilitychange', sync);
-            sync();
-
-            var rw;
-            window.addEventListener('resize', function () {
-                clearTimeout(rw);
-                rw = setTimeout(function () { gl.resize(); gl.renderer.render(gl.scene, gl.camera); }, 200);
-            });
-        })();
 
         /* ---- 滚动时间轴：信号黄进度段随滚动在墨轨上生长 ----
            GSAP 没到位就不建：进度段停在 scaleY(0) 贴着墨轨，看不见但不留坏状态。 */
