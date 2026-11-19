@@ -29,18 +29,28 @@
     <header class="page-head has-tide-lines">
         <div th:replace="~{fragments/chrome :: tideArt(@{/images/shore-lines.svg}, 'shore')}"></div>
         <div class="wrap">
-            <div class="eyebrow wipe-in">
-                <span class="bar"></span>
-                <span class="mono">Archive / 流年记</span>
+            <div class="tide-copy">
+                <div class="tide-copy-line">
+                    <div class="eyebrow wipe-in">
+                        <span class="bar"></span>
+                        <span class="mono">Archive / 流年记</span>
+                    </div>
+                </div>
+                <div class="tide-copy-line">
+                    <h1 class="page-title wipe-in">归档</h1>
+                </div>
+                <!--/* 原文是「Welcome to my website ——by 陈震 （Chen Zhen）」。
+                       规范禁用破折号，这里换成与全站一致的正斜杠分隔；
+                       括号也从全角改成半角，与导航、页脚的写法统一。 */-->
+                <div class="tide-copy-line">
+                    <p class="page-lead rise">Welcome to my website / by 陈震 (Chen Zhen)</p>
+                </div>
+                <div class="tide-copy-line">
+                    <p class="mono-sm rise" style="color: var(--ink-2);">
+                        共 <span th:text="${#lists.size(memoryList)}">0</span> 篇，按写作时间从新到旧
+                    </p>
+                </div>
             </div>
-            <h1 class="page-title wipe-in">归档</h1>
-            <!--/* 原文是「Welcome to my website ——by 陈震 （Chen Zhen）」。
-                   规范禁用破折号，这里换成与全站一致的正斜杠分隔；
-                   括号也从全角改成半角，与导航、页脚的写法统一。 */-->
-            <p class="page-lead rise">Welcome to my website / by 陈震 (Chen Zhen)</p>
-            <p class="mono-sm rise" style="color: var(--ink-2); margin-top: 16px;">
-                共 <span th:text="${#lists.size(memoryList)}">0</span> 篇，按写作时间从新到旧
-            </p>
         </div>
     </header>
 

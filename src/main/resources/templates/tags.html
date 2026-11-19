@@ -30,12 +30,20 @@
     <header class="page-head has-tide-lines">
         <div th:replace="~{fragments/chrome :: tideArt(@{/images/tide-lines.svg}, 'tide')}"></div>
         <div class="wrap">
-            <div class="eyebrow wipe-in">
-                <span class="bar"></span>
-                <span class="mono">Tags / 文章分类</span>
+            <div class="tide-copy">
+                <div class="tide-copy-line">
+                    <div class="eyebrow wipe-in">
+                        <span class="bar"></span>
+                        <span class="mono">Tags / 文章分类</span>
+                    </div>
+                </div>
+                <div class="tide-copy-line">
+                    <h1 class="page-title wipe-in">标签</h1>
+                </div>
+                <div class="tide-copy-line">
+                    <p class="page-lead rise">点一个标签，只看它底下的文章；再点一次取消。可以多选。</p>
+                </div>
             </div>
-            <h1 class="page-title wipe-in">标签</h1>
-            <p class="page-lead rise">点一个标签，只看它底下的文章；再点一次取消。可以多选。</p>
         </div>
     </header>
 

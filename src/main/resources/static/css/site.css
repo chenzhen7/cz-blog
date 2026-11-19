@@ -79,8 +79,9 @@ a { color: inherit; text-decoration: none; }
 img { display: block; max-width: 100%; }
 button { font: inherit; }
 
-.wrap { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
-@media (min-width: 1024px) { .wrap { padding: 0 48px; } }
+:root { --content-max-width: 1400px; --content-gutter: 24px; }
+@media (min-width: 1024px) { :root { --content-gutter: 48px; } }
+.wrap { max-width: var(--content-max-width); margin: 0 auto; padding: 0 var(--content-gutter); }
 
 /* 字号降回 15px 后字距要放回来：大写等宽字在小字号下需要更多呼吸才不糊成一团 */
 .mono    { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em; text-transform: uppercase; }
@@ -1081,18 +1082,25 @@ button { font: inherit; }
 
 /* 页头。顶栏是 position: fixed 的 60px，内页没有 hero 撑着，
    所以这里的上内边距必须自己把顶栏的高度让出来，不能只靠 margin。 */
-.page-head { padding: 132px 0 52px; border-bottom: 1px solid var(--line); }
+.page-head { padding: 132px 0 52px; }
 @media (min-width: 1024px) { .page-head { padding: 156px 0 60px; } }
 
-/* 透明线谱等比铺在页头留白处。脚本就绪前直接显示静态图。 */
-.page-head.has-tide-lines { position: relative; isolation: isolate; min-height: 530px; }
+/* 线谱铺满页头高度，左右对齐 .wrap 的内容边缘。 */
+.page-head.has-tide-lines {
+  position: relative;
+  isolation: isolate;
+  min-height: 530px;
+  overflow: clip;
+}
 .tide-art {
   position: absolute;
-  inset: 52px max(16px, calc((100% - 1376px) / 2)) 8px 29%;
+  inset-block: 0;
+  inset-inline: max(var(--content-gutter), calc((100% - var(--content-max-width)) / 2 + var(--content-gutter)));
   z-index: -1;
   pointer-events: none;
   display: grid;
-  place-items: center;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  place-items: unsafe center;
   container-type: size;
   overflow: clip;
 }
@@ -1101,19 +1109,48 @@ button { font: inherit; }
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
 }
 /* 兼容开发预览仍缓存旧标签页模板的情况。 */
 .tide-art[data-tide-source] {
-  background: url("../images/tide-lines.svg") center / contain no-repeat;
+  background: url("../images/tide-lines.svg") center / cover no-repeat;
+}
+.tide-copy {
+  display: grid;
+  justify-items: start;
+  gap: 20px;
+  width: fit-content;
+  max-width: min(100%, 38rem);
+}
+.page-head .tide-copy .eyebrow,
+.tide-copy p { margin: 0; }
+.tide-copy-line {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+}
+/* 每行文字各有一层模糊，长导语不会盖住短标题旁的线条。 */
+.tide-copy-line::before {
+  content: "";
+  position: absolute;
+  inset: -10px -28px;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 5%, transparent);
+  backdrop-filter: blur(9px);
+  /* 两个方向的遮罩相交，让文字附近的模糊自然过渡到清晰线条。 */
+  mask-image:
+    linear-gradient(90deg, transparent, #000 24px, #000 calc(100% - 24px), transparent),
+    linear-gradient(180deg, transparent, #000 10px, #000 calc(100% - 10px), transparent);
+  mask-composite: intersect;
 }
 .tide-scene {
-  /* SVG 上方留白较多，以线条和刻度的视觉中心为转轴。 */
   --tide-pivot-y: 58%;
   --tide-depth: clamp(24px, 4.5cqw, 46px);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  width: min(100cqw, 200cqh);
+  width: max(100cqw, 200cqh);
   aspect-ratio: 2;
 }
 .tide-projection,
@@ -1149,23 +1186,9 @@ button { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .tide-scene { display: none; }
 }
-@media (min-width: 901px) {
-  .page-head.has-tide-lines .page-lead {
-    max-width: min(58ch, max(23vw, calc(100vw - 940px)));
-  }
-  .tide-art[data-tide-variant="wavefront"] {
-    inset-inline-start: max(40%, 465px, calc((100% - 1376px) / 2 + 510px));
-  }
-}
 @media (max-width: 900px) {
   .page-head.has-tide-lines {
-    --tide-lines-height: min(372px, 50vw);
-    min-height: 0;
-    padding-bottom: calc(var(--tide-lines-height) + 24px);
-  }
-  .tide-art {
-    inset: auto 0 12px;
-    height: var(--tide-lines-height);
+    min-height: clamp(360px, 52svh, 460px);
   }
 }
 
@@ -1798,8 +1821,7 @@ button { font: inherit; }
 .anim .md-body h2 { clip-path: inset(0 100% 0 0); }
 .anim .md-body h2.wipe-done { clip-path: inset(0 0 0 0); }
 
-/* 页头。与内页的 .page-head 不同：这里没有下边框，正文区自己带分隔，
-   而且宽度要大一些（标题可能很长）。 */
+/* 文章页头。标题和摘要用独立排版，阅读区另设分隔。 */
 .post-head { padding: 132px 0 0; }
 @media (min-width: 1024px) { .post-head { padding: 156px 0 0; } }
 .post-head .eyebrow { margin-bottom: 22px; }
